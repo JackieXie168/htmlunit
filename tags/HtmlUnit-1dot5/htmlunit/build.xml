@@ -1,0 +1,304 @@
+<?xml version="1.0"?>
+<!--
+ This is a configuration file for the ant build tool
+ http://jakarta.apache.org/ant/index.html
+ $Revision$
+
+ Authors:
+    Mike Bowler
+    David K. Taylor
+-->
+
+<project name="HtmlUnit" default="cleancompile" basedir=".">
+
+<!--<property name="build.compiler" value="jikes" />-->
+<property name="build.compiler.pedantic" value="true"/>
+<property name="version" value="HtmlUnit-1.3.1-pre1" />
+
+<property environment="env"/>
+<property name="local-repository" value ="target/repository"/>
+<property name="remote-repository" value="http://www.ibiblio.org/maven"/>
+
+<path id="base.class.path">
+    <pathelement path="target/classes"/>
+
+    <fileset dir="${local-repository}/jars/">
+        <include name="**/*.jar"/>
+    </fileset>
+
+    <!-- Required so that jikes can find the JDK classes on Mac OS/X -->
+    <pathelement path="/System/Library/Frameworks/JavaVM.framework/Versions/1.3.1/Classes/classes.jar"/>
+    <pathelement path="/System/Library/Frameworks/JavaVM.framework/Versions/1.4.1/Classes/classes.jar"/>
+</path>
+
+<path id="test.class.path">
+    <pathelement path="target/test-classes"/>
+</path>
+
+<target name="maketarget" description="make target directories">
+    <mkdir dir="target/classes"/>
+    <mkdir dir="target/test-classes"/>
+</target>
+
+<target name="compile" description="compile" depends="maketarget">
+    <javac srcdir="src/java" destdir="target/classes" debug="on" deprecation="off" 
+            source="1.2" target="1.2">
+        <classpath refid="base.class.path"/>
+    </javac>
+    <copy todir="target/classes">
+        <fileset dir="src/java">
+            <exclude name="**/*.java"/>
+        </fileset>
+    </copy>    
+    <javac srcdir="src/test/java" destdir="target/test-classes" debug="on" deprecation="off" 
+            source="1.2" target="1.2">
+        <classpath refid="base.class.path"/>
+        <classpath refid="test.class.path"/>
+    </javac>
+    <copy todir="target/test-classes">
+        <fileset dir="src/test/java">
+            <exclude name="**/*.java"/>
+        </fileset>
+    </copy>        
+</target>
+<target name="jar" description="Make a jar of HtmlUnit" depends="cleancompile,junit">
+    <jar
+        jarfile="target/HtmlUnit.jar"
+        basedir="target/classes"
+        excludes="**/test/*,**/*.java,build.xml,lib,**/package.html"
+    />
+    <jar
+        jarfile="target/HtmlUnit-src.jar"
+        basedir="src/java"
+        includes="**/*.java"/>
+</target>
+
+<target name="cleancompile" description="clean compile" depends="clean, compile" />
+
+<target name="clean" description="clean">
+    <!-- Note that we can't just delete 'target' because this would then blow
+         away the repository which is needed for the compile.  Instead we delete
+         all the individual directories under target *except* for 'repository' -->
+    <delete dir="target/classes" quiet="true"/>
+    <delete dir="target/test-classes" quiet="true"/>
+</target>
+
+<target name="validate" description="Validate">
+    <xmlvalidate
+        failonerror="yes" lenient="no" warn="yes"
+        file="src/java/com/gargoylesoftware/htmlunit/javascript/JavaScriptConfiguration.xml"
+        classname="org.apache.xerces.parsers.SAXParser"
+        classpath="dist/lib/xercesImpl.jar">
+
+        <xmlcatalog>
+            <entity
+                publicId="JavaScriptConfiguration.xsd"
+                location="src/java/com/gargoylesoftware/htmlunit/javascript/JavaScriptConfiguration.xsd"/>
+        </xmlcatalog>
+    </xmlvalidate>
+</target>
+
+
+<target name="junit" description="junit">
+    <property name="test.data.dir" location="target/junit-data"/>
+    <property name="test.reports.dir" location="target/junit-reports"/>
+    
+    <delete dir="${test.data.dir}"/>
+    <mkdir dir="${test.data.dir}"/>
+        
+    <junit fork="true" forkmode="perBatch" 
+            errorProperty="test.failed" failureProperty="test.failed">
+        <classpath refid="base.class.path"/>
+        <classpath refid="test.class.path"/>
+        <formatter type="brief" usefile="false"/>
+        <formatter type="xml"/>
+
+        <batchtest todir="${test.data.dir}">
+            <fileset dir="target/test-classes">
+                <include name="**/*Test.class"/>
+                <exclude name="**/*$*.class"/>
+                <exclude name="**/JellyTest.class"/>
+            </fileset>
+        </batchtest>        
+        <batchtest todir="${test.data.dir}">
+            <fileset dir="target/test-classes">
+                <include name="**/JellyTest.class"/>
+                <exclude name="**/*$*.class"/>
+            </fileset>
+        </batchtest>
+    </junit>
+    
+    <delete dir="${test.reports.dir}"/> 
+    <mkdir dir="${test.reports.dir}"/>
+    <junitreport todir="${test.reports.dir}" tofile="DeleteMe.xml">
+        <fileset dir="${test.data.dir}">
+            <include name="TEST-*.xml"/>
+        </fileset>
+        <report format="frames" todir="${test.reports.dir}/junit"/>
+    </junitreport>
+    <delete file="${test.reports.dir}/DeleteMe.xml" />    
+    <echo>
+**********************
+JUnit results available here: ${test.reports.dir}/junit/index.html
+**********************
+    </echo>
+    <fail if="test.failed">Tests have failed!!</fail>
+</target>
+
+<target name="junitui" description="junitui">
+    <java fork="yes" classname="junit.swingui.TestRunner" dir="src/java">
+        <arg value="com.gargoylesoftware.htmlunit.test.MainTestSuite"/>
+        <classpath refid="base.class.path"/>
+    </java>
+</target>
+
+<target name="jellytest" description="DO NOT RUN THIS TASK">
+    <java fork="yes" classname="org.apache.commons.jelly.Jelly" dir=".">
+        <classpath refid="base.class.path"/>
+        <arg value="test.jelly"/>
+    </java>
+</target>
+
+<target name="get-dependency">
+    <mkdir dir="${local-repository}/jars/${type}/"/>
+    <get usetimestamp="true"
+        src="${remote-repository}/${project}/jars/${jarName}"
+        dest="${local-repository}/jars/${type}/${jarName}"/>
+</target>
+
+<target name="initialize"
+        description="Get a clean set of all needed jars"
+        depends="clean-jars,get-jars"/>
+<target name="clean-jars"
+        description="Delete existing jars">
+     <delete dir="${local-repository}/jars"/>
+</target>
+<target name="get-jars"
+        description="Get all the required dependencies from a remote repository">
+    
+    <!-- required -->
+    <antcall target="get-dependency">
+        <param name="type" value="required"/>
+        <param name="project" value="commons-httpclient"/>
+        <param name="jarName" value="commons-httpclient-3.0-rc1.jar"/>
+    </antcall>
+    <antcall target="get-dependency">
+        <param name="type" value="required"/>
+        <param name="project" value="commons-codec"/>
+        <param name="jarName" value="commons-codec-1.3.jar"/>
+    </antcall>
+    <antcall target="get-dependency">
+        <param name="type" value="required"/>
+        <param name="project" value="xerces"/>
+        <param name="jarName" value="xercesImpl-2.6.2.jar"/>
+    </antcall>
+    <antcall target="get-dependency">
+        <param name="type" value="required"/>
+        <param name="project" value="xerces"/>
+        <param name="jarName" value="xmlParserAPIs-2.2.1.jar"/>
+    </antcall>
+    <antcall target="get-dependency">
+        <param name="type" value="required"/>
+        <param name="project" value="nekohtml"/>
+        <param name="jarName" value="nekohtml-0.9.4.jar"/>
+    </antcall>
+    <antcall target="get-dependency">
+        <param name="type" value="required"/>
+        <param name="project" value="commons-logging"/>
+        <param name="jarName" value="commons-logging-1.0.4.jar"/>
+    </antcall>
+    <antcall target="get-dependency">
+        <param name="type" value="required"/>
+        <param name="project" value="jaxen"/>
+        <param name="jarName" value="jaxen-1.0-FCS-full.jar"/>
+    </antcall>
+    <antcall target="get-dependency">
+        <param name="type" value="required"/>
+        <param name="project" value="saxpath"/>
+        <param name="jarName" value="saxpath-1.0-FCS.jar"/>
+    </antcall>
+    <antcall target="get-dependency">
+        <param name="type" value="required"/>
+        <param name="project" value="commons-io"/>
+        <param name="jarName" value="commons-io-1.0.jar"/>
+    </antcall>    
+    <antcall target="get-dependency">
+        <param name="type" value="required"/>
+        <param name="project" value="commons-lang"/>
+        <param name="jarName" value="commons-lang-2.0.jar"/>
+    </antcall>
+    <antcall target="get-dependency">
+        <param name="type" value="required"/>
+        <param name="project" value="commons-collections"/>
+        <param name="jarName" value="commons-collections-3.1.jar"/>
+    </antcall>
+    
+    
+    <!-- optional -->
+    <antcall target="get-dependency">
+        <param name="type" value="optional"/>
+        <param name="project" value="rhino"/>
+        <param name="jarName" value="js-1.6R1.jar"/>
+    </antcall>
+    
+    <!-- test -->
+    <antcall target="get-dependency">
+        <param name="type" value="test"/>
+        <param name="project" value="junit"/>
+        <param name="jarName" value="junit-3.8.1.jar"/>
+    </antcall>
+    <antcall target="get-dependency">
+        <param name="type" value="test"/>
+        <param name="project" value="junitperf"/>
+        <param name="jarName" value="junitperf-1.8.jar"/>
+    </antcall>
+    <antcall target="get-dependency">
+        <param name="type" value="test"/>
+        <param name="project" value="commons-jelly"/>
+        <param name="jarName" value="commons-jelly-tags-junit-1.0.jar"/>
+    </antcall>
+    <antcall target="get-dependency">
+        <param name="type" value="test"/>
+        <param name="project" value="commons-jelly"/>
+        <param name="jarName" value="commons-jelly-tags-xml-1.0.jar"/>
+    </antcall>
+    <antcall target="get-dependency">
+        <param name="type" value="test"/>
+        <param name="project" value="gsbase"/>
+        <param name="jarName" value="gsbase-2.0.jar"/>
+    </antcall>
+        
+    <!-- jelly -->
+    <antcall target="get-dependency">
+        <param name="type" value="jelly"/>
+        <param name="project" value="commons-jelly"/>
+        <param name="jarName" value="commons-jelly-1.0-RC1.jar"/>
+    </antcall>
+    <antcall target="get-dependency">
+        <param name="type" value="jelly"/>
+        <param name="project" value="commons-jelly"/>
+        <param name="jarName" value="commons-jelly-tags-log-1.0.jar"/>
+    </antcall>
+    <antcall target="get-dependency">
+        <param name="type" value="jelly"/>
+        <param name="project" value="commons-jexl"/>
+        <param name="jarName" value="commons-jexl-1.0.jar"/>
+    </antcall>
+    <antcall target="get-dependency">
+        <param name="type" value="jelly"/>
+        <param name="project" value="commons-cli"/>
+        <param name="jarName" value="commons-cli-1.0.jar"/>
+    </antcall>
+    <antcall target="get-dependency">
+        <param name="type" value="jelly"/>
+        <param name="project" value="dom4j"/>
+        <param name="jarName" value="dom4j-1.5.jar"/>
+    </antcall>
+    <antcall target="get-dependency">
+        <param name="type" value="jelly"/>
+        <param name="project" value="commons-beanutils"/>
+        <param name="jarName" value="commons-beanutils-1.7.0.jar"/>
+    </antcall>
+</target>
+
+</project>
