@@ -1,0 +1,18 @@
+<project default="java:jar"
+    xmlns:j="jelly:core"
+    xmlns:u="jelly:util"
+    xmlns:ant="jelly:ant"
+    xmlns:maven="jelly:maven"
+    xmlns:m="maven"
+    xmlns:deploy="deploy">
+
+    <postGoal name="java:compile">
+        <ant:copy
+            file="src/java/com/gargoylesoftware/htmlunit/javascript/JavaScriptConfiguration.xml"
+            toFile="${maven.build.dest}/com/gargoylesoftware/htmlunit/javascript/JavaScriptConfiguration.xml"/>
+    </postGoal>
+
+    <preGoal name="xdoc:transform">
+        <attainGoal name="faq"/>
+    </preGoal>
+</project>

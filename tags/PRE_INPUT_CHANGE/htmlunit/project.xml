@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project>
+
+    <pomVersion>3</pomVersion>
+    <id>htmlunit</id>
+    <name>htmlunit</name>
+    <currentVersion>1.3beta</currentVersion>
+
+    <organization>
+        <name>Gargoyle Software Inc.</name>
+        <url>http://www.GargoyleSoftware.com/</url>
+        <logo>http://www.gargoylesoftware.com/images/CompanyLogoSmall.gif</logo>
+    </organization>
+    <inceptionYear>2002</inceptionYear>
+    <package>com.gargoylesoftware.htmlunit</package>
+    <logo>/images/HtmlUnitLogo.jpg</logo>
+    <gumpRepositoryId>htmlunit</gumpRepositoryId>
+
+    <description>
+        A tool for testing web based applications
+    </description>
+    <shortDescription>HtmlUnit</shortDescription>
+
+    <url>http://htmlunit.sourceforge.net</url>
+    <issueTrackingUrl>http://sourceforge.net/tracker/?group_id=47038&amp;atid=448266</issueTrackingUrl>
+
+    <siteAddress>htmlunit.sourceforge.net</siteAddress>
+    <siteDirectory>/home/groups/h/ht/htmlunit/htdocs</siteDirectory>
+    <distributionDirectory></distributionDirectory>
+
+    <repository>
+        <connection>scm:cvs:ext:mbowler@cvs.htmlunit.sourceforge.net:/cvsroot/htmlunit:htmlunit</connection>
+        <url>http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/htmlunit/</url>
+    </repository>
+
+    <licenses>
+        <license>
+            <name>The HtmlUnit Software License</name>
+            <url>http://htmlunit.sourceforge.net/license.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <versions>
+        <version>
+            <id>2.0</id>
+            <name>2.0</name>
+            <tag>2.0</tag>
+        </version>
+    </versions>
+
+    <mailingLists>
+        <mailingList>
+    	    <name>HtmlUnit Users</name>
+            <subscribe>http://lists.sourceforge.net/lists/listinfo/htmlunit-user</subscribe>
+            <unsubscribe>http://lists.sourceforge.net/lists/listinfo/htmlunit-user</unsubscribe>
+            <archive>http://lists.sourceforge.net/lists/listinfo/htmlunit-user</archive>
+        </mailingList>
+        <mailingList>
+    	    <name>HtmlUnit Developers</name>
+            <subscribe>http://lists.sourceforge.net/lists/listinfo/htmlunit-develop</subscribe>
+            <unsubscribe>http://lists.sourceforge.net/lists/listinfo/htmlunit-develop</unsubscribe>
+            <archive>http://lists.sourceforge.net/lists/listinfo/htmlunit-develop</archive>
+        </mailingList>
+    </mailingLists>
+
+    <developers>
+        <developer>
+            <name>Mike Bowler</name>
+            <id>mbowler</id>
+            <email>mbowler@GargoyleSoftware.com</email>
+            <organization>Gargoyle Software Inc.</organization>
+            <roles>
+                <role>Release Manager</role>
+                <role>Java Developer</role>
+            </roles>
+        </developer>
+        <developer>
+            <name>David K. Taylor</name>
+            <id>dktaylor</id>
+            <roles>
+                <role>Java Developer</role>
+            </roles>
+        </developer>
+    </developers>
+
+    <contributors>
+        <contributor>
+            <name>Noboru Sinohara</name>
+        </contributor>
+        <contributor>
+            <name>Mike J. Bresnahan</name>
+        </contributor>
+        <contributor>
+            <name>Dominique Broeglin</name>
+        </contributor>
+        <contributor>
+            <name>Alex Nikiforoff</name>
+        </contributor>
+        <contributor>
+            <name>Barnaby Court</name>
+        </contributor>
+        <contributor>
+            <name>Brad Clarke</name>
+        </contributor>
+    </contributors>
+
+    <dependencies>
+        <dependency>
+            <id>junit</id>
+            <version>3.8.1</version>
+            <url>http://www.junit.org/</url>
+        </dependency>
+        <dependency>
+            <id>junitperf</id>
+            <version>1.8</version>
+            <url>http://www.clarkware.com</url>
+        </dependency>
+        <dependency>
+            <id>commons-jelly</id>
+            <version>SNAPSHOT</version>
+            <url>http://jakarta.apache.org/commons/jelly</url>
+        </dependency>
+        <dependency>
+            <id>commons-jelly+tags-log</id>
+            <version>SNAPSHOT</version>
+            <url>http://jakarta.apache.org/commons/jelly</url>
+        </dependency>
+        <dependency>
+            <id>commons-jexl</id>
+            <version>SNAPSHOT</version>
+            <url>http://jakarta.apache.org/commons/jexl</url>
+        </dependency>
+        <dependency>
+            <id>commons-cli</id>
+            <version>SNAPSHOT</version>
+            <url>http://jakarta.apache.org/commons/cli</url>
+        </dependency>
+        <dependency>
+            <id>dom4j</id>
+            <version>1.4-dev-8</version>
+            <url>http://www.dom4j.org/</url>
+        </dependency>
+        <dependency>
+            <id>commons-collections</id>
+            <version>2.1</version>
+            <url>http://jakarta.apache.org/commons/collections.html</url>
+        </dependency>
+        <dependency>
+            <id>commons-beanutils</id>
+            <version>1.6.1</version>
+            <url>http://jakarta.apache.org/commons/beanutils</url>
+        </dependency>
+        <dependency>
+            <id>commons-httpclient</id>
+            <version>2.0-alpha3</version>
+            <url>http://jakarta.apache.org/commons/httpclient</url>
+        </dependency>
+        <dependency>
+            <id>gsbase</id>
+            <version>2.0</version>
+            <url>http://gsbase.sourceforge.net</url>
+        </dependency>
+        <dependency>
+            <id>rhino</id>
+            <version>1.5R4-RC3</version>
+            <url>http://www.mozilla.org/rhino</url>
+            <jar>js-1.5R4-RC3.jar</jar>
+        </dependency>
+        <dependency>
+            <id>xerces</id>
+            <version>2.0.2</version>
+            <url>http://xml.apache.org/xercesj</url>
+            <jar>xercesImpl-2.0.2.jar</jar>
+        </dependency>
+        <dependency>
+            <id>xerces</id>
+            <version>2.0.2</version>
+            <url>http://xml.apache.org/xercesj</url>
+            <jar>xmlParserAPIs-2.0.2.jar</jar>
+        </dependency>
+        <dependency>
+            <id>xml-apis</id>
+            <version>2.0.2</version>
+        </dependency>
+        <dependency>
+            <id>nekohtml</id>
+            <version>0.7.6</version>
+        </dependency>
+        <dependency>
+            <id>commons-logging</id>
+            <version>1.0.2</version>
+            <url>http://jakarta.apache.org/commons/logging.html</url>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <nagEmailAddress>htmlunit@GargoyleSoftware.com</nagEmailAddress>
+        <sourceDirectory>src/java</sourceDirectory>
+        <unitTestSourceDirectory>src/test/java</unitTestSourceDirectory>
+        <integrationUnitTestSourceDirectory/>
+        <aspectSourceDirectory/>
+
+        <unitTest>
+            <includes>
+                <include>**/*Test.java</include>
+            </includes>
+        </unitTest>
+
+        <jarResources>
+            <includes>
+                <include>**/*.xml</include>
+            </includes>
+        </jarResources>
+    </build>
+
+    <reports>
+        <report>maven-changelog-plugin</report>
+        <report>maven-changes-plugin</report>
+        <report>maven-checkstyle-plugin</report>
+        <report>maven-developer-activity-plugin</report>
+        <report>maven-file-activity-plugin</report>
+        <report>maven-javadoc-plugin</report>
+        <report>maven-jdepend-plugin</report>
+        <report>maven-junit-report-plugin</report>
+        <report>maven-jxr-plugin</report>
+        <report>maven-license-plugin</report>
+        <report>maven-tasklist-plugin</report>
+        <report>maven-clover-plugin</report>
+        <!-- <report>maven-linkcheck-plugin</report> -->
+    </reports>
+</project>
