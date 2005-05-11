@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project>
+
+    <pomVersion>3</pomVersion>
+    <id>htmlunit</id>
+    <name>htmlunit</name>
+    <currentVersion>1.6</currentVersion>
+
+    <organization>
+        <name>Gargoyle Software Inc.</name>
+        <url>http://www.GargoyleSoftware.com/</url>
+        <logo>/images/GargoyleSoftwareLogo.jpg</logo>
+    </organization>
+    <inceptionYear>2002</inceptionYear>
+    <package>com.gargoylesoftware.htmlunit</package>
+    <logo></logo>
+    <gumpRepositoryId>htmlunit</gumpRepositoryId>
+
+    <description>
+        A tool for testing web based applications
+    </description>
+    <shortDescription>HtmlUnit</shortDescription>
+
+    <url>http://htmlunit.sourceforge.net</url>
+    <issueTrackingUrl>http://sourceforge.net/tracker/?group_id=47038&amp;atid=448266</issueTrackingUrl>
+
+    <siteAddress>htmlunit.sourceforge.net</siteAddress>
+    <siteDirectory>/home/groups/h/ht/htmlunit/htdocs</siteDirectory>
+    <distributionDirectory>/home/groups/h/ht/htmlunit/htdocs/nightly</distributionDirectory>
+
+	<repository>
+	    <connection>scm:cvs:pserver:anonymous@cvs.sourceforge.net:/cvsroot/htmlunit:htmlunit</connection>
+	    <developerConnection>scm:cvs:ext:${maven.username}@cvs.sourceforge.net:/cvsroot/htmlunit:htmlunit/</developerConnection>
+	    <url>http://cvs.sourceforge.net/viewcvs.py/htmlunit/htmlunit</url>
+    </repository>
+  
+    <licenses>
+        <license>
+            <name>The HtmlUnit Software License</name>
+            <url>http://htmlunit.sourceforge.net/license.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <versions>
+        <version>
+            <id>2.0</id>
+            <name>2.0</name>
+            <tag>2.0</tag>
+        </version>
+    </versions>
+
+    <mailingLists>
+        <mailingList>
+            <name>HtmlUnit Users</name>
+            <subscribe>http://lists.sourceforge.net/lists/listinfo/htmlunit-user</subscribe>
+            <unsubscribe>http://lists.sourceforge.net/lists/listinfo/htmlunit-user</unsubscribe>
+            <archive>http://lists.sourceforge.net/lists/listinfo/htmlunit-user</archive>
+        </mailingList>
+        <mailingList>
+            <name>HtmlUnit Developers</name>
+            <subscribe>http://lists.sourceforge.net/lists/listinfo/htmlunit-develop</subscribe>
+            <unsubscribe>http://lists.sourceforge.net/lists/listinfo/htmlunit-develop</unsubscribe>
+            <archive>http://lists.sourceforge.net/lists/listinfo/htmlunit-develop</archive>
+        </mailingList>
+    </mailingLists>
+
+    <developers>
+        <developer>
+            <name>Mike Bowler</name>
+            <id>mbowler</id>
+            <email>mbowler@GargoyleSoftware.com</email>
+            <organization>Gargoyle Software Inc.</organization>
+            <roles>
+                <role>Release Manager</role>
+                <role>Java Developer</role>
+            </roles>
+            <timezone>-5</timezone>
+        </developer>
+        <developer>
+            <name>David K. Taylor</name>
+            <id>dktaylor</id>
+            <roles>
+                <role>Java Developer</role>
+            </roles>
+        </developer>
+        <developer>
+            <name>Brad Clarke</name>
+            <id>yourgod</id>
+            <email>yourgod@users.sourceforge.net</email>
+            <url>http://www.bradclarke.com/</url>
+            <timezone>-6</timezone>
+            <roles>
+                <role>Java Developer</role>
+            </roles>
+        </developer>
+        <developer>
+            <name>Marc Guillemot</name>
+            <id>mguillem</id>
+            <email>mguillem@users.sourceforge.net</email>
+            <timezone>+1</timezone>
+            <roles>
+                <role>Java Developer</role>
+            </roles>
+        </developer>
+        <developer>
+            <name>Chris Erskine</name>
+            <id>cerskine</id>
+            <email>cerskine@users.sourceforge.net</email>
+            <timezone>-7</timezone>
+            <roles>
+                <role>Java Developer</role>
+            </roles>
+        </developer>
+    </developers>
+
+    <contributors>
+        <contributor>
+            <name>Noboru Sinohara</name>
+        </contributor>
+        <contributor>
+            <name>Mike J. Bresnahan</name>
+            <email>gudujarlson@sf.net</email>
+        </contributor>
+        <contributor>
+            <name>Dominique Broeglin</name>
+        </contributor>
+        <contributor>
+            <name>Alex Nikiforoff</name>
+        </contributor>
+        <contributor>
+            <name>Barnaby Court</name>
+        </contributor>
+        <contributor>
+            <name>Andreas Hangler</name>
+        </contributor>
+        <contributor>
+            <name>Jun Chen</name>
+            <email>chen_jun@users.sourceforge.net</email>
+        </contributor>
+        <contributor>
+            <name>Christian Sell</name>
+            <email>cse@dynabean.de</email>
+        </contributor>
+        <contributor>
+            <name>Darrell DeBoer</name>
+        </contributor>
+        <contributor>
+            <name>David D. Kilzer</name>
+        </contributor>
+        <contributor>
+            <name>Ben Curren</name>
+            <email>bcurren@esomnie.com</email>
+        </contributor>
+        <contributor>
+            <name>Mike Williams</name>
+        </contributor>
+        <contributor>
+            <name>Mike Gallaher</name>
+        </contributor>
+        <contributor>
+            <name>Dierk Koenig</name>
+        </contributor>
+        <contributor>
+            <name>Daniel Gredler</name>
+        </contributor>
+        <contributor>
+            <name>Mike Bresnahan</name>
+        </contributor>
+        <contributor>
+            <name>Sergey Gorelkin</name>
+        </contributor>
+        <contributor>
+            <name>Chris Eldredge</name>
+        </contributor>
+        <contributor>
+            <name>Hans Donner</name>
+        </contributor>
+        <contributor>
+            <name>Michael Ottati</name>
+        </contributor>
+        <contributor>
+            <name>George Murnock</name>
+        </contributor>
+        <contributor>
+            <name>Kent Tong</name>
+        </contributor>
+        <contributor>
+            <name>Alfred Nathaniel</name>
+        </contributor>
+        <contributor>
+            <name>Bruce Faulkner</name>
+        </contributor>
+    </contributors>
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>3.8.1</version>
+            <url>http://www.junit.org/</url>
+            <properties>
+                <htmlunit.group>test</htmlunit.group>
+                <htmlunit.description>JUnit testing framework</htmlunit.description>
+            </properties>
+        </dependency>
+        <dependency>
+            <groupId>junitperf</groupId>
+            <artifactId>junitperf</artifactId>
+            <version>1.8</version>
+            <url>http://www.clarkware.com</url>
+            <properties>
+                <htmlunit.group>test</htmlunit.group>
+                <htmlunit.description>Additional support for testing</htmlunit.description>
+            </properties>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-jelly</groupId>
+            <artifactId>commons-jelly</artifactId>
+            <version>1.0-RC1</version>
+            <url>http://jakarta.apache.org/commons/jelly</url>
+            <properties>
+                <htmlunit.group>jelly</htmlunit.group>
+                <htmlunit.description>Jelly itself</htmlunit.description>
+            </properties>
+        </dependency>
+        <dependency>
+            <groupId>commons-jelly</groupId>
+            <artifactId>commons-jelly-tags-log</artifactId>
+            <version>1.0</version>
+            <url>http://jakarta.apache.org/commons/jelly</url>
+            <properties>
+                <htmlunit.group>Jelly</htmlunit.group>
+                <htmlunit.description>Jelly tags for logging</htmlunit.description>
+            </properties>
+        </dependency>
+        <dependency>
+            <groupId>commons-jelly</groupId>
+            <artifactId>commons-jelly-tags-xml</artifactId>
+            <version>1.0</version>
+            <url>http://jakarta.apache.org/commons/jelly/libs/xml/</url>
+            <properties>
+                <classloader>root.maven</classloader>
+                <htmlunit.group>test</htmlunit.group>
+                <htmlunit.description>Support for building HtmlUnit</htmlunit.description>
+            </properties>
+        </dependency>
+        <dependency>
+            <groupId>commons-jelly</groupId>
+            <artifactId>commons-jelly-tags-junit</artifactId>
+            <version>1.0</version>
+            <url>http://jakarta.apache.org/commons/jelly/libs/junit/</url>
+            <properties>
+                <classloader>root.maven</classloader>
+                <htmlunit.group>test</htmlunit.group>
+                <htmlunit.description>Support for building HtmlUnit</htmlunit.description>
+            </properties>
+        </dependency>
+        <dependency>
+            <groupId>commons-jexl</groupId>
+            <artifactId>commons-jexl</artifactId>
+            <version>1.0</version>
+            <url>http://jakarta.apache.org/commons/jexl</url>
+            <properties>
+                <htmlunit.group>jelly</htmlunit.group>
+                <htmlunit.description>Expression language</htmlunit.description>
+            </properties>
+        </dependency>
+        <dependency>
+            <groupId>commons-cli</groupId>
+            <artifactId>commons-cli</artifactId>
+            <version>1.0</version>
+            <url>http://jakarta.apache.org/commons/cli</url>
+            <properties>
+                <htmlunit.group>jelly</htmlunit.group>
+                <htmlunit.description>Command line interface</htmlunit.description>
+            </properties>
+        </dependency>
+        <dependency>
+            <groupId>dom4j</groupId>
+            <artifactId>dom4j</artifactId>
+            <version>1.5</version>
+            <url>http://www.dom4j.org/</url>
+            <properties>
+                <htmlunit.group>jelly</htmlunit.group>
+                <htmlunit.description>XML DOM wrapper</htmlunit.description>
+            </properties>
+        </dependency>
+        <dependency>
+            <groupId>jaxen</groupId>
+            <artifactId>jaxen</artifactId>
+            <version>1.0-FCS-full</version>
+            <url>http://jaxen.org/</url>
+            <properties>
+                <htmlunit.group>required</htmlunit.group>
+                <htmlunit.description>XPath support</htmlunit.description>
+            </properties>
+        </dependency>
+        <dependency>
+            <groupId>saxpath</groupId>
+            <artifactId>saxpath</artifactId>
+            <version>1.0-FCS</version>
+            <url>http://saxpath.org/</url>
+            <properties>
+                <htmlunit.group>required</htmlunit.group>
+                <htmlunit.description>XPath support</htmlunit.description>
+            </properties>
+        </dependency>
+        
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>3.1</version>
+            <url>http://jakarta.apache.org/commons/collections.html</url>
+            <properties>
+                <htmlunit.group>required</htmlunit.group>
+                <htmlunit.description>Collection classes</htmlunit.description>
+            </properties>
+        </dependency>
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version>1.7.0</version>
+            <url>http://jakarta.apache.org/commons/beanutils</url>
+            <properties>
+                <htmlunit.group>jelly</htmlunit.group>
+                <htmlunit.description>Javabean support</htmlunit.description>
+            </properties>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.0</version>
+            <url>http://jakarta.apache.org/commons/lang</url>
+            <properties>
+                <htmlunit.group>required</htmlunit.group>
+                <htmlunit.description>Core Language Utilities</htmlunit.description>
+            </properties>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-httpclient</groupId>
+            <artifactId>commons-httpclient</artifactId>
+            <version>3.0-rc2</version>
+            <url>http://jakarta.apache.org/commons/httpclient</url>
+            <properties>
+                <htmlunit.group>required</htmlunit.group>
+                <htmlunit.description>Provides the actual http support</htmlunit.description>
+            </properties>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.3</version>
+            <url>http://jakarta.apache.org/commons/codec</url>
+            <properties>
+                <htmlunit.group>required</htmlunit.group>
+                <htmlunit.description>Provides common encoders</htmlunit.description>
+            </properties>
+        </dependency>
+        <dependency>
+            <groupId>gsbase</groupId>
+            <artifactId>gsbase</artifactId>
+            <version>2.0.1</version>
+            <url>http://gsbase.sourceforge.net</url>
+            <properties>
+                <htmlunit.group>test</htmlunit.group>
+                <htmlunit.description>Misc testing support classes</htmlunit.description>
+            </properties>
+        </dependency>
+        <dependency>
+            <groupId>rhino</groupId>
+            <artifactId>js</artifactId>
+            <version>1.6R1</version>
+            <url>http://www.mozilla.org/rhino</url>
+            <properties>
+                <htmlunit.group>optional</htmlunit.group>
+                <htmlunit.description>Needed for javascript support</htmlunit.description>
+            </properties>
+        </dependency>
+        <dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+            <version>2.6.2</version>
+            <url>http://xml.apache.org/xerces2-j/index.html</url>
+            <properties>
+                <htmlunit.group>required</htmlunit.group>
+                <htmlunit.description>XML Parser</htmlunit.description>
+            </properties>
+        </dependency>
+        <dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xmlParserAPIs</artifactId>
+            <version>2.2.1</version>
+            <url>http://xml.apache.org/xerces2-j/index.html</url>
+            <properties>
+                <htmlunit.group>required</htmlunit.group>
+                <htmlunit.description>XML Parser</htmlunit.description>
+            </properties>
+        </dependency>
+        <dependency>
+            <groupId>nekohtml</groupId>
+            <artifactId>nekohtml</artifactId>
+            <version>0.9.4</version>
+            <properties>
+                <htmlunit.group>required</htmlunit.group>
+                <htmlunit.description>Converts html into an XML DOM model</htmlunit.description>
+            </properties>
+        </dependency>
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.0.4</version>
+            <url>http://jakarta.apache.org/commons/logging.html</url>
+            <properties>
+                <htmlunit.group>required</htmlunit.group>
+                <htmlunit.description>Logging support</htmlunit.description>
+            </properties>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>1.0</version>
+            <url>http://jakarta.apache.org/commons/io/</url>
+            <properties>
+                <htmlunit.group>required</htmlunit.group>
+                <htmlunit.description>IO utilities</htmlunit.description>
+            </properties>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <nagEmailAddress>htmlunit@GargoyleSoftware.com</nagEmailAddress>
+        <sourceDirectory>src/java</sourceDirectory>
+        <unitTestSourceDirectory>src/test/java</unitTestSourceDirectory>
+        <integrationUnitTestSourceDirectory/>
+        <aspectSourceDirectory/>
+
+        <unitTest>
+            <includes>
+                <include>**/*Test.java</include>
+            </includes>
+        </unitTest>
+
+        <jarResources>
+            <includes>
+                <include>**/*.xml</include>
+            </includes>
+        </jarResources>
+    </build>
+</project>
