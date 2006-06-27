@@ -1,0 +1,17 @@
+maven.log
+velocity.log
+log
+target
+build.properties
+.classpath
+.project
+.checkstyle
+temp
+build_eclipse
+.checkclipse
+checkstyle.properties
+.settings
+build
+dist
+ant-jars
+ant-target
