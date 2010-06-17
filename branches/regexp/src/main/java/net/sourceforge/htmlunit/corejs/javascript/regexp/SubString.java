@@ -52,7 +52,7 @@ class SubString {
 
     public SubString(char[] source, int start, int len)
     {
-    // there must be a better way of doing this??
+        // there must be a better way of doing this??
         index = 0;
         length = len;
         charArray = new char[len];
@@ -63,8 +63,8 @@ class SubString {
     @Override
     public String toString() {
         return charArray == null
-               ? ""
-               : new String(charArray, index, length);
+        ? ""
+                : new String(charArray, index, length);
     }
 
     static final SubString emptySubString = new SubString();
