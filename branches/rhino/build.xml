@@ -59,6 +59,10 @@
     <ant antfile="src/build.xml" target="shell"/>
   </target> 
 
+  <target name="htmlunit" depends="compile">
+    <ant antfile="htmlunittestsrc/build.xml" target="junit"/>
+  </target> 
+
   <target name="copy-source" depends="init">
     <ant antfile="src/build.xml" target="copy-source"/>
     <ant antfile="toolsrc/build.xml" target="copy-source"/>
