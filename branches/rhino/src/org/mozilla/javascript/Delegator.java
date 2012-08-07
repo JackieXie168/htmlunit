@@ -23,7 +23,7 @@ package org.mozilla.javascript;
  * @author Matthias Radestock
  */
 
-public class Delegator extends ScriptableObject implements Function {
+public class Delegator implements Function {
 
     protected Scriptable obj = null;
 
