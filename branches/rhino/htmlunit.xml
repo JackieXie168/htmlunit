@@ -24,16 +24,17 @@ Ahmed Ashour
 	<property name="javadoc.dir" value="build/javadoc"/>
 	<property name="jar.javadoc" location="build/htmlunit-core-js-${version}-javadoc.jar" />
 
-	<target name="compile">
+	<target name="clean-compile">
 	    <ant antfile="build.xml" target="clean"/>
 	    <ant antfile="build.xml" target="compile"/>
+		<delete dir="${dist.dir}"/>
 	</target>
 
-	<target name="test" depends="compile" description="Runs htmlunit-specific tests">
+	<target name="test" depends="clean-compile" description="Runs htmlunit-specific tests">
 		<ant antfile="htmlunittestsrc/build.xml" target="junit"/>
 	</target> 
 
-	<target name="repackage" depends="compile" description="Copy org.mozilla.* to net.sourceforge.htmlunit.corejs and compiles">
+	<target name="repackage" depends="clean-compile" description="Copy org.mozilla.* to net.sourceforge.htmlunit.corejs and compiles">
 		<property name="corejs.dir" value="${repackaged-rhino.dir}/src/net/sourceforge/htmlunit/corejs"/>
 		
 		<mkdir dir="${corejs.dir}"/>
@@ -68,7 +69,7 @@ Ahmed Ashour
 		           author='true' version='true' use='true'
 		           windowtitle="HtmlUnit core-js-${version}"
 		           doctitle="HtmlUnit core-js-${version}" encoding="ISO-8859-1"
-		  />
+		 />
 	</target>
 
 	<target name="jar-all" depends="javadoc">
@@ -89,6 +90,21 @@ Ahmed Ashour
 	 	<jar destfile="${jar.javadoc}">
 		    <fileset dir='${javadoc.dir}' />
 		</jar>
+	</target>
+
+	<target name="bundle">
+<!--		<gpg file="pom.xml"/>
+		<gpg file="${jar}"/>
+		<gpg file="${jar.sources}"/>
+		<gpg file="${jar.javadoc}"/> -->
+	 	<jar destfile="build/bundle.jar">
+		    <fileset dir='.'>
+				<include name="pom.xml"/>
+				<include name="pom.xml.asc"/>
+		    </fileset>
+    	   <fileset dir="build" includes="*.jar,*.jar.asc" />
+		</jar>
+		<delete file="pom.xml.asc"/>
 	</target>
 
 </project>
