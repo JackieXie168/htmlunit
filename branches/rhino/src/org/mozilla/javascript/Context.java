@@ -1325,7 +1325,7 @@ public class Context
                              securityDomain);
     }
 
-    final Script compileString(String source,
+    protected Script compileString(String source,
                                Evaluator compiler,
                                ErrorReporter compilationErrorReporter,
                                String sourceName, int lineno,
