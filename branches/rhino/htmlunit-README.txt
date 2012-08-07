@@ -5,4 +5,5 @@ Steps needs to make this project:
   making build/classes as the output folder 
 - Add 'lib' and 'build' to svn:ignore
 - Add 'htmlunittestsrc' which contains 'build.xml' and the test cases
-- Let build.xml reference htmlunittestsrc/build.xml, with target 'junit'
+- Use only 'htmlunit.xml' to 'test' and to 'bundle' by:
+   ant -f htmlunit.xml bundle
