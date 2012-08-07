@@ -2522,6 +2522,8 @@ public class ScriptRuntime {
             return "undefined";
         if (value instanceof ScriptableObject)
         	return ((ScriptableObject) value).getTypeOf();
+        if (value instanceof Delegator)
+            return typeof(((Delegator) value).getDelegee());
         if (value instanceof Scriptable)
             return (value instanceof Callable) ? "function" : "object";
         if (value instanceof CharSequence)
@@ -3724,13 +3726,13 @@ public class ScriptRuntime {
 
     public static RuntimeException undefReadError(Object object, Object id)
     {
-        String idStr = (id == null) ? "null" : id.toString();
+        final String idStr = toString(id);
         return typeError2("msg.undef.prop.read", toString(object), idStr);
     }
 
     public static RuntimeException undefCallError(Object object, Object id)
     {
-        String idStr = (id == null) ? "null" : id.toString();
+        final String idStr = toString(id);
         return typeError2("msg.undef.method.call", toString(object), idStr);
     }
 
@@ -3738,9 +3740,8 @@ public class ScriptRuntime {
                                                    Object id,
                                                    Object value)
     {
-        String idStr = (id == null) ? "null" : id.toString();
-        String valueStr = (value instanceof Scriptable)
-                          ? value.toString() : toString(value);
+        final String idStr = toString(id);
+        final String valueStr = toString(value);
         return typeError3("msg.undef.prop.write", toString(object), idStr,
                           valueStr);
     }
