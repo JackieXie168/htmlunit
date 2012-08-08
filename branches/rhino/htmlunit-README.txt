@@ -11,10 +11,12 @@ Steps needs to make this project:
 - Deploy snapshot:
     ant -f htmlunit.xml deploy-snapshot
 
-- Generate bundle for release:
-    ant -f htmlunit.xml deploy-snapshot
-
+- Generate deploy the release files into Sonatype staging repository:
+    ant -f htmlunit.xml jar-all
+    mvn gpg:sign-and-deploy-file -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ -DrepositoryId=sonatype-nexus-staging -DpomFile=pom.xml -Dfile=build/htmlunit-core-js-2.11.jar
+    mvn gpg:sign-and-deploy-file -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ -DrepositoryId=sonatype-nexus-staging -DpomFile=pom.xml -Dfile=build/htmlunit-core-js-2.11-sources.jar -Dclassifier=sources
+    mvn gpg:sign-and-deploy-file -Durl=https://oss.sonatype.org/service/local/staging/deploy/maven2/ -DrepositoryId=sonatype-nexus-staging -DpomFile=pom.xml -Dfile=build/htmlunit-core-js-2.11-javadoc.jar -Dclassifier=javadoc
 
 TODO:
-    - GPG automated from ant (in "bundle" target)
+    - GPG automated from ant (in "bundle" target), if possible
     - Git generation of diffRhino.txt
