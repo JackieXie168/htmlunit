@@ -18,6 +18,3 @@ Steps needs to make this project:
 TODO:
     - GPG automated from ant (in "bundle" target)
     - Git generation of diffRhino.txt
-    - Snapshot upload of sources and javadoc
-    - 'Get' maven-ant-tasks-2.1.3.jar to lib folder automatically
-    

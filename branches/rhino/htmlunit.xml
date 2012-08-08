@@ -110,18 +110,24 @@ Ahmed Ashour
 		<delete file="pom.xml.asc"/>
 	</target>
 
-	<target name="deploy-snapshot" depends="jar-all" description="Deploys a snapshot to Sonatype snapshot repository">
+	<target name="check-maven-ant-tasks">
+		<property name="maven-ant-tasks.url" value="http://repo1.maven.org/maven2/org/apache/maven/maven-ant-tasks/2.1.3/maven-ant-tasks-2.1.3.jar"/>
+		<get src="${maven-ant-tasks.url}" dest="lib" skipexisting="true"/>
+	</target>	
+
+	<target name="deploy-snapshot" depends="check-maven-ant-tasks,jar-all"
+			description="Deploys a snapshot to Sonatype snapshot repository">
+
 		<path id="maven-ant-tasks.classpath" path="lib/maven-ant-tasks-2.1.3.jar" />
 		<typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="urn:maven-artifact-ant"
 			classpathref="maven-ant-tasks.classpath" />
 
 		<artifact:mvn>
-			<arg value="org.apache.maven.plugins:maven-deploy-plugin:2.6:deploy-file" />
+			<arg value="org.apache.maven.plugins:maven-deploy-plugin:2.7:deploy-file" />
 			<arg value="-Durl=${maven-snapshots-repository-url}" />
 			<arg value="-DrepositoryId=${maven-snapshots-repository-id}" />
 			<arg value="-DpomFile=pom.xml" />
 			<arg value="-Dfile=${jar}" />
 		</artifact:mvn>
 	</target>
-
 </project>
