@@ -13,7 +13,7 @@ the terms of the MPL.
 Marc Guillemot
 Ahmed Ashour
 ====================================================================== -->
-<project name="htmlunit-core-js build" default="jar-all" basedir=".">
+<project name="htmlunit-core-js build" default="jar-all" basedir="." xmlns:artifact="urn:maven-artifact-ant">
 
 	<property name="version" value="2.11-SNAPSHOT"/>
 
@@ -23,6 +23,9 @@ Ahmed Ashour
 	<property name="jar.sources" location="build/htmlunit-core-js-${version}-sources.jar" />
 	<property name="javadoc.dir" value="build/javadoc"/>
 	<property name="jar.javadoc" location="build/htmlunit-core-js-${version}-javadoc.jar" />
+
+	<property name="maven-snapshots-repository-id" value="sonatype-nexus-snapshots" />
+	<property name="maven-snapshots-repository-url" value="https://oss.sonatype.org/content/repositories/snapshots/" />
 
 	<target name="clean-compile">
 	    <ant antfile="build.xml" target="clean"/>
@@ -105,6 +108,20 @@ Ahmed Ashour
     	   <fileset dir="build" includes="*.jar,*.jar.asc" />
 		</jar>
 		<delete file="pom.xml.asc"/>
+	</target>
+
+	<target name="deploy-snapshot" depends="jar-all" description="Deploys a snapshot to Sonatype snapshot repository">
+		<path id="maven-ant-tasks.classpath" path="lib/maven-ant-tasks-2.1.3.jar" />
+		<typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="urn:maven-artifact-ant"
+			classpathref="maven-ant-tasks.classpath" />
+
+		<artifact:mvn>
+			<arg value="org.apache.maven.plugins:maven-deploy-plugin:2.6:deploy-file" />
+			<arg value="-Durl=${maven-snapshots-repository-url}" />
+			<arg value="-DrepositoryId=${maven-snapshots-repository-id}" />
+			<arg value="-DpomFile=pom.xml" />
+			<arg value="-Dfile=${jar}" />
+		</artifact:mvn>
 	</target>
 
 </project>
