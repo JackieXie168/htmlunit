@@ -1053,7 +1053,7 @@ public class WebClient implements Serializable {
         }
         responseHeaders.add(new NameValuePair("content-type",
             decoder.getMediaType() + ";charset=" + decoder.getCharset()));
-        final DownloadedContent downloadedContent = HttpWebConnection.downloadContent(url.openStream());
+        final DownloadedContent downloadedContent = HttpWebConnection2.downloadContent(url.openStream());
         final WebResponseData data = new WebResponseData(downloadedContent, 200, "OK", responseHeaders);
         return new WebResponse(data, url, webRequest.getHttpMethod(), 0);
     }
@@ -1712,8 +1712,8 @@ public class WebClient implements Serializable {
             }
         }
         //FIXME Depends on the implementation
-        if (webConnection_ instanceof HttpWebConnection) {
-            ((HttpWebConnection) webConnection_).shutdown();
+        if (webConnection_ instanceof HttpWebConnection2) {
+            ((HttpWebConnection2) webConnection_).shutdown();
         }
     }
 
@@ -1863,7 +1863,7 @@ public class WebClient implements Serializable {
             return new UrlFetchWebConnection(this);
         }
 
-        return new HttpWebConnection(this);
+        return new HttpWebConnection2(this);
     }
 
     private static class LoadJob {

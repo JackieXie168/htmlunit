@@ -46,9 +46,7 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpHost;
-import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.ProtocolException;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
 import org.apache.http.client.CookieStore;
@@ -63,7 +61,6 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpTrace;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.params.ClientPNames;
-import org.apache.http.client.params.HttpClientParams;
 import org.apache.http.client.utils.DateUtils;
 import org.apache.http.client.utils.URIUtils;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -86,14 +83,12 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.impl.client.AbstractHttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.client.DefaultRedirectStrategy;
-import org.apache.http.impl.conn.PoolingClientConnectionManager;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.impl.cookie.BasicPathHandler;
 import org.apache.http.impl.cookie.BrowserCompatSpec;
 import org.apache.http.message.BasicHeader;
-import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.BasicHttpContext;
@@ -108,7 +103,7 @@ import com.gargoylesoftware.htmlunit.util.UrlUtils;
  * This is meant to use the new API in HttpClient 4.3, and should be renamed to HttpWebConnection,
  * after the old code is removed.
  *
- * @version $Revision: 8491 $
+ * @version $Revision$
  * @author <a href="mailto:mbowler@GargoyleSoftware.com">Mike Bowler</a>
  * @author Noboru Sinohara
  * @author David D. Kilzer
@@ -122,7 +117,7 @@ import com.gargoylesoftware.htmlunit.util.UrlUtils;
 public class HttpWebConnection2 implements WebConnection {
 
     private static final String HACKED_COOKIE_POLICY = "mine";
-    private AbstractHttpClient httpClient_;
+    private HttpClientBuilder httpClientBuilder_;
     private final WebClient webClient_;
 
     /** Use single HttpContext, so there is no need to re-send authentication for each and every request. */
@@ -149,7 +144,7 @@ public class HttpWebConnection2 implements WebConnection {
      */
     public WebResponse getResponse(final WebRequest request) throws IOException {
         final URL url = request.getUrl();
-        final AbstractHttpClient httpClient = getHttpClient();
+        final CloseableHttpClient httpClient = getHttpClientBuilder().build();
 
         HttpUriRequest httpMethod = null;
         try {
@@ -171,7 +166,8 @@ public class HttpWebConnection2 implements WebConnection {
             catch (final SSLPeerUnverifiedException s) {
                 // Try to use only SSLv3 instead
                 if (webClient_.getOptions().isUseInsecureSSL()) {
-                    HtmlUnitSSLSocketFactory.setUseSSL3Only(getHttpClient().getParams(), true);
+                    // TODO: asashour
+                    // HtmlUnitSSLSocketFactory.setUseSSL3Only(getHttpClient().getParams(), true);
                     httpResponse = httpClient.execute(hostConfiguration, httpMethod);
                 }
                 else {
@@ -184,7 +180,7 @@ public class HttpWebConnection2 implements WebConnection {
                 // come out of connections and throw a ConnectionPoolTimeoutException.
                 // => best solution, discard the HttpClient instance.
                 synchronized (this) {
-                    httpClient_ = null;
+                    httpClientBuilder_ = null;
                 }
                 throw e;
             }
@@ -328,9 +324,10 @@ public class HttpWebConnection2 implements WebConnection {
         writeRequestHeadersToHttpMethod(httpMethod, webRequest.getAdditionalHeaders());
 //        getHttpClient().getParams().setParameter(ClientPNames.HANDLE_REDIRECTS, true);
 
-        final AbstractHttpClient httpClient = getHttpClient();
+        final HttpClientBuilder httpClient = getHttpClientBuilder();
 
-        reconfigureHttpClientIfNeeded(httpClient);
+        //TODO: asashour
+        //reconfigureHttpClientIfNeeded(httpClient);
 
         // Tell the client where to get its credentials from
         // (it may have changed on the webClient since last call to getHttpClientFor(...))
@@ -354,27 +351,30 @@ public class HttpWebConnection2 implements WebConnection {
             // updating our client to keep the credentials for the next request
             credentialsProvider.setCredentials(authScope, requestCredentials);
         }
-        httpClient.setCredentialsProvider(credentialsProvider);
+        // TODO: asashour
+        // httpClient.setCredentialsProvider(credentialsProvider);
 
         if (webClient_.getCookieManager().isCookiesEnabled()) {
             // Cookies are enabled. Note that it's important that we enable single cookie headers,
             // for compatibility purposes.
-            httpClient.getParams().setParameter(CookieSpecPNames.SINGLE_COOKIE_HEADER, Boolean.TRUE);
-            httpClient.getParams().setParameter(ClientPNames.COOKIE_POLICY, HACKED_COOKIE_POLICY);
-            httpClient.setCookieStore(new HtmlUnitCookieStore2(webClient_.getCookieManager()));
+            // TODO: asashour
+//            httpClient.getParams().setParameter(CookieSpecPNames.SINGLE_COOKIE_HEADER, Boolean.TRUE);
+//            httpClient.getParams().setParameter(ClientPNames.COOKIE_POLICY, HACKED_COOKIE_POLICY);
+//            httpClient.setCookieStore(new HtmlUnitCookieStore2(webClient_.getCookieManager()));
         }
         else {
             // Cookies are disabled.
-            httpClient.setCookieStore(new CookieStore() {
-                public void addCookie(final Cookie cookie) { /* empty */ }
-                public void clear() { /* empty */ }
-                public boolean clearExpired(final Date date) {
-                    return false;
-                }
-                public List<Cookie> getCookies() {
-                    return Collections.<Cookie>emptyList();
-                }
-            });
+            // TODO: asashour
+//            httpClient.setCookieStore(new CookieStore() {
+//                public void addCookie(final Cookie cookie) { /* empty */ }
+//                public void clear() { /* empty */ }
+//                public boolean clearExpired(final Date date) {
+//                    return false;
+//                }
+//                public List<Cookie> getCookies() {
+//                    return Collections.<Cookie>emptyList();
+//                }
+//            });
         }
         return httpMethod;
     }
@@ -504,16 +504,17 @@ public class HttpWebConnection2 implements WebConnection {
      *
      * @return the initialized HTTP client
      */
-    protected synchronized AbstractHttpClient getHttpClient() {
-        if (httpClient_ == null) {
-            httpClient_ = createHttpClient();
+    protected synchronized HttpClientBuilder getHttpClientBuilder() {
+        if (httpClientBuilder_ == null) {
+            httpClientBuilder_ = createHttpClient();
 
             // this factory is required later
             // to be sure this is done, we do it outside the createHttpClient() call
-            httpClient_.getCookieSpecs().register(HACKED_COOKIE_POLICY, htmlUnitCookieSpecFactory_);
+            // TODO: asashour
+            //httpClientBuilder_.getCookieSpecs().register(HACKED_COOKIE_POLICY, htmlUnitCookieSpecFactory_);
         }
 
-        return httpClient_;
+        return httpClientBuilder_;
     }
 
     /**
@@ -534,38 +535,39 @@ public class HttpWebConnection2 implements WebConnection {
      * some tracking; see feature request 1438216).
      * @return the <tt>HttpClient</tt> that will be used by this WebConnection
      */
-    protected AbstractHttpClient createHttpClient() {
-        final HttpParams httpParams = new BasicHttpParams();
+    protected HttpClientBuilder createHttpClient() {
+        // TODO: asashour
+//        final HttpParams httpParams = new BasicHttpParams();
+//
+//        HttpClientParams.setRedirecting(httpParams, false);
+//        // Set timeouts
+//        configureTimeout(httpParams, webClient_.getOptions().getTimeout());
+//
+//        final SchemeRegistry schemeRegistry = new SchemeRegistry();
+//        schemeRegistry.register(new Scheme("http", 80, new SocksSocketFactory()));
+//        configureHttpsScheme(schemeRegistry);
+//
+//        final PoolingClientConnectionManager connectionManager =
+//            new PoolingClientConnectionManager(schemeRegistry);
+//        connectionManager.setDefaultMaxPerRoute(6);
+//
+//        final DefaultHttpClient httpClient = new DefaultHttpClient(connectionManager, httpParams);
+//        httpClient.setCookieStore(new HtmlUnitCookieStore2(webClient_.getCookieManager()));
+//
+//        httpClient.setRedirectStrategy(new DefaultRedirectStrategy() {
+//            @Override
+//            public boolean isRedirected(final HttpRequest request, final HttpResponse response,
+//                    final HttpContext context) throws ProtocolException {
+//                return super.isRedirected(request, response, context)
+//                        && response.getFirstHeader("location") != null;
+//            }
+//        });
+//
+//        if (getVirtualHost() != null) {
+//            httpClient.getParams().setParameter(ClientPNames.VIRTUAL_HOST, virtualHost_);
+//        }
 
-        HttpClientParams.setRedirecting(httpParams, false);
-        // Set timeouts
-        configureTimeout(httpParams, webClient_.getOptions().getTimeout());
-
-        final SchemeRegistry schemeRegistry = new SchemeRegistry();
-        schemeRegistry.register(new Scheme("http", 80, new SocksSocketFactory()));
-        configureHttpsScheme(schemeRegistry);
-
-        final PoolingClientConnectionManager connectionManager =
-            new PoolingClientConnectionManager(schemeRegistry);
-        connectionManager.setDefaultMaxPerRoute(6);
-
-        final DefaultHttpClient httpClient = new DefaultHttpClient(connectionManager, httpParams);
-        httpClient.setCookieStore(new HtmlUnitCookieStore2(webClient_.getCookieManager()));
-
-        httpClient.setRedirectStrategy(new DefaultRedirectStrategy() {
-            @Override
-            public boolean isRedirected(final HttpRequest request, final HttpResponse response,
-                    final HttpContext context) throws ProtocolException {
-                return super.isRedirected(request, response, context)
-                        && response.getFirstHeader("location") != null;
-            }
-        });
-
-        if (getVirtualHost() != null) {
-            httpClient.getParams().setParameter(ClientPNames.VIRTUAL_HOST, virtualHost_);
-        }
-
-        return httpClient;
+        return HttpClientBuilder.create();
     }
 
     private void configureTimeout(final HttpParams httpParams, final int timeout) {
@@ -612,7 +614,8 @@ public class HttpWebConnection2 implements WebConnection {
     public void setVirtualHost(final String virtualHost) {
         virtualHost_ = virtualHost;
         if (virtualHost_ != null) {
-            getHttpClient().getParams().setParameter(ClientPNames.VIRTUAL_HOST, virtualHost_);
+            // TODO: asashour
+            //getHttpClient().getParams().setParameter(ClientPNames.VIRTUAL_HOST, virtualHost_);
         }
     }
 
@@ -724,9 +727,10 @@ public class HttpWebConnection2 implements WebConnection {
      * Shutdown the connection manager.
      */
     public synchronized void shutdown() {
-        if (httpClient_ != null) {
-            httpClient_.getConnectionManager().shutdown();
-            httpClient_ = null;
+        if (httpClientBuilder_ != null) {
+            // TODO: asashour
+            //httpClientBuilder_.getConnectionManager().shutdown();
+            httpClientBuilder_ = null;
         }
     }
 }
@@ -840,7 +844,7 @@ class HtmlUnitBrowserCompatCookieSpec2 extends BrowserCompatSpec {
  * Implementation of {@link CookieStore} like {@link org.apache.http.impl.client.BasicCookieStore}
  * BUT storing cookies in the order of addition.
  * @author Marc Guillemot
- * @version $Revision: 8491 $
+ * @version $Revision$
  */
 class HtmlUnitCookieStore2 implements CookieStore, Serializable {
     private CookieManager manager_;
