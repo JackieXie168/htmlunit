@@ -51,6 +51,7 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
@@ -60,34 +61,36 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpTrace;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.utils.DateUtils;
 import org.apache.http.client.utils.URIUtils;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.params.ConnRoutePNames;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.cookie.ClientCookie;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.cookie.CookieAttributeHandler;
 import org.apache.http.cookie.CookieOrigin;
 import org.apache.http.cookie.CookiePathComparator;
 import org.apache.http.cookie.CookieSpec;
-import org.apache.http.cookie.CookieSpecFactory;
+import org.apache.http.cookie.CookieSpecProvider;
 import org.apache.http.cookie.MalformedCookieException;
 import org.apache.http.cookie.SetCookie;
-import org.apache.http.cookie.params.CookieSpecPNames;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.InputStreamBody;
-import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.impl.cookie.BasicPathHandler;
+import org.apache.http.impl.cookie.BestMatchSpecFactory;
 import org.apache.http.impl.cookie.BrowserCompatSpec;
+import org.apache.http.impl.cookie.BrowserCompatSpecFactory;
+import org.apache.http.impl.cookie.IgnoreSpecFactory;
+import org.apache.http.impl.cookie.NetscapeDraftSpecFactory;
+import org.apache.http.impl.cookie.RFC2109SpecFactory;
+import org.apache.http.impl.cookie.RFC2965SpecFactory;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.HttpParams;
@@ -123,7 +126,7 @@ public class HttpWebConnection2 implements WebConnection {
     /** Use single HttpContext, so there is no need to re-send authentication for each and every request. */
     private HttpContext httpContext_ = new BasicHttpContext();
     private String virtualHost_;
-    private final CookieSpecFactory htmlUnitCookieSpecFactory_;
+    private final CookieSpecProvider htmlUnitCookieSpecProvider_;
     private final WebClientOptions usedOptions_ = new WebClientOptions();
 
     /**
@@ -132,8 +135,9 @@ public class HttpWebConnection2 implements WebConnection {
      */
     public HttpWebConnection2(final WebClient webClient) {
         webClient_ = webClient;
-        htmlUnitCookieSpecFactory_ = new CookieSpecFactory() {
-            public CookieSpec newInstance(final HttpParams params) {
+        htmlUnitCookieSpecProvider_ = new CookieSpecProvider() {
+            @Override
+            public CookieSpec create(final HttpContext context) {
                 return new HtmlUnitBrowserCompatCookieSpec2(webClient_.getIncorrectnessListener());
             }
         };
@@ -326,8 +330,7 @@ public class HttpWebConnection2 implements WebConnection {
 
         final HttpClientBuilder httpClient = getHttpClientBuilder();
 
-        //TODO: asashour
-        //reconfigureHttpClientIfNeeded(httpClient);
+        reconfigureHttpClientIfNeeded(httpClient);
 
         // Tell the client where to get its credentials from
         // (it may have changed on the webClient since last call to getHttpClientFor(...))
@@ -510,8 +513,18 @@ public class HttpWebConnection2 implements WebConnection {
 
             // this factory is required later
             // to be sure this is done, we do it outside the createHttpClient() call
-            // TODO: asashour
-            //httpClientBuilder_.getCookieSpecs().register(HACKED_COOKIE_POLICY, htmlUnitCookieSpecFactory_);
+            final RegistryBuilder<CookieSpecProvider> registeryBuilder
+                = RegistryBuilder.<CookieSpecProvider>create()
+                .register(CookieSpecs.BEST_MATCH, new BestMatchSpecFactory())
+                .register(CookieSpecs.STANDARD, new RFC2965SpecFactory())
+                .register(CookieSpecs.BROWSER_COMPATIBILITY, new BrowserCompatSpecFactory())
+                .register(CookieSpecs.NETSCAPE, new NetscapeDraftSpecFactory())
+                .register(CookieSpecs.IGNORE_COOKIES, new IgnoreSpecFactory())
+                .register("rfc2109", new RFC2109SpecFactory())
+                .register("rfc2965", new RFC2965SpecFactory());
+            
+            registeryBuilder.register(HACKED_COOKIE_POLICY, htmlUnitCookieSpecProvider_);
+            httpClientBuilder_.setDefaultCookieSpecRegistry(registeryBuilder.build());
         }
 
         return httpClientBuilder_;
@@ -570,9 +583,10 @@ public class HttpWebConnection2 implements WebConnection {
         return HttpClientBuilder.create();
     }
 
-    private void configureTimeout(final HttpParams httpParams, final int timeout) {
-        httpParams.setParameter(CoreConnectionPNames.SO_TIMEOUT, timeout);
-        httpParams.setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, timeout);
+    private void configureTimeout(final HttpClientBuilder builder, final int timeout) {
+        //TODO: commented for HttpClient 4.3
+        //params.setAttribute(CoreConnectionPNames.SO_TIMEOUT, timeout);
+        //params.setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, timeout);
 
         usedOptions_.setTimeout(timeout);
     }
@@ -581,26 +595,26 @@ public class HttpWebConnection2 implements WebConnection {
      * React on changes that may have occurred on the WebClient settings.
      * Registering as a listener would be probably better.
      */
-    private void reconfigureHttpClientIfNeeded(final AbstractHttpClient httpClient) {
+    private void reconfigureHttpClientIfNeeded(final HttpClientBuilder httpClientBuilder) {
         final WebClientOptions options = webClient_.getOptions();
 
         // register new SSL factory only if settings have changed
         if (options.isUseInsecureSSL() != usedOptions_.isUseInsecureSSL()
                 || options.getSSLClientCertificateUrl() != usedOptions_.getSSLClientCertificateUrl()) {
-            configureHttpsScheme(httpClient.getConnectionManager().getSchemeRegistry());
+            configureHttpsScheme(httpClientBuilder);
         }
 
         if (options.getTimeout() != usedOptions_.getTimeout()) {
-            configureTimeout(httpClient.getParams(), options.getTimeout());
+            configureTimeout(httpClientBuilder, options.getTimeout());
         }
     }
 
-    private void configureHttpsScheme(final SchemeRegistry schemeRegistry) {
+    private void configureHttpsScheme(final HttpClientBuilder builder) {
         final WebClientOptions options = webClient_.getOptions();
 
-        final SSLSocketFactory socketFactory = HtmlUnitSSLSocketFactory.buildSSLSocketFactory(options);
+        final SSLConnectionSocketFactory socketFactory = HtmlUnitSSLConnectionSocketFactory.buildSSLSocketFactory(options);
 
-        schemeRegistry.register(new Scheme("https", 443, socketFactory));
+        builder.setSSLSocketFactory(socketFactory);
 
         usedOptions_.setUseInsecureSSL(options.isUseInsecureSSL());
         usedOptions_.setSSLClientCertificate(options.getSSLClientCertificateUrl(),
