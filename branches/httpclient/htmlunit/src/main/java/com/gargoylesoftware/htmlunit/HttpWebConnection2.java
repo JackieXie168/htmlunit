@@ -148,7 +148,8 @@ public class HttpWebConnection2 implements WebConnection {
      */
     public WebResponse getResponse(final WebRequest request) throws IOException {
         final URL url = request.getUrl();
-        final CloseableHttpClient httpClient = getHttpClientBuilder().build();
+        final CloseableHttpClient httpClient = reconfigureHttpClientIfNeeded(getHttpClientBuilder())
+                .build();
 
         HttpUriRequest httpMethod = null;
         try {
@@ -329,8 +330,6 @@ public class HttpWebConnection2 implements WebConnection {
 //        getHttpClient().getParams().setParameter(ClientPNames.HANDLE_REDIRECTS, true);
 
         final HttpClientBuilder httpClient = getHttpClientBuilder();
-
-        reconfigureHttpClientIfNeeded(httpClient);
 
         // Tell the client where to get its credentials from
         // (it may have changed on the webClient since last call to getHttpClientFor(...))
@@ -595,7 +594,7 @@ public class HttpWebConnection2 implements WebConnection {
      * React on changes that may have occurred on the WebClient settings.
      * Registering as a listener would be probably better.
      */
-    private void reconfigureHttpClientIfNeeded(final HttpClientBuilder httpClientBuilder) {
+    private HttpClientBuilder reconfigureHttpClientIfNeeded(final HttpClientBuilder httpClientBuilder) {
         final WebClientOptions options = webClient_.getOptions();
 
         // register new SSL factory only if settings have changed
@@ -607,6 +606,7 @@ public class HttpWebConnection2 implements WebConnection {
         if (options.getTimeout() != usedOptions_.getTimeout()) {
             configureTimeout(httpClientBuilder, options.getTimeout());
         }
+        return httpClientBuilder;
     }
 
     private void configureHttpsScheme(final HttpClientBuilder builder) {
