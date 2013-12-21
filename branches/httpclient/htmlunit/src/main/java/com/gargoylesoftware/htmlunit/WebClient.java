@@ -1199,7 +1199,7 @@ public class WebClient implements Serializable {
             }
         }
         else {
-            response = loadWebResponseFromWebConnection(webRequest, ALLOWED_REDIRECTIONS_SAME_URL);
+            response = loadWebResponseFromWebConnection(webRequest);
         }
 
         return response;
@@ -1208,12 +1208,10 @@ public class WebClient implements Serializable {
     /**
      * Loads a {@link WebResponse} from the server through the WebConnection.
      * @param webRequest the request
-     * @param allowedRedirects the number of allowed redirects remaining
      * @throws IOException if an IO problem occurs
      * @return the resultant {@link WebResponse}
      */
-    private WebResponse loadWebResponseFromWebConnection(final WebRequest webRequest,
-        final int allowedRedirects) throws IOException {
+    private WebResponse loadWebResponseFromWebConnection(final WebRequest webRequest) throws IOException {
 
         URL url = webRequest.getUrl();
         final HttpMethod method = webRequest.getHttpMethod();
@@ -1321,18 +1319,14 @@ public class WebClient implements Serializable {
                 LOG.debug("Got a redirect status code [" + status + "] new location = [" + locationString + "]");
             }
 
-            if (allowedRedirects == 0) {
-                throw new FailingHttpStatusCodeException("Too much redirect for "
-                    + webResponse.getWebRequest().getUrl(), webResponse);
-            }
-            else if ((status == HttpStatus.SC_MOVED_PERMANENTLY || status == HttpStatus.SC_TEMPORARY_REDIRECT)
+            if ((status == HttpStatus.SC_MOVED_PERMANENTLY || status == HttpStatus.SC_TEMPORARY_REDIRECT)
                 && method == HttpMethod.GET) {
                 final WebRequest wrs = new WebRequest(newUrl);
                 wrs.setRequestParameters(parameters);
                 for (final Map.Entry<String, String> entry : webRequest.getAdditionalHeaders().entrySet()) {
                     wrs.setAdditionalHeader(entry.getKey(), entry.getValue());
                 }
-                return loadWebResponseFromWebConnection(wrs, allowedRedirects - 1);
+                return loadWebResponseFromWebConnection(wrs);
             }
             else if (status <= HttpStatus.SC_SEE_OTHER) {
                 final WebRequest wrs = new WebRequest(newUrl);
@@ -1340,7 +1334,7 @@ public class WebClient implements Serializable {
                 for (final Map.Entry<String, String> entry : webRequest.getAdditionalHeaders().entrySet()) {
                     wrs.setAdditionalHeader(entry.getKey(), entry.getValue());
                 }
-                return loadWebResponseFromWebConnection(wrs, allowedRedirects - 1);
+                return loadWebResponseFromWebConnection(wrs);
             }
         }
 
