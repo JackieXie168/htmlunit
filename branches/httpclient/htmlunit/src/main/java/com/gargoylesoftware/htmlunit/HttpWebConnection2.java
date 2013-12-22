@@ -52,6 +52,7 @@ import org.apache.http.auth.Credentials;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
@@ -61,6 +62,7 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpTrace;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.client.utils.DateUtils;
 import org.apache.http.client.utils.URIUtils;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -92,7 +94,6 @@ import org.apache.http.impl.cookie.NetscapeDraftSpecFactory;
 import org.apache.http.impl.cookie.RFC2109SpecFactory;
 import org.apache.http.impl.cookie.RFC2965SpecFactory;
 import org.apache.http.message.BasicHeader;
-import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
@@ -579,14 +580,18 @@ public class HttpWebConnection2 implements WebConnection {
 //            httpClient.getParams().setParameter(ClientPNames.VIRTUAL_HOST, virtualHost_);
 //        }
 
-        return HttpClientBuilder.create();
+        final HttpClientBuilder builder = HttpClientBuilder.create();
+        configureTimeout(builder, webClient_.getOptions().getTimeout());
+        return builder;
     }
 
     private void configureTimeout(final HttpClientBuilder builder, final int timeout) {
-        //TODO: commented for HttpClient 4.3
-        //params.setAttribute(CoreConnectionPNames.SO_TIMEOUT, timeout);
-        //params.setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, timeout);
-
+        RequestConfig.Builder requestBuilder = RequestConfig.custom()
+                .setConnectTimeout(timeout)
+                .setConnectionRequestTimeout(timeout)
+                .setSocketTimeout(timeout);
+        builder.setDefaultRequestConfig(requestBuilder.build());
+        httpContext_.removeAttribute(HttpClientContext.REQUEST_CONFIG);
         usedOptions_.setTimeout(timeout);
     }
 
