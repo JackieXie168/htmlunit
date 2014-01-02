@@ -341,6 +341,7 @@ public class HttpWebConnection2 implements WebConnection {
             final AuthScope authScope = new AuthScope(requestUrl.getHost(), requestUrl.getPort());
             // updating our client to keep the credentials for the next request
             credentialsProvider.setCredentials(authScope, requestUrlCredentials);
+            httpContext_.removeAttribute(HttpClientContext.TARGET_AUTH_STATE);
         }
 
         // if someone has set credentials to this request, we have to add this
@@ -749,6 +750,11 @@ public class HttpWebConnection2 implements WebConnection {
             httpClientBuilder_ = null;
         }
     }
+
+    //TODO: should we really do this?
+    public void clearCredentials() {
+        httpContext_.removeAttribute(HttpClientContext.TARGET_AUTH_STATE);
+    }
 }
 
 /**
@@ -899,4 +905,5 @@ class HtmlUnitCookieStore2 implements CookieStore, Serializable {
     public synchronized void clear() {
         manager_.clearCookies();
     }
+
 }

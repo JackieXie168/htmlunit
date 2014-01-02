@@ -56,7 +56,9 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import com.gargoylesoftware.htmlunit.AjaxController;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.HttpMethod;
+import com.gargoylesoftware.htmlunit.HttpWebConnection2;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.WebConnection;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -643,6 +645,10 @@ public class XMLHttpRequest extends SimpleScriptable {
     private void doSend(final Context context) {
         final WebClient wc = getWindow().getWebWindow().getWebClient();
         try {
+            WebConnection connection = wc.getWebConnection();
+            if (connection instanceof HttpWebConnection2) {
+                ((HttpWebConnection2) connection).clearCredentials();
+            }
             final String originHeaderValue = webRequest_.getAdditionalHeaders().get(HEADER_ORIGIN);
             final boolean crossOriginResourceSharing = originHeaderValue != null;
             if (crossOriginResourceSharing && isPreflight()) {
