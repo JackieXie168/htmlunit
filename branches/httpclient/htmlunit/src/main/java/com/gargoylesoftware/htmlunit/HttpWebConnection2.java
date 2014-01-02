@@ -82,7 +82,6 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.InputStreamBody;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.impl.cookie.BasicPathHandler;
@@ -95,7 +94,6 @@ import org.apache.http.impl.cookie.RFC2109SpecFactory;
 import org.apache.http.impl.cookie.RFC2965SpecFactory;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.params.HttpParams;
-import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 
 import com.gargoylesoftware.htmlunit.util.KeyDataPair;
@@ -125,7 +123,7 @@ public class HttpWebConnection2 implements WebConnection {
     private final WebClient webClient_;
 
     /** Use single HttpContext, so there is no need to re-send authentication for each and every request. */
-    private HttpContext httpContext_ = new BasicHttpContext();
+    private HttpContext httpContext_ = new HttpClientContext();
     private String virtualHost_;
     private final CookieSpecProvider htmlUnitCookieSpecProvider_;
     private final WebClientOptions usedOptions_ = new WebClientOptions();
@@ -149,8 +147,7 @@ public class HttpWebConnection2 implements WebConnection {
      */
     public WebResponse getResponse(final WebRequest request) throws IOException {
         final URL url = request.getUrl();
-        final CloseableHttpClient httpClient = reconfigureHttpClientIfNeeded(getHttpClientBuilder())
-                .build();
+        final HttpClientBuilder builder = reconfigureHttpClientIfNeeded(getHttpClientBuilder());
 
         HttpUriRequest httpMethod = null;
         try {
@@ -167,14 +164,14 @@ public class HttpWebConnection2 implements WebConnection {
 
             HttpResponse httpResponse = null;
             try {
-                httpResponse = httpClient.execute(hostConfiguration, httpMethod, httpContext_);
+                httpResponse = builder.build().execute(hostConfiguration, httpMethod, httpContext_);
             }
             catch (final SSLPeerUnverifiedException s) {
                 // Try to use only SSLv3 instead
                 if (webClient_.getOptions().isUseInsecureSSL()) {
                     // TODO: asashour
                     // HtmlUnitSSLSocketFactory.setUseSSL3Only(getHttpClient().getParams(), true);
-                    httpResponse = httpClient.execute(hostConfiguration, httpMethod);
+                    httpResponse = builder.build().execute(hostConfiguration, httpMethod);
                 }
                 else {
                     throw s;
@@ -354,8 +351,8 @@ public class HttpWebConnection2 implements WebConnection {
             // updating our client to keep the credentials for the next request
             credentialsProvider.setCredentials(authScope, requestCredentials);
         }
-        // TODO: asashour
-        // httpClient.setCredentialsProvider(credentialsProvider);
+        httpContext_.removeAttribute(HttpClientContext.CREDS_PROVIDER);
+        httpClient.setDefaultCredentialsProvider(credentialsProvider);
 
         if (webClient_.getCookieManager().isCookiesEnabled()) {
             // Cookies are enabled. Note that it's important that we enable single cookie headers,
