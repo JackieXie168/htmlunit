@@ -46,7 +46,9 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpHost;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.ProtocolException;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
 import org.apache.http.client.CookieStore;
@@ -82,6 +84,7 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.InputStreamBody;
+import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.impl.cookie.BasicPathHandler;
@@ -360,22 +363,20 @@ public class HttpWebConnection2 implements WebConnection {
             // for compatibility purposes.
             // TODO: asashour
 //            httpClient.getParams().setParameter(CookieSpecPNames.SINGLE_COOKIE_HEADER, Boolean.TRUE);
-//            httpClient.getParams().setParameter(ClientPNames.COOKIE_POLICY, HACKED_COOKIE_POLICY);
-//            httpClient.setCookieStore(new HtmlUnitCookieStore2(webClient_.getCookieManager()));
+            httpClient.setDefaultCookieStore(new HtmlUnitCookieStore2(webClient_.getCookieManager()));
         }
         else {
             // Cookies are disabled.
-            // TODO: asashour
-//            httpClient.setCookieStore(new CookieStore() {
-//                public void addCookie(final Cookie cookie) { /* empty */ }
-//                public void clear() { /* empty */ }
-//                public boolean clearExpired(final Date date) {
-//                    return false;
-//                }
-//                public List<Cookie> getCookies() {
-//                    return Collections.<Cookie>emptyList();
-//                }
-//            });
+            httpClient.setDefaultCookieStore(new CookieStore() {
+                public void addCookie(final Cookie cookie) { /* empty */ }
+                public void clear() { /* empty */ }
+                public boolean clearExpired(final Date date) {
+                    return false;
+                }
+                public List<Cookie> getCookies() {
+                    return Collections.<Cookie>emptyList();
+                }
+            });
         }
         return httpMethod;
     }
@@ -579,6 +580,14 @@ public class HttpWebConnection2 implements WebConnection {
 //        }
 
         final HttpClientBuilder builder = HttpClientBuilder.create();
+        builder.setRedirectStrategy(new DefaultRedirectStrategy() {
+            @Override
+            public boolean isRedirected(final HttpRequest request, final HttpResponse response,
+                    final HttpContext context) throws ProtocolException {
+                return super.isRedirected(request, response, context)
+                        && response.getFirstHeader("location") != null;
+            }
+        });
         configureTimeout(builder, webClient_.getOptions().getTimeout());
         return builder;
     }
@@ -587,7 +596,10 @@ public class HttpWebConnection2 implements WebConnection {
         RequestConfig.Builder requestBuilder = RequestConfig.custom()
                 .setConnectTimeout(timeout)
                 .setConnectionRequestTimeout(timeout)
-                .setSocketTimeout(timeout);
+                .setSocketTimeout(timeout)
+                .setCookieSpec(HACKED_COOKIE_POLICY)
+                .setRedirectsEnabled(false);
+
         builder.setDefaultRequestConfig(requestBuilder.build());
         httpContext_.removeAttribute(HttpClientContext.REQUEST_CONFIG);
         usedOptions_.setTimeout(timeout);
