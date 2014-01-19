@@ -162,7 +162,7 @@ public class HttpWebConnection2 implements WebConnection {
                         + " (reason: " + e.getMessage() + ")", e);
             }
             final HttpHost hostConfiguration = getHostConfiguration(request);
-            setProxy(httpMethod, request);
+//            setProxy(httpMethod, request);
             final long startTime = System.currentTimeMillis();
 
             HttpResponse httpResponse = null;
@@ -222,16 +222,51 @@ public class HttpWebConnection2 implements WebConnection {
         return hostConfiguration;
     }
 
-    private static void setProxy(final HttpUriRequest httpUriRequest, final WebRequest webRequest) {
+//    private static void setProxy(final HttpUriRequest httpUriRequest, final WebRequest webRequest) {
+//        if (webRequest.getProxyHost() != null) {
+//            final HttpHost proxy = new HttpHost(webRequest.getProxyHost(), webRequest.getProxyPort());
+//            final HttpParams httpRequestParams = httpUriRequest.getParams();
+//            if (webRequest.isSocksProxy()) {
+//                SocksSocketFactory.setSocksProxy(httpRequestParams, proxy);
+//            }
+//            else {
+//                httpRequestParams.setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+//            }
+//        }
+//    }
+
+    private static void setProxy(final HttpRequestBase httpRequest, final WebRequest webRequest) {
         if (webRequest.getProxyHost() != null) {
             final HttpHost proxy = new HttpHost(webRequest.getProxyHost(), webRequest.getProxyPort());
-            final HttpParams httpRequestParams = httpUriRequest.getParams();
-            if (webRequest.isSocksProxy()) {
-                SocksSocketFactory.setSocksProxy(httpRequestParams, proxy);
+            RequestConfig config = httpRequest.getConfig();
+            RequestConfig.Builder builder;
+            if (config == null) {
+                builder = RequestConfig.custom();
             }
             else {
-                httpRequestParams.setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+                builder = RequestConfig.copy(config);
             }
+            builder.setProxy(proxy);
+            httpRequest.setConfig(builder.build());
+            
+//            if (webRequest.isSocksProxy()) {
+//                SocksSocketFactory.setSocksProxy(httpRequestParams, proxy);
+//            }
+//            else {
+//                httpRequestParams.setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+//            }
+        }
+        else {
+            RequestConfig config = httpRequest.getConfig();
+            RequestConfig.Builder builder;
+            if (config == null) {
+                builder = RequestConfig.custom();
+            }
+            else {
+                builder = RequestConfig.copy(config);
+            }
+            builder.setProxy(null);
+            httpRequest.setConfig(builder.build());
         }
     }
 
@@ -258,6 +293,7 @@ public class HttpWebConnection2 implements WebConnection {
         URI uri = URIUtils.createURI(url.getProtocol(), url.getHost(), url.getPort(), url.getPath(),
                 escapeQuery(url.getQuery()), null);
         final HttpRequestBase httpMethod = buildHttpMethod(webRequest.getHttpMethod(), uri);
+        setProxy(httpMethod, webRequest);
         if (!(httpMethod instanceof HttpEntityEnclosingRequest)) {
             // this is the case for GET as well as TRACE, DELETE, OPTIONS and HEAD
             if (!webRequest.getRequestParameters().isEmpty()) {
