@@ -394,6 +394,7 @@ public class HttpWebConnection2 implements WebConnection {
         httpContext_.removeAttribute(HttpClientContext.CREDS_PROVIDER);
         httpClient.setDefaultCredentialsProvider(credentialsProvider);
 
+        httpContext_.removeAttribute(HttpClientContext.COOKIE_STORE);
         if (webClient_.getCookieManager().isCookiesEnabled()) {
             // Cookies are enabled. Note that it's important that we enable single cookie headers,
             // for compatibility purposes.
