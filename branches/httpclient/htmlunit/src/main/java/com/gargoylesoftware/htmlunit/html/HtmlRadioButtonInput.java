@@ -14,9 +14,9 @@
  */
 package com.gargoylesoftware.htmlunit.html;
 
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.EVENT_ONCHANGE_AFTER_ONCLICK;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.EVENT_ONCHANGE_LOSING_FOCUS;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.HTMLCHECKEDINPUT_SET_CHECKED_TO_FALSE_WHEN_CLONE;
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.HTMLCHECKEDINPUT_SET_DEFAULT_CHECKED_UPDATES_CHECKED;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.HTMLCHECKEDINPUT_SET_DEFAULT_VALUE_WHEN_CLONE;
 
 import java.io.IOException;
@@ -42,6 +42,7 @@ import com.gargoylesoftware.htmlunit.javascript.host.Event;
  * @author Ahmed Ashour
  * @author Benoit Heinrich
  * @author Ronald Brill
+ * @author Frank Danek
  */
 public class HtmlRadioButtonInput extends HtmlInput {
 
@@ -58,15 +59,15 @@ public class HtmlRadioButtonInput extends HtmlInput {
      * If no value is specified, it is set to "on" as browsers do (eg IE6 and Mozilla 1.7)
      * even if spec says that it is not allowed
      * (<a href="http://www.w3.org/TR/REC-html40/interact/forms.html#adef-value-INPUT">W3C</a>).
-     * @param namespaceURI the URI that identifies an XML namespace
+     *
      * @param qualifiedName the qualified name of the element type to instantiate
      * @param page the page that contains this element
      * @param attributes the initial attributes
      */
-    HtmlRadioButtonInput(final String namespaceURI, final String qualifiedName, final SgmlPage page,
+    HtmlRadioButtonInput(final String qualifiedName, final SgmlPage page,
             final Map<String, DomAttr> attributes) {
         // default value for both IE6 and Mozilla 1.7 even if spec says it is unspecified
-        super(namespaceURI, qualifiedName, page, addValueIfNeeded(page, attributes));
+        super(qualifiedName, page, addValueIfNeeded(page, attributes));
 
         // fix the default value in case we have set it
         if (getAttribute("value") == DEFAULT_VALUE) {
@@ -205,8 +206,20 @@ public class HtmlRadioButtonInput extends HtmlInput {
      * {@inheritDoc}
      */
     @Override
+    protected ScriptResult doClickFireClickEvent(final Event event) throws IOException {
+        if (!hasFeature(EVENT_ONCHANGE_LOSING_FOCUS) && !hasFeature(EVENT_ONCHANGE_AFTER_ONCLICK)) {
+            executeOnChangeHandlerIfAppropriate(this);
+        }
+
+        return super.doClickFireClickEvent(event);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     protected void doClickFireChangeEvent() throws IOException {
-        if (!hasFeature(EVENT_ONCHANGE_LOSING_FOCUS)) {
+        if (!hasFeature(EVENT_ONCHANGE_LOSING_FOCUS) && hasFeature(EVENT_ONCHANGE_AFTER_ONCLICK)) {
             executeOnChangeHandlerIfAppropriate(this);
         }
     }
@@ -248,9 +261,7 @@ public class HtmlRadioButtonInput extends HtmlInput {
     @Override
     public void setDefaultChecked(final boolean defaultChecked) {
         defaultCheckedState_ = defaultChecked;
-        if (hasFeature(HTMLCHECKEDINPUT_SET_DEFAULT_CHECKED_UPDATES_CHECKED)) {
-            setChecked(isDefaultChecked());
-        }
+        setChecked(isDefaultChecked());
         if (hasFeature(HTMLCHECKEDINPUT_SET_CHECKED_TO_FALSE_WHEN_CLONE)) {
             reset();
             forceChecked_ = true;
@@ -332,7 +343,7 @@ public class HtmlRadioButtonInput extends HtmlInput {
      */
     @Override
     public void setAttributeNS(final String namespaceURI, final String qualifiedName, final String attributeValue) {
-        if (hasFeature(HTMLCHECKEDINPUT_SET_DEFAULT_CHECKED_UPDATES_CHECKED) && "value".equals(qualifiedName)) {
+        if ("value".equals(qualifiedName)) {
             setDefaultValue(attributeValue, false);
         }
         super.setAttributeNS(namespaceURI, qualifiedName, attributeValue);

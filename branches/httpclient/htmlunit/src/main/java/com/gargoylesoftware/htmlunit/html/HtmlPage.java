@@ -14,13 +14,13 @@
  */
 package com.gargoylesoftware.htmlunit.html;
 
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.BLUR_BEFORE_ONCHANGE;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.EVENT_DOM_CONTENT_LOADED;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.EVENT_ONBEFOREUNLOAD_USES_EVENT;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.EVENT_ONLOAD_FRAMESET_FIRST;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.EVENT_ONLOAD_IFRAME_CREATED_BY_JAVASCRIPT;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.FOCUS_BODY_ELEMENT_AT_START;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.FOCUS_HTML_ELEMENT_AT_START;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_DEFERRED;
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_FRAME_RESOLVE_URL_WITH_PARENT_WINDOW;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.PAGE_SELECTION_RANGE_FROM_SELECTABLE_TEXT_INPUT;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.URL_MISSING_SLASHES;
 
@@ -88,6 +88,7 @@ import com.gargoylesoftware.htmlunit.javascript.JavaScriptEngine;
 import com.gargoylesoftware.htmlunit.javascript.JavaScriptErrorListener;
 import com.gargoylesoftware.htmlunit.javascript.PostponedAction;
 import com.gargoylesoftware.htmlunit.javascript.SimpleScriptable;
+import com.gargoylesoftware.htmlunit.javascript.host.BeforeUnloadEvent;
 import com.gargoylesoftware.htmlunit.javascript.host.Event;
 import com.gargoylesoftware.htmlunit.javascript.host.Node;
 import com.gargoylesoftware.htmlunit.javascript.host.Window;
@@ -133,6 +134,7 @@ import com.gargoylesoftware.htmlunit.protocol.javascript.JavaScriptURLConnection
  * @author Ethan Glasser-Camp
  * @author <a href="mailto:tom.anderson@univ.oxon.org">Tom Anderson</a>
  * @author Ronald Brill
+ * @author Frank Danek
  */
 public class HtmlPage extends SgmlPage {
 
@@ -236,6 +238,9 @@ public class HtmlPage extends SgmlPage {
         if (!isAboutBlank) {
             if (browserVersion.hasFeature(FOCUS_HTML_ELEMENT_AT_START)) {
                 elementWithFocus_ = getDocumentElement();
+            }
+            else if (browserVersion.hasFeature(FOCUS_BODY_ELEMENT_AT_START)) {
+                elementWithFocus_ = getBody();
             }
             setReadyState(READY_STATE_COMPLETE);
             getDocumentElement().setReadyState(READY_STATE_COMPLETE);
@@ -679,8 +684,7 @@ public class HtmlPage extends SgmlPage {
             if (frame) {
                 final boolean frameSrcIsNotSet = (baseUrl == WebClient.URL_ABOUT_BLANK);
                 final boolean frameSrcIsJs = "javascript".equals(baseUrl.getProtocol());
-                final boolean jsFrameUseParentUrl = hasFeature(JS_FRAME_RESOLVE_URL_WITH_PARENT_WINDOW);
-                if (frameSrcIsNotSet || (frameSrcIsJs && jsFrameUseParentUrl)) {
+                if (frameSrcIsNotSet || frameSrcIsJs) {
                     baseUrl = ((HtmlPage) window.getTopWindow().getEnclosedPage()).getWebResponse()
                         .getWebRequest().getUrl();
                 }
@@ -1085,16 +1089,23 @@ public class HtmlPage extends SgmlPage {
         final WebClient client = getWebClient();
         final Cache cache = client.getCache();
 
-        final WebRequest request = new WebRequest(url);
+        final WebRequest request = new WebRequest(url, getWebClient().getBrowserVersion().getScriptAcceptHeader());
         request.setAdditionalHeaders(new HashMap<String, String>(referringRequest.getAdditionalHeaders()));
         request.setAdditionalHeader("Referer", referringRequest.getUrl().toString());
+        request.setAdditionalHeader("Accept", client.getBrowserVersion().getScriptAcceptHeader());
 
+        // our cache is a bit strange;
+        // loadWebResponse check the cache for the web response
+        // AND also fixes the request url for the following cache lookups
+        final WebResponse response = client.loadWebResponse(request);
+
+        // now we can look into the cache with the fixed request for
+        // a cached script
         final Object cachedScript = cache.getCachedObject(request);
         if (cachedScript instanceof Script) {
             return (Script) cachedScript;
         }
 
-        final WebResponse response = client.loadWebResponse(request);
         client.printContentIfNecessary(response);
         client.throwFailingHttpStatusCodeExceptionIfNecessary(response);
 
@@ -1138,10 +1149,12 @@ public class HtmlPage extends SgmlPage {
         }
 
         final String scriptCode = response.getContentAsString(scriptEncoding);
+        response.cleanUp();
         if (null != scriptCode) {
             final JavaScriptEngine javaScriptEngine = client.getJavaScriptEngine();
             final Script script = javaScriptEngine.compile(this, scriptCode, url.toExternalForm(), 1);
             if (script != null) {
+                // cache the script
                 cache.cacheIfPossible(request, response, script);
             }
 
@@ -1180,7 +1193,7 @@ public class HtmlPage extends SgmlPage {
                 throw new IllegalStateException("Headelement was not defined for this page");
             }
             final Map<String, DomAttr> emptyMap = Collections.emptyMap();
-            titleElement = new HtmlTitle(null, HtmlTitle.TAG_NAME, this, emptyMap);
+            titleElement = new HtmlTitle(HtmlTitle.TAG_NAME, this, emptyMap);
             if (head.getFirstChild() != null) {
                 head.getFirstChild().insertBefore(titleElement);
             }
@@ -1212,17 +1225,35 @@ public class HtmlPage extends SgmlPage {
     }
 
     /**
+     * Gets the first child of startElement or it's children that is an instance of the given class.
+     * @param startElement the parent element
+     * @param clazz the class to search for
+     * @return <code>null</code> if no child found
+     */
+    private DomElement getFirstChildElementRecursive(final DomElement startElement, final Class<?> clazz) {
+        if (startElement == null) {
+            return null;
+        }
+        for (final DomElement element : startElement.getChildElements()) {
+            if (clazz.isInstance(element)) {
+                return element;
+            }
+            final DomElement childFound = getFirstChildElementRecursive(element, clazz);
+            if (childFound != null) {
+                return childFound;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Gets the title element for this page. Returns null if one is not found.
      *
      * @return the title element for this page or null if this is not one
      */
     private HtmlTitle getTitleElement() {
-        final HtmlHead head = (HtmlHead) getFirstChildElement(getDocumentElement(), HtmlHead.class);
-        if (head != null) {
-            return (HtmlTitle) getFirstChildElement(head, HtmlTitle.class);
-        }
-
-        return null;
+        return (HtmlTitle) getFirstChildElementRecursive(getDocumentElement(), HtmlTitle.class);
     }
 
     /**
@@ -1244,7 +1275,14 @@ public class HtmlPage extends SgmlPage {
             if (element == null) { // happens for instance if document.documentElement has been removed from parent
                 return true;
             }
-            final Event event = new Event(element, eventType);
+            final Event event;
+            if (eventType.equals(Event.TYPE_BEFORE_UNLOAD)
+                && !getWebClient().getBrowserVersion().hasFeature(EVENT_ONBEFOREUNLOAD_USES_EVENT)) {
+                event = new BeforeUnloadEvent(element, eventType);
+            }
+            else {
+                event = new Event(element, eventType);
+            }
             element.fireEvent(event);
             if (!isOnbeforeunloadAccepted(this, event)) {
                 return false;
@@ -1277,7 +1315,14 @@ public class HtmlPage extends SgmlPage {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Executing on" + eventType + " handler for " + frame);
                 }
-                final Event event = new Event(frame, eventType);
+                final Event event;
+                if (eventType.equals(Event.TYPE_BEFORE_UNLOAD)
+                    && !getWebClient().getBrowserVersion().hasFeature(EVENT_ONBEFOREUNLOAD_USES_EVENT)) {
+                    event = new BeforeUnloadEvent(frame, eventType);
+                }
+                else {
+                    event = new Event(frame, eventType);
+                }
                 ((Node) frame.getScriptObject()).executeEvent(event);
                 if (!isOnbeforeunloadAccepted((HtmlPage) frame.getPage(), event)) {
                     return false;
@@ -1450,7 +1495,7 @@ public class HtmlPage extends SgmlPage {
      * @return a list of {@link FrameWindow}
      */
     public List<FrameWindow> getFrames() {
-        final List<FrameWindow> list = new ArrayList<FrameWindow>();
+        final List<FrameWindow> list = new ArrayList<FrameWindow>(frameElements_.size());
         for (final BaseFrameElement frameElement : frameElements_) {
             list.add(frameElement.getEnclosedWindow());
         }
@@ -1920,11 +1965,11 @@ public class HtmlPage extends SgmlPage {
      * @see WebAssert#assertAllTabIndexAttributesSet(HtmlPage)
      */
     public boolean setFocusedElement(final HtmlElement newElement, final boolean windowActivated) {
-        if (elementWithFocus_ == newElement && (!windowActivated)) {
+        if (elementWithFocus_ == newElement && !windowActivated) {
             // nothing to do
             return true;
         }
-        else if (newElement != null && newElement.getPage() != this) {
+        if (newElement != null && newElement.getPage() != this) {
             throw new IllegalArgumentException("Can't move focus to an element from a different page.");
         }
 
@@ -1941,14 +1986,8 @@ public class HtmlPage extends SgmlPage {
             }
 
             if (oldFocusedElement != null) {
-                if (hasFeature(BLUR_BEFORE_ONCHANGE)) {
-                    oldFocusedElement.fireEvent(Event.TYPE_BLUR);
-                    oldFocusedElement.removeFocus();
-                }
-                else { // IE, FF3
-                    oldFocusedElement.removeFocus();
-                    oldFocusedElement.fireEvent(Event.TYPE_BLUR);
-                }
+                oldFocusedElement.removeFocus();
+                oldFocusedElement.fireEvent(Event.TYPE_BLUR);
             }
         }
 
@@ -2343,11 +2382,15 @@ public class HtmlPage extends SgmlPage {
      * @return true for quirks mode, false for standards mode
      */
     public boolean isQuirksMode() {
-        return ((HTMLDocument) getScriptObject()).getDocumentMode() == 5;
+        return "BackCompat".equals(((HTMLDocument) getScriptObject()).getCompatMode());
     }
 
+    /**
+     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
+     * {@inheritDoc}
+     */
     @Override
-    protected boolean isDirectlyAttachedToPage() {
+    public boolean isDirectlyAttachedToPage() {
         return true;
     }
 

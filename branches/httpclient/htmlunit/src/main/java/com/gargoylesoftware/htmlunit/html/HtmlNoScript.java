@@ -14,6 +14,7 @@
  */
 package com.gargoylesoftware.htmlunit.html;
 
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.CSS_NOSCRIPT_DISPLAY_INLINE;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.NOSCRIPT_BODY_AS_TEXT;
 
 import java.util.Map;
@@ -31,6 +32,8 @@ import com.gargoylesoftware.htmlunit.WebClient;
  * @author David K. Taylor
  * @author <a href="mailto:cse@dynabean.de">Christian Sell</a>
  * @author Ahmed Ashour
+ * @author Ronald Brill
+ * @author Frank Danek
  */
 public class HtmlNoScript extends HtmlElement {
 
@@ -40,14 +43,13 @@ public class HtmlNoScript extends HtmlElement {
     /**
      * Creates an instance of HtmlNoScript
      *
-     * @param namespaceURI the URI that identifies an XML namespace
      * @param qualifiedName the qualified name of the element type to instantiate
      * @param page the HtmlPage that contains this element
      * @param attributes the initial attributes
      */
-    HtmlNoScript(final String namespaceURI, final String qualifiedName, final SgmlPage page,
+    HtmlNoScript(final String qualifiedName, final SgmlPage page,
             final Map<String, DomAttr> attributes) {
-        super(namespaceURI, qualifiedName, page, attributes);
+        super(qualifiedName, page, attributes);
     }
 
     @Override
@@ -58,5 +60,23 @@ public class HtmlNoScript extends HtmlElement {
             return super.appendChild(node);
         }
         return null;
+    }
+
+    /**
+     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
+     *
+     * Returns the default display style.
+     *
+     * @return the default display style.
+     */
+    @Override
+    public DisplayStyle getDefaultStyleDisplay() {
+        if (!getPage().getWebClient().getOptions().isJavaScriptEnabled()) {
+            return DisplayStyle.BLOCK;
+        }
+        if (hasFeature(CSS_NOSCRIPT_DISPLAY_INLINE)) {
+            return DisplayStyle.INLINE;
+        }
+        return DisplayStyle.NONE;
     }
 }

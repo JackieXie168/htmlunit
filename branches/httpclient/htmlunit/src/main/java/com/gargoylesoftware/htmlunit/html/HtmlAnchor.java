@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.SgmlPage;
 import com.gargoylesoftware.htmlunit.WebRequest;
@@ -42,6 +43,7 @@ import com.gargoylesoftware.htmlunit.util.UrlUtils;
  * @author Ahmed Ashour
  * @author Dmitri Zoubkov
  * @author Ronald Brill
+ * @author Frank Danek
  */
 public class HtmlAnchor extends HtmlElement {
 
@@ -53,14 +55,13 @@ public class HtmlAnchor extends HtmlElement {
     /**
      * Creates a new instance.
      *
-     * @param namespaceURI the URI that identifies an XML namespace
      * @param qualifiedName the qualified name of the element type to instantiate
      * @param page the page that contains this element
      * @param attributes the initial attributes
      */
-    HtmlAnchor(final String namespaceURI, final String qualifiedName, final SgmlPage page,
+    HtmlAnchor(final String qualifiedName, final SgmlPage page,
             final Map<String, DomAttr> attributes) {
-        super(namespaceURI, qualifiedName, page, attributes);
+        super(qualifiedName, page, attributes);
     }
 
     /**
@@ -100,22 +101,11 @@ public class HtmlAnchor extends HtmlElement {
             page.executeJavaScriptIfPossible(builder.toString(), "javascript url", getStartLineNumber());
             return;
         }
-        URL url = page.getFullyQualifiedUrl(href);
-        // fix for empty url
-        if (StringUtils.isEmpty(href)) {
-            final boolean dropFilename = hasFeature(ANCHOR_EMPTY_HREF_NO_FILENAME);
-            if (dropFilename) {
-                String path = url.getPath();
-                path = path.substring(0, path.lastIndexOf('/') + 1);
-                url = UrlUtils.getUrlWithNewPath(url, path);
-                url = UrlUtils.getUrlWithNewRef(url, null);
-            }
-            else {
-                url = UrlUtils.getUrlWithNewRef(url, null);
-            }
-        }
 
-        final WebRequest webRequest = new WebRequest(url);
+        final URL url = getTargetUrl(href, page);
+
+        final BrowserVersion browser = page.getWebClient().getBrowserVersion();
+        final WebRequest webRequest = new WebRequest(url, browser.getHtmlAcceptHeader());
         webRequest.setCharset(page.getPageEncoding());
         webRequest.setAdditionalHeader("Referer", page.getUrl().toExternalForm());
         if (LOG.isDebugEnabled()) {
@@ -128,6 +118,33 @@ public class HtmlAnchor extends HtmlElement {
         page.getWebClient().download(page.getEnclosingWindow(),
                 page.getResolvedTarget(getTargetAttribute()),
                 webRequest, href.endsWith("#"), "Link click");
+    }
+
+    /**
+     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
+     *
+     * @param href the href
+     * @param page the HtmlPage
+     * @return the calculated target url.
+     * @throws MalformedURLException if an IO error occurs
+     */
+    public static URL getTargetUrl(final String href, final HtmlPage page) throws MalformedURLException {
+        URL url = page.getFullyQualifiedUrl(href);
+        // fix for empty url
+        if (StringUtils.isEmpty(href)) {
+            final boolean dropFilename = page.getWebClient().getBrowserVersion()
+                    .hasFeature(ANCHOR_EMPTY_HREF_NO_FILENAME);
+            if (dropFilename) {
+                String path = url.getPath();
+                path = path.substring(0, path.lastIndexOf('/') + 1);
+                url = UrlUtils.getUrlWithNewPath(url, path);
+                url = UrlUtils.getUrlWithNewRef(url, null);
+            }
+            else {
+                url = UrlUtils.getUrlWithNewRef(url, null);
+            }
+        }
+        return url;
     }
 
     /**
@@ -314,5 +331,17 @@ public class HtmlAnchor extends HtmlElement {
     @Override
     protected boolean isEmptyXmlTagExpanded() {
         return true;
+    }
+
+    /**
+     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
+     *
+     * Returns the default display style.
+     *
+     * @return the default display style.
+     */
+    @Override
+    public DisplayStyle getDefaultStyleDisplay() {
+        return DisplayStyle.INLINE;
     }
 }

@@ -66,6 +66,8 @@ import com.gargoylesoftware.htmlunit.javascript.configuration.WebBrowser;
  * @author Marc Guillemot
  * @author Chris Erskine
  * @author Ahmed Ashour
+ * @author Frank Danek
+ * @author Ronald Brill
  */
 public class BrowserVersion implements Serializable, Cloneable {
 
@@ -73,6 +75,8 @@ public class BrowserVersion implements Serializable, Cloneable {
     private String applicationMinorVersion_ = "0";
     private String applicationName_;
     private String applicationVersion_;
+    private String buildId_;
+    private String vendor_;
     private String browserLanguage_ = LANGUAGE_ENGLISH_US;
     private String cpuClass_ = CPU_CLASS_X86;
     private boolean onLine_ = true;
@@ -84,6 +88,11 @@ public class BrowserVersion implements Serializable, Cloneable {
     private final Set<PluginConfiguration> plugins_ = new HashSet<PluginConfiguration>();
     private final Set<BrowserVersionFeatures> features_ = EnumSet.noneOf(BrowserVersionFeatures.class);
     private final String nickname_;
+    private String htmlAcceptHeader_;
+    private String imgAcceptHeader_;
+    private String cssAcceptHeader_;
+    private String scriptAcceptHeader_;
+    private String xmlHttpRequestAcceptHeader_;
 
     /**
      * Application name for the Internet Explorer series of browsers.
@@ -111,51 +120,24 @@ public class BrowserVersion implements Serializable, Cloneable {
     private static final String PLATFORM_WIN32 = "Win32";
 
     /**
-     * Firefox 3.6.
-     * @deprecated as of 2.12. Use FF17 instead.
-     **/
-    @Deprecated
-    public static final BrowserVersion FIREFOX_3_6 = new BrowserVersion(
-        NETSCAPE, "5.0 (Windows; en-US)",
-        "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.2.28) Gecko/20120306 Firefox/3.6.28",
-        (float) 3.6, "FF3.6", null);
-
-    /**
-     * Firefox 10. Warning: experimental!!!.
-     * @deprecated as of 2.12. Use FF17 instead.
-     */
-    @Deprecated
-    public static final BrowserVersion FIREFOX_10 = new BrowserVersion(
-        NETSCAPE, "5.0 (Windows)",
-        "Mozilla/5.0 (Windows NT 6.1; rv:10.0.11) Gecko/20100101 Firefox/10.0.11",
-        (float) 10.0, "FF10", null);
-
-    /**
      * Firefox 17 ESR.
      * @since 2.12
-     **/
+     * @deprecated as of 2.14
+     */
+    @Deprecated
     public static final BrowserVersion FIREFOX_17 = new BrowserVersion(
         NETSCAPE, "5.0 (Windows)",
         "Mozilla/5.0 (Windows NT 6.1; rv:17.0) Gecko/20100101 Firefox/17.0",
         (float) 17.0, "FF17", null);
 
     /**
-     * Internet Explorer 6.
-     * @deprecated as of 2.12
+     * Firefox 24 ESR.
+     * @since 2.14
      */
-    @Deprecated
-    public static final BrowserVersion INTERNET_EXPLORER_6 = new BrowserVersion(
-        INTERNET_EXPLORER, "4.0 (compatible; MSIE 6.0b; Windows 98)",
-        "Mozilla/4.0 (compatible; MSIE 6.0; Windows 98)", 6, "IE6", null);
-
-    /**
-     * Internet Explorer 7.
-     * @deprecated as of 2.12
-     */
-    @Deprecated
-    public static final BrowserVersion INTERNET_EXPLORER_7 = new BrowserVersion(
-        INTERNET_EXPLORER, "4.0 (compatible; MSIE 7.0; Windows NT 5.1)",
-        "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)", 7, "IE7", null);
+    public static final BrowserVersion FIREFOX_24 = new BrowserVersion(
+        NETSCAPE, "5.0 (Windows)",
+        "Mozilla/5.0 (Windows NT 6.1; rv:24.0) Gecko/20100101 Firefox/24.0",
+        (float) 24.0, "FF24", null);
 
     /** Internet Explorer 8. */
     public static final BrowserVersion INTERNET_EXPLORER_8 = new BrowserVersion(
@@ -167,58 +149,70 @@ public class BrowserVersion implements Serializable, Cloneable {
         INTERNET_EXPLORER, "5.0 (compatible; MSIE 9.0; Windows NT 6.1)",
         "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1)", 9, "IE9", null);
 
-    /**
-     * Chrome 16.
-     * @deprecated as of 2.12
-     */
-    @Deprecated
-    public static final BrowserVersion CHROME_16 = new BrowserVersion(
-        "Netscape", "5.0 (Macintosh; Intel Mac OS X 10_7_2) AppleWebKit/535.7"
-        + " (KHTML, like Gecko) Chrome/16.0.912.63 Safari/535.7",
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_2) AppleWebKit/535.7"
-        + " (KHTML, like Gecko) Chrome/16.0.912.63 Safari/535.7",
-        16, "Chrome16", null);
+    /** Internet Explorer 11. Work In Progress!!! */
+    public static final BrowserVersion INTERNET_EXPLORER_11 = new BrowserVersion(
+        NETSCAPE, "5.0 (Windows NT 6.1; Trident/7.0; rv:11.0) like Gecko",
+        "Mozilla/5.0 (Windows NT 6.1; Trident/7.0; rv:11.0) like Gecko", 11, "IE11", null);
 
     /** Latest Chrome. Work In Progress!!! */
     public static final BrowserVersion CHROME = new BrowserVersion(
         "Netscape", "5.0 (Windows NT 6.1) AppleWebKit/537.36"
-        + " (KHTML, like Gecko) Chrome/29.0.1547.76 Safari/537.36",
+        + " (KHTML, like Gecko) Chrome/31.0.1650.63 Safari/537.36",
         "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36"
-        + " (KHTML, like Gecko) Chrome/29.0.1547.76 Safari/537.36",
-        29, "Chrome", null);
+        + " (KHTML, like Gecko) Chrome/31.0.1650.63 Safari/537.36",
+        31, "Chrome", null);
 
     /** The default browser version. */
     private static BrowserVersion DefaultBrowserVersion_ = INTERNET_EXPLORER_8;
 
     /** Register plugins for the browser versions. */
     static {
-        INTERNET_EXPLORER_6.initDefaultFeatures();
-        INTERNET_EXPLORER_7.initDefaultFeatures();
         INTERNET_EXPLORER_8.initDefaultFeatures();
         INTERNET_EXPLORER_9.initDefaultFeatures();
+        INTERNET_EXPLORER_11.initDefaultFeatures();
 
-        FIREFOX_3_6.initDefaultFeatures();
-        FIREFOX_10.initDefaultFeatures();
         FIREFOX_17.initDefaultFeatures();
+
+        FIREFOX_17.setBrowserLanguage("en-US");
+        FIREFOX_17.setVendor("");
+        FIREFOX_17.buildId_ = "20130805152501";
+        FIREFOX_17.setHtmlAcceptHeader("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+        FIREFOX_17.setXmlHttpRequestAcceptHeader("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+        FIREFOX_17.setImgAcceptHeader("image/png,image/*;q=0.8,*/*;q=0.5");
+        FIREFOX_17.setCssAcceptHeader("text/css,*/*;q=0.1");
+
+        FIREFOX_24.initDefaultFeatures();
+
+        FIREFOX_24.setBrowserLanguage("en-US");
+        FIREFOX_24.setVendor("");
+        FIREFOX_24.buildId_ = "20131112155850";
+        FIREFOX_24.setHtmlAcceptHeader("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+        FIREFOX_24.setXmlHttpRequestAcceptHeader("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+        FIREFOX_24.setImgAcceptHeader("image/png,image/*;q=0.8,*/*;q=0.5");
+        FIREFOX_24.setCssAcceptHeader("text/css,*/*;q=0.1");
+
+        INTERNET_EXPLORER_8.setHtmlAcceptHeader("image/gif, image/jpeg, image/pjpeg, image/pjpeg, */*");
+
+        INTERNET_EXPLORER_11.setBrowserLanguage("en-US");
+        INTERNET_EXPLORER_11.setVendor("");
+        INTERNET_EXPLORER_11.setHtmlAcceptHeader("text/html, application/xhtml+xml, */*");
+        INTERNET_EXPLORER_11.setImgAcceptHeader("image/png, image/svg+xml, image/*;q=0.8, */*;q=0.5");
+        INTERNET_EXPLORER_11.setCssAcceptHeader("text/css, */*");
+        INTERNET_EXPLORER_11.setScriptAcceptHeader("application/javascript, */*;q=0.8");
 
         final PluginConfiguration flash = new PluginConfiguration("Shockwave Flash",
             "Shockwave Flash 9.0 r31", "libflashplayer.so");
         flash.getMimeTypes().add(new PluginConfiguration.MimeType("application/x-shockwave-flash",
             "Shockwave Flash", "swf"));
-        FIREFOX_3_6.getPlugins().add(flash);
-        FIREFOX_10.getPlugins().add(flash);
         FIREFOX_17.getPlugins().add(flash);
+        FIREFOX_24.getPlugins().add(flash);
 
-        CHROME_16.initDefaultFeatures();
-        CHROME_16.setApplicationCodeName("Mozilla");
-        CHROME_16.setPlatform("MacIntel");
-        CHROME_16.setCpuClass(null);
-        CHROME_16.setBrowserLanguage("undefined");
         CHROME.initDefaultFeatures();
         CHROME.setApplicationCodeName("Mozilla");
+        CHROME.setVendor("Google Inc.");
         CHROME.setPlatform("MacIntel");
         CHROME.setCpuClass(null);
-        CHROME.setBrowserLanguage("undefined");
+        CHROME.setBrowserLanguage("en-US");
         // there are other issues with Chrome; a different productSub, etc.
     }
 
@@ -274,6 +268,12 @@ public class BrowserVersion implements Serializable, Cloneable {
         userAgent_ = userAgent;
         browserVersionNumeric_ = browserVersionNumeric;
         nickname_ = nickname;
+        htmlAcceptHeader_ = "*/*";
+        imgAcceptHeader_ = "*/*";
+        cssAcceptHeader_ = "*/*";
+        scriptAcceptHeader_ = "*/*";
+        xmlHttpRequestAcceptHeader_ = "*/*";
+
         if (features != null) {
             features_.addAll(Arrays.asList(features));
         }
@@ -336,7 +336,7 @@ public class BrowserVersion implements Serializable, Cloneable {
      * @return whether or not this version is a version of IE
      */
     public final boolean isIE() {
-        return INTERNET_EXPLORER.equals(getApplicationName());
+        return getNickname().startsWith("IE");
     }
 
     /**
@@ -351,11 +351,11 @@ public class BrowserVersion implements Serializable, Cloneable {
 
     /**
      * Returns <tt>true</tt> if this <tt>BrowserVersion</tt> instance represents some
-     * version of Firefox like {@link #FIREFOX_3_6} or {@link #FIREFOX_17}.
+     * version of Firefox like {@link #FIREFOX_17} or {@link #FIREFOX_24}.
      * @return whether or not this version is a version of a Firefox browser
      */
     public final boolean isFirefox() {
-        return !isChrome() && NETSCAPE.equals(getApplicationName());
+        return getNickname().startsWith("FF");
     }
 
     /**
@@ -394,6 +394,13 @@ public class BrowserVersion implements Serializable, Cloneable {
      */
     public String getApplicationVersion() {
         return applicationVersion_;
+    }
+
+    /**
+     * @return the vendor
+     */
+    public String getVendor() {
+        return vendor_;
     }
 
     /**
@@ -465,6 +472,51 @@ public class BrowserVersion implements Serializable, Cloneable {
     }
 
     /**
+     * Returns the value used by the browser for the accept header
+     * if requesting a page.
+     * @return the accept header string
+     */
+    public String getHtmlAcceptHeader() {
+        return htmlAcceptHeader_;
+    }
+
+    /**
+     * Returns the value used by the browser for the accept header
+     * if requesting an script.
+     * @return the accept header string
+     */
+    public String getScriptAcceptHeader() {
+        return scriptAcceptHeader_;
+    }
+
+    /**
+     * Returns the value used by the browser for the accept header
+     * if performing an XMLHttpRequest.
+     * @return the accept header string
+     */
+    public String getXmlHttpRequestAcceptHeader() {
+        return xmlHttpRequestAcceptHeader_;
+    }
+
+    /**
+     * Returns the value used by the browser for the accept header
+     * if requesting an image.
+     * @return the accept header string
+     */
+    public String getImgAcceptHeader() {
+        return imgAcceptHeader_;
+    }
+
+    /**
+     * Returns the value used by the browser for the accept header
+     * if requesting a css declaration.
+     * @return the accept header string
+     */
+    public String getCssAcceptHeader() {
+        return cssAcceptHeader_;
+    }
+
+    /**
      * @param applicationCodeName the applicationCodeName to set
      */
     public void setApplicationCodeName(final String applicationCodeName) {
@@ -490,6 +542,13 @@ public class BrowserVersion implements Serializable, Cloneable {
      */
     public void setApplicationVersion(final String applicationVersion) {
         applicationVersion_ = applicationVersion;
+    }
+
+    /**
+     * @param vendor the vendor to set
+     */
+    public void setVendor(final String vendor) {
+        this.vendor_ = vendor;
     }
 
     /**
@@ -549,6 +608,42 @@ public class BrowserVersion implements Serializable, Cloneable {
     }
 
     /**
+     * @param htmlAcceptHeader the accept header to be used when retrieving pages
+     */
+    public void setHtmlAcceptHeader(final String htmlAcceptHeader) {
+        htmlAcceptHeader_ = htmlAcceptHeader;
+    }
+
+    /**
+     * @param imgAcceptHeader the accept header to be used when retrieving images
+     */
+    public void setImgAcceptHeader(final String imgAcceptHeader) {
+        imgAcceptHeader_ = imgAcceptHeader;
+    }
+
+    /**
+     * @param cssAcceptHeader the accept header to be used when retrieving pages
+     */
+    public void setCssAcceptHeader(final String cssAcceptHeader) {
+        cssAcceptHeader_ = cssAcceptHeader;
+    }
+
+    /**
+     * @param scriptAcceptHeader the accept header to be used when retrieving scripts
+     */
+    public void setScriptAcceptHeader(final String scriptAcceptHeader) {
+        scriptAcceptHeader_ = scriptAcceptHeader;
+    }
+
+    /**
+     * @param xmlHttpRequestAcceptHeader the accept header to be used when
+     * performing XMLHttpRequests
+     */
+    public void setXmlHttpRequestAcceptHeader(final String xmlHttpRequestAcceptHeader) {
+        xmlHttpRequestAcceptHeader_ = xmlHttpRequestAcceptHeader;
+    }
+
+    /**
      * @return the browserVersionNumeric
      */
     public float getBrowserVersionNumeric() {
@@ -599,6 +694,19 @@ public class BrowserVersion implements Serializable, Cloneable {
     }
 
     /**
+     * Returns the buildId.
+     * @return the buildId
+     */
+    public String getBuildId() {
+        return buildId_;
+    }
+
+    @Override
+    public String toString() {
+        return nickname_;
+    }
+
+    /**
      * Creates and return a copy of this object. Current instance and cloned
      * object can be modified independently.
      * @return a clone of this instance.
@@ -610,12 +718,20 @@ public class BrowserVersion implements Serializable, Cloneable {
 
         clone.setApplicationCodeName(getApplicationCodeName());
         clone.setApplicationMinorVersion(getApplicationMinorVersion());
+        clone.setVendor(getVendor());
         clone.setBrowserLanguage(getBrowserLanguage());
         clone.setCpuClass(getCpuClass());
         clone.setOnLine(isOnLine());
         clone.setPlatform(getPlatform());
         clone.setSystemLanguage(getSystemLanguage());
         clone.setUserLanguage(getUserLanguage());
+
+        clone.buildId_ = getBuildId();
+        clone.htmlAcceptHeader_ = getHtmlAcceptHeader();
+        clone.imgAcceptHeader_ = getImgAcceptHeader();
+        clone.cssAcceptHeader_ = getCssAcceptHeader();
+        clone.scriptAcceptHeader_ = getScriptAcceptHeader();
+        clone.xmlHttpRequestAcceptHeader_ = getXmlHttpRequestAcceptHeader();
 
         for (final PluginConfiguration pluginConf : getPlugins()) {
             clone.getPlugins().add(pluginConf.clone());

@@ -30,6 +30,8 @@ import com.gargoylesoftware.htmlunit.SgmlPage;
  * @author <a href="mailto:cse@dynabean.de">Christian Sell</a>
  * @author Marc Guillemot
  * @author Ahmed Ashour
+ * @author Ronald Brill
+ * @author Frank Danek
  */
 public class HtmlLabel extends HtmlElement {
 
@@ -39,14 +41,13 @@ public class HtmlLabel extends HtmlElement {
     /**
      * Creates an instance of HtmlLabel
      *
-     * @param namespaceURI the URI that identifies an XML namespace
      * @param qualifiedName the qualified name of the element type to instantiate
      * @param page the HtmlPage that contains this element
      * @param attributes the initial attributes
      */
-    HtmlLabel(final String namespaceURI, final String qualifiedName, final SgmlPage page,
+    HtmlLabel(final String qualifiedName, final SgmlPage page,
             final Map<String, DomAttr> attributes) {
-        super(namespaceURI, qualifiedName, page, attributes);
+        super(qualifiedName, page, attributes);
     }
 
     /**
@@ -165,5 +166,17 @@ public class HtmlLabel extends HtmlElement {
         }
 
         return response;
+    }
+
+    /**
+     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
+     *
+     * Returns the default display style.
+     *
+     * @return the default display style.
+     */
+    @Override
+    public DisplayStyle getDefaultStyleDisplay() {
+        return DisplayStyle.INLINE;
     }
 }

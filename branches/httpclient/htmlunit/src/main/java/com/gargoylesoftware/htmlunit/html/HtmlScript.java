@@ -14,11 +14,11 @@
  */
 package com.gargoylesoftware.htmlunit.html;
 
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.CSS_SCRIPT_DISPLAY_INLINE;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.EVENT_ONERROR_EXTERNAL_JAVASCRIPT;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.EVENT_ONLOAD_EXTERNAL_JAVASCRIPT;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.EVENT_ONREADY_STATE_CHANGE;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.HTMLSCRIPT_APPLICATION_JAVASCRIPT;
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.HTMLSCRIPT_SRC_JAVASCRIPT;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.HTMLSCRIPT_TRIM_TYPE;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_SCRIPT_ALWAYS_REEXECUTE_ON_SRC_CHANGE;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_SCRIPT_SUPPORTS_FOR_AND_EVENT;
@@ -72,6 +72,7 @@ import com.gargoylesoftware.htmlunit.xml.XmlPage;
  * @author Sudhan Moghe
  * @author Ronald Brill
  * @author Daniel Wagner-Hall
+ * @author Frank Danek
  * @see <a href="http://www.w3.org/TR/2000/WD-DOM-Level-1-20000929/level-one-html.html#ID-81598695">DOM Level 1</a>
  * @see <a href="http://www.w3.org/TR/2003/REC-DOM-Level-2-HTML-20030109/html.html#ID-81598695">DOM Level 2</a>
  */
@@ -90,14 +91,13 @@ public class HtmlScript extends HtmlElement {
     /**
      * Creates an instance of HtmlScript
      *
-     * @param namespaceURI the URI that identifies an XML namespace
      * @param qualifiedName the qualified name of the element type to instantiate
      * @param page the HtmlPage that contains this element
      * @param attributes the initial attributes
      */
-    HtmlScript(final String namespaceURI, final String qualifiedName, final SgmlPage page,
+    HtmlScript(final String qualifiedName, final SgmlPage page,
             final Map<String, DomAttr> attributes) {
-        super(namespaceURI, qualifiedName, page, attributes);
+        super(qualifiedName, page, attributes);
     }
 
     /**
@@ -374,7 +374,6 @@ public class HtmlScript extends HtmlElement {
         }
 
         final HtmlPage page = (HtmlPage) getPage();
-        final BrowserVersion browser = page.getWebClient().getBrowserVersion();
 
         final String src = getSrcAttribute();
         if (src.equals(SLASH_SLASH_COLON)) {
@@ -382,24 +381,7 @@ public class HtmlScript extends HtmlElement {
         }
 
         if (src != ATTRIBUTE_NOT_DEFINED) {
-            if (src.startsWith(JavaScriptURLConnection.JAVASCRIPT_PREFIX)) {
-                // <script src="javascript:'[code]'"></script>
-                if (browser.hasFeature(HTMLSCRIPT_SRC_JAVASCRIPT)) {
-                    String code = StringUtils.removeStart(src, JavaScriptURLConnection.JAVASCRIPT_PREFIX).trim();
-                    final int len = code.length();
-                    if (len > 2) {
-                        if ((code.charAt(0) == '\'' && code.charAt(len - 1) == '\'')
-                            || (code.charAt(0) == '"' && code.charAt(len - 1) == '"')) {
-                            code = code.substring(1, len - 1);
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug("Executing JavaScript: " + code);
-                            }
-                            page.executeJavaScriptIfPossible(code, code, getStartLineNumber());
-                        }
-                    }
-                }
-            }
-            else {
+            if (!src.startsWith(JavaScriptURLConnection.JAVASCRIPT_PREFIX)) {
                 // <script src="[url]"></script>
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Loading external JavaScript: " + src);
@@ -579,12 +561,16 @@ public class HtmlScript extends HtmlElement {
 
         final String data = textNode.getData();
         if (data.contains("//<![CDATA[")) {
-            printWriter.println(data);
+            printWriter.print(data);
+            printWriter.print("\r\n");
         }
         else {
-            printWriter.println("//<![CDATA[");
-            printWriter.println(data);
-            printWriter.println("//]]>");
+            printWriter.print("//<![CDATA[");
+            printWriter.print("\r\n");
+            printWriter.print(data);
+            printWriter.print("\r\n");
+            printWriter.print("//]]>");
+            printWriter.print("\r\n");
         }
     }
 
@@ -624,4 +610,18 @@ public class HtmlScript extends HtmlElement {
         return writer.toString();
     }
 
+    /**
+     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
+     *
+     * Returns the default display style.
+     *
+     * @return the default display style.
+     */
+    @Override
+    public DisplayStyle getDefaultStyleDisplay() {
+        if (hasFeature(CSS_SCRIPT_DISPLAY_INLINE)) {
+            return DisplayStyle.INLINE;
+        }
+        return DisplayStyle.NONE;
+    }
 }

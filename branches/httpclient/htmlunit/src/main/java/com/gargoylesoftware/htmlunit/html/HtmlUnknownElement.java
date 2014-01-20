@@ -27,6 +27,8 @@ import com.gargoylesoftware.htmlunit.SgmlPage;
  * @author <a href="mailto:cse@dynabean.de">Christian Sell</a>
  * @author Ahmed Ashour
  * @author Rodney Gitzel
+ * @author Ronald Brill
+ * @author Frank Danek
  */
 public class HtmlUnknownElement extends HtmlElement {
 
@@ -38,20 +40,7 @@ public class HtmlUnknownElement extends HtmlElement {
      * @param attributes the initial attributes
      */
     HtmlUnknownElement(final SgmlPage page, final String tagName, final Map<String, DomAttr> attributes) {
-        this(page, null, tagName, attributes);
-    }
-
-    /**
-     * Creates an instance.
-     *
-     * @param page the page that contains this element
-     * @param namespaceURI the URI that identifies an XML namespace
-     * @param qualifiedName the qualified name of the element type to instantiate
-     * @param attributes the initial attributes
-     */
-    HtmlUnknownElement(final SgmlPage page, final String namespaceURI, final String qualifiedName,
-            final Map<String, DomAttr> attributes) {
-        super(namespaceURI, qualifiedName, page, attributes);
+        super(tagName, page, attributes);
     }
 
     /**
@@ -60,5 +49,17 @@ public class HtmlUnknownElement extends HtmlElement {
     @Override
     protected boolean isTrimmedText() {
         return false;
+    }
+
+    /**
+     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
+     *
+     * Returns the default display style.
+     *
+     * @return the default display style.
+     */
+    @Override
+    public DisplayStyle getDefaultStyleDisplay() {
+        return DisplayStyle.INLINE;
     }
 }

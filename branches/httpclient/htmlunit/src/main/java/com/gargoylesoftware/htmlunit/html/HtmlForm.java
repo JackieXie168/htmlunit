@@ -14,7 +14,6 @@
  */
 package com.gargoylesoftware.htmlunit.html;
 
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.FORM_SUBMISSION_URL_END_WITH_QUESTIONMARK;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.FORM_SUBMISSION_URL_WITHOUT_HASH;
 
 import java.net.MalformedURLException;
@@ -61,6 +60,7 @@ import com.gargoylesoftware.htmlunit.util.UrlUtils;
  * @author Ahmed Ashour
  * @author Philip Graf
  * @author Ronald Brill
+ * @author Frank Danek
  */
 public class HtmlForm extends HtmlElement {
 
@@ -79,14 +79,13 @@ public class HtmlForm extends HtmlElement {
     /**
      * Creates an instance.
      *
-     * @param namespaceURI the URI that identifies an XML namespace
      * @param qualifiedName the qualified name of the element type to instantiate
      * @param htmlPage the page that contains this element
      * @param attributes the initial attributes
      */
-    HtmlForm(final String namespaceURI, final String qualifiedName, final SgmlPage htmlPage,
+    HtmlForm(final String qualifiedName, final SgmlPage htmlPage,
             final Map<String, DomAttr> attributes) {
-        super(namespaceURI, qualifiedName, htmlPage, attributes);
+        super(qualifiedName, htmlPage, attributes);
     }
 
     /**
@@ -166,46 +165,45 @@ public class HtmlForm extends HtmlElement {
 
         final BrowserVersion browser = getPage().getWebClient().getBrowserVersion();
         String actionUrl = getActionAttribute();
+        String anchor = "";
+        String queryFromFields = "";
         if (HttpMethod.GET == method) {
-            final String anchor = StringUtils.substringAfter(actionUrl, "#");
+            anchor = StringUtils.substringAfter(actionUrl, "#");
             final String enc = getPage().getPageEncoding();
-            final String queryFromFields =
+            queryFromFields =
                 URLEncodedUtils.format(Arrays.asList(NameValuePair.toHttpClient(parameters)), enc);
 
             // action may already contain some query parameters: they have to be removed
             actionUrl = StringUtils.substringBefore(actionUrl, "#");
             actionUrl = StringUtils.substringBefore(actionUrl, "?");
-            if (browser.hasFeature(FORM_SUBMISSION_URL_END_WITH_QUESTIONMARK)
-                    || queryFromFields.length() > 0) {
-                actionUrl += "?" + queryFromFields;
-            }
-            if (anchor.length() > 0
-                    && !browser.hasFeature(FORM_SUBMISSION_URL_WITHOUT_HASH)) {
-                actionUrl += "#" + anchor;
-            }
             parameters.clear(); // parameters have been added to query
         }
         URL url;
         try {
             if (actionUrl.isEmpty()) {
-                url = htmlPage.getUrl();
-                if (browser.hasFeature(FORM_SUBMISSION_URL_WITHOUT_HASH)) {
-                    url = UrlUtils.getUrlWithNewRef(url, null);
-                }
-            }
-            else if (actionUrl.startsWith("?")) {
-                String urlString = htmlPage.getUrl().toExternalForm();
-                if (urlString.indexOf('?') != -1) {
-                    urlString = urlString.substring(0, urlString.indexOf('?'));
-                }
-                else if (urlString.indexOf('#') != -1
-                        && browser.hasFeature(FORM_SUBMISSION_URL_WITHOUT_HASH)) {
-                    urlString = urlString.substring(0, urlString.indexOf('#'));
-                }
-                url = new URL(urlString + actionUrl);
+                url = WebClient.expandUrl(htmlPage.getUrl(), actionUrl);
             }
             else {
                 url = htmlPage.getFullyQualifiedUrl(actionUrl);
+            }
+
+            if (queryFromFields.length() > 0) {
+                url = UrlUtils.getUrlWithNewQuery(url, queryFromFields);
+            }
+
+            if (HttpMethod.GET == method && browser.hasFeature(FORM_SUBMISSION_URL_WITHOUT_HASH)
+                    && WebClient.URL_ABOUT_BLANK != url) {
+                url = UrlUtils.getUrlWithNewRef(url, null);
+            }
+            else if (HttpMethod.POST == method
+                    && browser.hasFeature(FORM_SUBMISSION_URL_WITHOUT_HASH)
+                    && WebClient.URL_ABOUT_BLANK != url
+                    && StringUtils.isEmpty(actionUrl)) {
+                url = UrlUtils.getUrlWithNewRef(url, null);
+            }
+            else if (anchor.length() > 0
+                    && WebClient.URL_ABOUT_BLANK != url) {
+                url = UrlUtils.getUrlWithNewRef(url, anchor);
             }
         }
         catch (final MalformedURLException e) {

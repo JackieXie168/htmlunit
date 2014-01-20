@@ -14,6 +14,8 @@
  */
 package com.gargoylesoftware.htmlunit.html;
 
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.CSS_DISPLAY_DEFAULT;
+
 import java.util.Map;
 
 import com.gargoylesoftware.htmlunit.SgmlPage;
@@ -24,6 +26,8 @@ import com.gargoylesoftware.htmlunit.SgmlPage;
  * @see <a href="https://developer.mozilla.org/en-US/docs/HTML/Element/meter">MDN documentation</a>
  * @version $Revision$
  * @author Marc Guillemot
+ * @author Ronald Brill
+ * @author Frank Danek
  */
 public class HtmlMeter extends HtmlMedia {
 
@@ -33,13 +37,27 @@ public class HtmlMeter extends HtmlMedia {
     /**
      * Creates an instance of HtmlMeter
      *
-     * @param namespaceURI the URI that identifies an XML namespace
      * @param qualifiedName the qualified name of the element type to instantiate
      * @param page the HtmlPage that contains this element
      * @param attributes the initial attributes
      */
-    HtmlMeter(final String namespaceURI, final String qualifiedName, final SgmlPage page,
+    HtmlMeter(final String qualifiedName, final SgmlPage page,
             final Map<String, DomAttr> attributes) {
-        super(namespaceURI, qualifiedName, page, attributes);
+        super(qualifiedName, page, attributes);
+    }
+
+    /**
+     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
+     *
+     * Returns the default display style.
+     *
+     * @return the default display style.
+     */
+    @Override
+    public DisplayStyle getDefaultStyleDisplay() {
+        if (hasFeature(CSS_DISPLAY_DEFAULT)) {
+            return DisplayStyle.INLINE_BLOCK;
+        }
+        return DisplayStyle.INLINE;
     }
 }

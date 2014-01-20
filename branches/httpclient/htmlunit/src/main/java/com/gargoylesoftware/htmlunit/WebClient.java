@@ -16,9 +16,9 @@ package com.gargoylesoftware.htmlunit;
 
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.DIALOGWINDOW_REFERER;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.GENERATED_150;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_XML_SUPPORT_VIA_ACTIVEXOBJECT;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.PROTOCOL_DATA;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.URL_MINIMAL_QUERY_ENCODING;
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.WINDOW_ACTIVE_ELEMENT_FOCUSED;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -42,8 +42,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
-import net.sourceforge.htmlunit.corejs.javascript.ScriptableObject;
-
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -54,6 +52,7 @@ import org.apache.http.NoHttpResponseException;
 import org.apache.http.client.CredentialsProvider;
 import org.w3c.css.sac.ErrorHandler;
 
+import com.gargoylesoftware.htmlunit.activex.javascript.msxml.MSXMLActiveXObjectFactory;
 import com.gargoylesoftware.htmlunit.attachment.Attachment;
 import com.gargoylesoftware.htmlunit.attachment.AttachmentHandler;
 import com.gargoylesoftware.htmlunit.gae.GAEUtils;
@@ -62,6 +61,7 @@ import com.gargoylesoftware.htmlunit.html.DomNode;
 import com.gargoylesoftware.htmlunit.html.FrameWindow;
 import com.gargoylesoftware.htmlunit.html.HTMLParserListener;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
+import com.gargoylesoftware.htmlunit.html.HtmlInlineFrame;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.javascript.JavaScriptEngine;
 import com.gargoylesoftware.htmlunit.javascript.JavaScriptErrorListener;
@@ -117,6 +117,7 @@ import com.gargoylesoftware.htmlunit.util.UrlUtils;
  * @author Amit Manjhi
  * @author Nicolas Belisle
  * @author Ronald Brill
+ * @author Frank Danek
  */
 public class WebClient implements Serializable {
 
@@ -167,6 +168,7 @@ public class WebClient implements Serializable {
     private ScriptPreProcessor scriptPreProcessor_;
 
     private Map<String, String> activeXObjectMap_ = Collections.emptyMap();
+    private transient MSXMLActiveXObjectFactory msxmlActiveXObjectFactory_;
     private RefreshHandler refreshHandler_ = new NiceRefreshHandler(2);
     private JavaScriptErrorListener javaScriptErrorListener_;
 
@@ -220,6 +222,22 @@ public class WebClient implements Serializable {
         addWebWindowListener(new CurrentWindowTracker(this));
         currentWindow_ = new TopLevelWindow("", this);
         fireWindowOpened(new WebWindowEvent(currentWindow_, WebWindowEvent.OPEN, null, null));
+
+        if (getBrowserVersion().hasFeature(JS_XML_SUPPORT_VIA_ACTIVEXOBJECT)) {
+            initMSXMLActiveX();
+        }
+    }
+
+    private void initMSXMLActiveX() {
+        msxmlActiveXObjectFactory_ = new MSXMLActiveXObjectFactory();
+        // TODO [IE11] initialize in #init or in #initialize?
+        try {
+            msxmlActiveXObjectFactory_.init(getBrowserVersion());
+        }
+        catch (final Exception e) {
+            LOG.error("Exception while initializing MSXML ActiveX for the page", e);
+            throw new ScriptException(null, e); // BUG: null is not useful.
+        }
     }
 
     /**
@@ -373,7 +391,8 @@ public class WebClient implements Serializable {
      */
     @SuppressWarnings("unchecked")
     public <P extends Page> P getPage(final URL url) throws IOException, FailingHttpStatusCodeException {
-        return (P) getPage(getCurrentWindow().getTopWindow(), new WebRequest(url));
+        return (P) getPage(getCurrentWindow().getTopWindow(),
+                new WebRequest(url, getBrowserVersion().getHtmlAcceptHeader()));
     }
 
     /**
@@ -683,7 +702,7 @@ public class WebClient implements Serializable {
         if (currentWindow_ == window) {
             return;
         }
-        //onBlur event is triggered for focused element of old current window
+        // onBlur event is triggered for focused element of old current window
         if (currentWindow_ != null && !currentWindow_.isClosed()) {
             final Page enclosedPage = currentWindow_.getEnclosedPage();
             if (enclosedPage != null && enclosedPage.isHtmlPage()) {
@@ -694,23 +713,21 @@ public class WebClient implements Serializable {
             }
         }
         currentWindow_ = window;
-        //1. In IE activeElement becomes focused element for new current window
-        //2. onFocus event is triggered for focusedElement of new current window
-        final Page enclosedPage = currentWindow_.getEnclosedPage();
-        if (enclosedPage != null && enclosedPage.isHtmlPage()) {
-            final Window jsWindow = (Window) currentWindow_.getScriptObject();
-            if (jsWindow != null) {
-                if (getBrowserVersion().hasFeature(WINDOW_ACTIVE_ELEMENT_FOCUSED)) {
+
+        // when marking an iframe window as current we have no need to move the focus
+        final boolean isIFrame = currentWindow_ instanceof FrameWindow
+                && ((FrameWindow) currentWindow_).getFrameElement() instanceof HtmlInlineFrame;
+        if (!isIFrame) {
+            //1. activeElement becomes focused element for new current window
+            //2. onFocus event is triggered for focusedElement of new current window
+            final Page enclosedPage = currentWindow_.getEnclosedPage();
+            if (enclosedPage != null && enclosedPage.isHtmlPage()) {
+                final Window jsWindow = (Window) currentWindow_.getScriptObject();
+                if (jsWindow != null) {
                     final HTMLElement activeElement =
                             (HTMLElement) ((HTMLDocument) jsWindow.getDocument()).getActiveElement();
                     if (activeElement != null) {
                         ((HtmlPage) enclosedPage).setFocusedElement(activeElement.getDomNodeOrDie(), true);
-                    }
-                }
-                else {
-                    final HtmlElement focusedElement = ((HtmlPage) enclosedPage).getFocusedElement();
-                    if (focusedElement != null) {
-                        ((HtmlPage) enclosedPage).setFocusedElement(focusedElement, true);
                     }
                 }
             }
@@ -781,7 +798,7 @@ public class WebClient implements Serializable {
         final HtmlPage openerPage = (HtmlPage) opener.getEnclosedPage();
         if (url != null) {
             try {
-                final WebRequest request = new WebRequest(url);
+                final WebRequest request = new WebRequest(url, getBrowserVersion().getHtmlAcceptHeader());
                 if (getBrowserVersion().hasFeature(DIALOGWINDOW_REFERER)
                         && openerPage != null) {
                     final String referer = openerPage.getUrl().toExternalForm();
@@ -795,11 +812,6 @@ public class WebClient implements Serializable {
         }
         else {
             initializeEmptyWindow(window);
-            if (openerPage != null) {
-                final Window jsWindow = (Window) window.getScriptObject();
-                jsWindow.setDomNode(openerPage);
-                jsWindow.getDocument().setDomNode(openerPage);
-            }
         }
         return window;
     }
@@ -910,7 +922,7 @@ public class WebClient implements Serializable {
         fireWindowOpened(new WebWindowEvent(window, WebWindowEvent.OPEN, null, null));
 
         final HtmlPage openerPage = (HtmlPage) opener.getEnclosedPage();
-        final WebRequest request = new WebRequest(url);
+        final WebRequest request = new WebRequest(url, getBrowserVersion().getHtmlAcceptHeader());
         if (getBrowserVersion().hasFeature(DIALOGWINDOW_REFERER) && openerPage != null) {
             final String referer = openerPage.getUrl().toExternalForm();
             request.setAdditionalHeader("Referer", referer);
@@ -1053,7 +1065,7 @@ public class WebClient implements Serializable {
         }
         responseHeaders.add(new NameValuePair("content-type",
             decoder.getMediaType() + ";charset=" + decoder.getCharset()));
-        final DownloadedContent downloadedContent = HttpWebConnection2.downloadContent(url.openStream());
+        final DownloadedContent downloadedContent = HttpWebConnection.downloadContent(url.openStream());
         final WebResponseData data = new WebResponseData(downloadedContent, 200, "OK", responseHeaders);
         return new WebResponse(data, url, webRequest.getHttpMethod(), 0);
     }
@@ -1199,7 +1211,7 @@ public class WebClient implements Serializable {
             }
         }
         else {
-            response = loadWebResponseFromWebConnection(webRequest);
+            response = loadWebResponseFromWebConnection(webRequest, ALLOWED_REDIRECTIONS_SAME_URL);
         }
 
         return response;
@@ -1208,10 +1220,13 @@ public class WebClient implements Serializable {
     /**
      * Loads a {@link WebResponse} from the server through the WebConnection.
      * @param webRequest the request
+     * @param allowedRedirects the number of allowed redirects remaining
      * @throws IOException if an IO problem occurs
      * @return the resultant {@link WebResponse}
      */
-    private WebResponse loadWebResponseFromWebConnection(final WebRequest webRequest) throws IOException {
+    private WebResponse loadWebResponseFromWebConnection(final WebRequest webRequest,
+        final int allowedRedirects) throws IOException {
+
         URL url = webRequest.getUrl();
         final HttpMethod method = webRequest.getHttpMethod();
         final List<NameValuePair> parameters = webRequest.getRequestParameters();
@@ -1272,10 +1287,10 @@ public class WebClient implements Serializable {
         addDefaultHeaders(webRequest);
 
         // Retrieve the response, either from the cache or from the server.
-        final Object fromCache = getCache().getCachedObject(webRequest);
+        final WebResponse fromCache = getCache().getCachedResponse(webRequest);
         final WebResponse webResponse;
-        if (fromCache != null && fromCache instanceof WebResponse) {
-            webResponse = new WebResponseFromCache((WebResponse) fromCache, webRequest);
+        if (fromCache != null) {
+            webResponse = new WebResponseFromCache(fromCache, webRequest);
         }
         else {
             try {
@@ -1284,7 +1299,7 @@ public class WebClient implements Serializable {
             catch (final NoHttpResponseException e) {
                 return new WebResponse(responseDataNoHttpResponse_, webRequest, 0);
             }
-            getCache().cacheIfPossible(webRequest, webResponse, webResponse);
+            getCache().cacheIfPossible(webRequest, webResponse, null);
         }
 
         // Continue according to the HTTP status code.
@@ -1318,14 +1333,18 @@ public class WebClient implements Serializable {
                 LOG.debug("Got a redirect status code [" + status + "] new location = [" + locationString + "]");
             }
 
-            if ((status == HttpStatus.SC_MOVED_PERMANENTLY || status == HttpStatus.SC_TEMPORARY_REDIRECT)
+            if (allowedRedirects == 0) {
+                throw new FailingHttpStatusCodeException("Too much redirect for "
+                    + webResponse.getWebRequest().getUrl(), webResponse);
+            }
+            else if ((status == HttpStatus.SC_MOVED_PERMANENTLY || status == HttpStatus.SC_TEMPORARY_REDIRECT)
                 && method == HttpMethod.GET) {
                 final WebRequest wrs = new WebRequest(newUrl);
                 wrs.setRequestParameters(parameters);
                 for (final Map.Entry<String, String> entry : webRequest.getAdditionalHeaders().entrySet()) {
                     wrs.setAdditionalHeader(entry.getKey(), entry.getValue());
                 }
-                return loadWebResponseFromWebConnection(wrs);
+                return loadWebResponseFromWebConnection(wrs, allowedRedirects - 1);
             }
             else if (status <= HttpStatus.SC_SEE_OTHER) {
                 final WebRequest wrs = new WebRequest(newUrl);
@@ -1333,7 +1352,7 @@ public class WebClient implements Serializable {
                 for (final Map.Entry<String, String> entry : webRequest.getAdditionalHeaders().entrySet()) {
                     wrs.setAdditionalHeader(entry.getKey(), entry.getValue());
                 }
-                return loadWebResponseFromWebConnection(wrs);
+                return loadWebResponseFromWebConnection(wrs, allowedRedirects - 1);
             }
         }
 
@@ -1447,6 +1466,14 @@ public class WebClient implements Serializable {
      */
     public Map<String, String> getActiveXObjectMap() {
         return activeXObjectMap_;
+    }
+
+    /**
+     * Returns the MSXML ActiveX object factory (if supported).
+     * @return the msxmlActiveXObjectFactory
+     */
+    public MSXMLActiveXObjectFactory getMSXMLActiveXObjectFactory() {
+        return msxmlActiveXObjectFactory_;
     }
 
     /**
@@ -1666,8 +1693,9 @@ public class WebClient implements Serializable {
                 // now looks at the visibility of the frame window
                 final BaseFrameElement frameElement = fw.getFrameElement();
                 if (frameElement.isDisplayed()) {
-                    final ScriptableObject scriptableObject = frameElement.getScriptObject();
-                    final ComputedCSSStyleDeclaration style = ((HTMLElement) scriptableObject).getCurrentStyle();
+                    final HTMLElement htmlElement = (HTMLElement) frameElement.getScriptObject();
+                    final ComputedCSSStyleDeclaration style =
+                            htmlElement.getWindow().getComputedStyle(htmlElement, null);
                     use = (style.getCalculatedWidth(false, false) != 0)
                         && (style.getCalculatedHeight(false, false) != 0);
                 }
@@ -1705,8 +1733,8 @@ public class WebClient implements Serializable {
             }
         }
         //FIXME Depends on the implementation
-        if (webConnection_ instanceof HttpWebConnection2) {
-            ((HttpWebConnection2) webConnection_).shutdown();
+        if (webConnection_ instanceof HttpWebConnection) {
+            ((HttpWebConnection) webConnection_).shutdown();
         }
     }
 
@@ -1849,6 +1877,10 @@ public class WebClient implements Serializable {
         webConnection_ = createWebConnection();
         scriptEngine_ = new JavaScriptEngine(this);
         jobManagers_ = Collections.synchronizedList(new ArrayList<WeakReference<JavaScriptJobManager>>());
+
+        if (getBrowserVersion().hasFeature(JS_XML_SUPPORT_VIA_ACTIVEXOBJECT)) {
+            initMSXMLActiveX();
+        }
     }
 
     private WebConnection createWebConnection() {
@@ -1930,6 +1962,7 @@ public class WebClient implements Serializable {
                 return;
             }
             final URL current = page.getUrl();
+            justHashJump = isHashJump && (url.getQuery() == null || url.getQuery().equals(current.getQuery()));
             if (!justHashJump && url.sameFile(current) && StringUtils.isNotEmpty(url.getRef())) {
                 justHashJump = true;
             }
@@ -2006,6 +2039,7 @@ public class WebClient implements Serializable {
                         downloadedResponse.target_, "_self");
                 if (downloadedResponse.urlWithOnlyHashChange_ != null) {
                     final HtmlPage page = (HtmlPage) downloadedResponse.requestingWindow_.getEnclosedPage();
+                    final String oldURL = page.getUrl().toExternalForm();
                     page.getWebResponse().getWebRequest().setUrl(downloadedResponse.urlWithOnlyHashChange_);
                     win.getHistory().addPage(page);
 
@@ -2013,7 +2047,7 @@ public class WebClient implements Serializable {
                     final Window jsWindow = (Window) win.getScriptObject();
                     if (null != jsWindow) {
                         final Location location = jsWindow.getLocation();
-                        location.setHash(downloadedResponse.urlWithOnlyHashChange_.getRef());
+                        location.setHash(oldURL, downloadedResponse.urlWithOnlyHashChange_.getRef());
                     }
                 }
                 else {

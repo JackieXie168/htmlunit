@@ -14,6 +14,7 @@
  */
 package com.gargoylesoftware.htmlunit.html;
 
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.CSS_SELECT_DISPLAY_INLINE;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.SELECT_DESELECT_ALL_IF_SWITCHING_UNKNOWN;
 
 import java.util.ArrayList;
@@ -45,6 +46,7 @@ import com.gargoylesoftware.htmlunit.util.NameValuePair;
  * @author Daniel Gredler
  * @author Ahmed Ashour
  * @author Ronald Brill
+ * @author Frank Danek
  */
 public class HtmlSelect extends HtmlElement implements DisabledElement, SubmittableElement, FormFieldWithNameHistory {
 
@@ -57,14 +59,13 @@ public class HtmlSelect extends HtmlElement implements DisabledElement, Submitta
     /**
      * Creates an instance.
      *
-     * @param namespaceURI the URI that identifies an XML namespace
      * @param qualifiedName the qualified name of the element type to instantiate
      * @param page the page that contains this element
      * @param attributes the initial attributes
      */
-    HtmlSelect(final String namespaceURI, final String qualifiedName, final SgmlPage page,
+    HtmlSelect(final String qualifiedName, final SgmlPage page,
             final Map<String, DomAttr> attributes) {
-        super(namespaceURI, qualifiedName, page, attributes);
+        super(qualifiedName, page, attributes);
         originalName_ = getNameAttribute();
     }
 
@@ -255,10 +256,30 @@ public class HtmlSelect extends HtmlElement implements DisabledElement, Submitta
      * @return the page contained in the current window as returned
      * by {@link com.gargoylesoftware.htmlunit.WebClient#getCurrentWindow()}
      */
-    @SuppressWarnings("unchecked")
     public <P extends Page> P setSelectedAttribute(final String optionValue, final boolean isSelected) {
+        return setSelectedAttribute(optionValue, isSelected, true);
+    }
+
+    /**
+     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
+     *
+     * Sets the "selected" state of the specified option. If this "select" element
+     * is single-select, then calling this method will deselect all other options.
+     *
+     * Only options that are actually in the document may be selected.
+     *
+     * @param isSelected true if the option is to become selected
+     * @param optionValue the value of the option that is to change
+     * @param invokeOnFocus whether to set focus or not.
+     * @param <P> the page type
+     * @return the page contained in the current window as returned
+     * by {@link com.gargoylesoftware.htmlunit.WebClient#getCurrentWindow()}
+     */
+    @SuppressWarnings("unchecked")
+    public <P extends Page> P setSelectedAttribute(final String optionValue,
+            final boolean isSelected, final boolean invokeOnFocus) {
         try {
-            return (P) setSelectedAttribute(getOptionByValue(optionValue), isSelected);
+            return (P) setSelectedAttribute(getOptionByValue(optionValue), isSelected, invokeOnFocus);
         }
         catch (final ElementNotFoundException e) {
             if (hasFeature(SELECT_DESELECT_ALL_IF_SWITCHING_UNKNOWN)) {
@@ -598,5 +619,20 @@ public class HtmlSelect extends HtmlElement implements DisabledElement, Submitta
      */
     public Collection<String> getPreviousNames() {
         return previousNames_;
+    }
+
+    /**
+     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
+     *
+     * Returns the default display style.
+     *
+     * @return the default display style.
+     */
+    @Override
+    public DisplayStyle getDefaultStyleDisplay() {
+        if (hasFeature(CSS_SELECT_DISPLAY_INLINE)) {
+            return DisplayStyle.INLINE;
+        }
+        return DisplayStyle.INLINE_BLOCK;
     }
 }

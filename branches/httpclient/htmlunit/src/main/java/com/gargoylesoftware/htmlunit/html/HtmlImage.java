@@ -47,6 +47,7 @@ import com.gargoylesoftware.htmlunit.javascript.host.Node;
  * @author Ahmed Ashour
  * @author <a href="mailto:knut.johannes.dahle@gmail.com">Knut Johannes Dahle</a>
  * @author Ronald Brill
+ * @author Frank Danek
  */
 public class HtmlImage extends HtmlElement {
 
@@ -54,6 +55,8 @@ public class HtmlImage extends HtmlElement {
 
     /** The HTML tag represented by this element. */
     public static final String TAG_NAME = "img";
+    /** Another HTML tag represented by this element. */
+    public static final String TAG_NAME2 = "image";
 
     private int lastClickX_;
     private int lastClickY_;
@@ -65,14 +68,13 @@ public class HtmlImage extends HtmlElement {
     /**
      * Creates a new instance.
      *
-     * @param namespaceURI the URI that identifies an XML namespace
      * @param qualifiedName the qualified name of the element type to instantiate
      * @param page the page that contains this element
      * @param attributes the initial attributes
      */
-    HtmlImage(final String namespaceURI, final String qualifiedName, final SgmlPage page,
+    HtmlImage(final String qualifiedName, final SgmlPage page,
             final Map<String, DomAttr> attributes) {
-        super(namespaceURI, qualifiedName, page, attributes);
+        super(qualifiedName, page, attributes);
     }
 
     /**
@@ -391,7 +393,8 @@ public class HtmlImage extends HtmlElement {
             final WebClient webclient = page.getWebClient();
 
             final URL url = page.getFullyQualifiedUrl(getSrcAttribute());
-            final WebRequest request = new WebRequest(url);
+            final String accept = getPage().getWebClient().getBrowserVersion().getImgAcceptHeader();
+            final WebRequest request = new WebRequest(url, accept);
             request.setAdditionalHeader("Referer", page.getUrl().toExternalForm());
             imageWebResponse_ = webclient.loadWebResponse(request);
             imageReader_ = null;
@@ -487,5 +490,37 @@ public class HtmlImage extends HtmlElement {
     public void saveAs(final File file) throws IOException {
         final ImageReader reader = getImageReader();
         ImageIO.write(reader.read(0), reader.getFormatName(), file);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void finalize() {
+        if (imageReader_ != null) {
+            try {
+                final ImageInputStream stream = (ImageInputStream) imageReader_.getInput();
+                if (stream != null) {
+                    stream.close();
+                }
+                imageReader_.setInput(null);
+                imageReader_.dispose();
+            }
+            catch (final IOException e) {
+                LOG.error(e.getMessage() , e);
+            }
+        }
+    }
+
+    /**
+     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
+     *
+     * Returns the default display style.
+     *
+     * @return the default display style.
+     */
+    @Override
+    public DisplayStyle getDefaultStyleDisplay() {
+        return DisplayStyle.INLINE;
     }
 }

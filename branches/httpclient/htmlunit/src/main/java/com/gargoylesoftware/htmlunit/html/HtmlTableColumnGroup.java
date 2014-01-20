@@ -26,6 +26,8 @@ import com.gargoylesoftware.htmlunit.SgmlPage;
  * @author David K. Taylor
  * @author <a href="mailto:cse@dynabean.de">Christian Sell</a>
  * @author Ahmed Ashour
+ * @author Ronald Brill
+ * @author Frank Danek
  */
 public class HtmlTableColumnGroup extends HtmlElement {
 
@@ -35,14 +37,13 @@ public class HtmlTableColumnGroup extends HtmlElement {
     /**
      * Creates an instance of HtmlTableColumnGroup
      *
-     * @param namespaceURI the URI that identifies an XML namespace
      * @param qualifiedName the qualified name of the element type to instantiate
      * @param page the HtmlPage that contains this element
      * @param attributes the initial attributes
      */
-    HtmlTableColumnGroup(final String namespaceURI, final String qualifiedName, final SgmlPage page,
+    HtmlTableColumnGroup(final String qualifiedName, final SgmlPage page,
             final Map<String, DomAttr> attributes) {
-        super(namespaceURI, qualifiedName, page, attributes);
+        super(qualifiedName, page, attributes);
     }
 
     /**
@@ -115,5 +116,17 @@ public class HtmlTableColumnGroup extends HtmlElement {
      */
     public final String getValignAttribute() {
         return getAttribute("valign");
+    }
+
+    /**
+     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
+     *
+     * Returns the default display style.
+     *
+     * @return the default display style.
+     */
+    @Override
+    public DisplayStyle getDefaultStyleDisplay() {
+        return DisplayStyle.TABLE_COLUMN_GROUP;
     }
 }

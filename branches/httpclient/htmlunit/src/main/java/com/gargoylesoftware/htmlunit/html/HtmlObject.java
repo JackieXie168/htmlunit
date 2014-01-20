@@ -27,6 +27,8 @@ import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLObjectElement;
  * @author David K. Taylor
  * @author <a href="mailto:cse@dynabean.de">Christian Sell</a>
  * @author Ahmed Ashour
+ * @author Ronald Brill
+ * @author Frank Danek
  */
 public class HtmlObject extends HtmlElement {
 
@@ -36,14 +38,13 @@ public class HtmlObject extends HtmlElement {
     /**
      * Creates an instance of HtmlObject
      *
-     * @param namespaceURI the URI that identifies an XML namespace
      * @param qualifiedName the qualified name of the element type to instantiate
      * @param page the HtmlPage that contains this element
      * @param attributes the initial attributes
      */
-    HtmlObject(final String namespaceURI, final String qualifiedName, final SgmlPage page,
+    HtmlObject(final String qualifiedName, final SgmlPage page,
             final Map<String, DomAttr> attributes) {
-        super(namespaceURI, qualifiedName, page, attributes);
+        super(qualifiedName, page, attributes);
         if (attributes != null) {
             final DomAttr classid = attributes.get("classid");
             if (classid != null) {
@@ -254,5 +255,17 @@ public class HtmlObject extends HtmlElement {
      */
     public final String getVspaceAttribute() {
         return getAttribute("vspace");
+    }
+
+    /**
+     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
+     *
+     * Returns the default display style.
+     *
+     * @return the default display style.
+     */
+    @Override
+    public DisplayStyle getDefaultStyleDisplay() {
+        return DisplayStyle.INLINE;
     }
 }

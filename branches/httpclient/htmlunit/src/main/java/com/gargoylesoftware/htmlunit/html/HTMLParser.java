@@ -15,7 +15,8 @@
 package com.gargoylesoftware.htmlunit.html;
 
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.DOCTYPE_IS_COMMENT;
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.GENERATED_3;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.HTML_ATTRIBUTE_LOWER_CASE;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.HTML_CDATA_AS_COMMENT;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.HTMLCONDITIONAL_COMMENTS;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.HTMLIFRAME_IGNORE_SELFCLOSING;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.HTMLPARSER_REMOVE_EMPTY_CONTENT;
@@ -40,6 +41,7 @@ import java.util.Stack;
 import net.sourceforge.htmlunit.corejs.javascript.Scriptable;
 import net.sourceforge.htmlunit.corejs.javascript.ScriptableObject;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.xerces.parsers.AbstractSAXParser;
 import org.apache.xerces.util.DefaultErrorHandler;
@@ -89,6 +91,7 @@ import com.gargoylesoftware.htmlunit.svg.SvgElementFactory;
  * @author Ethan Glasser-Camp
  * @author Sudhan Moghe
  * @author Ronald Brill
+ * @author Frank Danek
  */
 public final class HTMLParser {
 
@@ -247,6 +250,7 @@ public final class HTMLParser {
             throw new RuntimeException("Failed parsing content from " + url, origin);
         }
         finally {
+            IOUtils.closeQuietly(content);
             page.registerParsingEnd();
         }
 
@@ -258,7 +262,7 @@ public final class HTMLParser {
      * probably be done by NekoHTML. See the bug linked below. If and when that bug is fixed,
      * we may be able to get rid of this code.
      *
-     * http://sourceforge.net/tracker/index.php?func=detail&aid=1898038&group_id=195122&atid=952178
+     * http://sourceforge.net/p/nekohtml/bugs/15/
      * @param page
      * @param originalCall
      * @param checkInsideFrameOnly true if the original page had body that was removed by JavaScript
@@ -283,7 +287,7 @@ public final class HTMLParser {
 
         // If the document does not have a body, add it.
         if (!hasBody && !checkInsideFrameOnly) {
-            final HtmlBody body = new HtmlBody(null, "body", page, null, false);
+            final HtmlBody body = new HtmlBody("body", page, null, false);
             doc.appendChild(body);
         }
 
@@ -443,6 +447,9 @@ public final class HTMLParser {
             try {
                 setFeature(FEATURE_AUGMENTATIONS, true);
                 setProperty("http://cyberneko.org/html/properties/names/elems", "default");
+                if (!webClient.getBrowserVersion().hasFeature(HTML_ATTRIBUTE_LOWER_CASE)) {
+                    setProperty("http://cyberneko.org/html/properties/names/attrs", "no-change");
+                }
                 setFeature("http://cyberneko.org/html/features/report-errors", reportErrors);
                 setFeature(FEATURE_PARSE_NOSCRIPT, !webClient.getOptions().isJavaScriptEnabled());
                 setFeature(HTMLScanner.ALLOW_SELFCLOSING_IFRAME,
@@ -572,17 +579,23 @@ public final class HTMLParser {
                     if ("X-UA-Compatible".equals(meta.getHttpEquivAttribute())) {
                         final String content = meta.getContentAttribute();
                         if (content.startsWith("IE=")) {
-                            try {
-                                int value = Integer.parseInt(content.substring(3).trim());
-                                final int version = (int) page_.getWebClient().getBrowserVersion().
-                                        getBrowserVersionNumeric();
-                                if (value > version) {
-                                    value = version;
-                                }
-                                ((HTMLDocument) page_.getScriptObject()).forceDocumentMode(value);
+                            final String mode = content.substring(3).trim();
+                            final int version = (int) page_.getWebClient().getBrowserVersion().
+                                                                getBrowserVersionNumeric();
+                            if ("edge".equals(mode)) {
+                                ((HTMLDocument) page_.getScriptObject()).forceDocumentMode(version);
                             }
-                            catch (final Exception e) {
-                                // ignore
+                            else {
+                                try {
+                                    int value = Integer.parseInt(mode);
+                                    if (value > version) {
+                                        value = version;
+                                    }
+                                    ((HTMLDocument) page_.getScriptObject()).forceDocumentMode(value);
+                                }
+                                catch (final Exception e) {
+                                    // ignore
+                                }
                             }
                         }
                     }
@@ -619,7 +632,7 @@ public final class HTMLParser {
             if ("table".equals(currentNodeName) && "div".equals(newNodeName)) {
                 currentNode.insertBefore(newElement);
             }
-            else if (head_ != null && "title".equals(newNodeName)) {
+            else if (head_ != null && "title".equals(newNodeName) && !parsingInnerHead_) {
                 head_.appendChild(newElement);
             }
             else {
@@ -808,7 +821,7 @@ public final class HTMLParser {
             handleCharacters();
             final String data = new String(ch, start, length);
             if (!data.startsWith("[CDATA")
-                    || !page_.hasFeature(GENERATED_3)) {
+                    || page_.hasFeature(HTML_CDATA_AS_COMMENT)) {
                 final DomComment comment = new DomComment(page_, data);
                 currentNode_.appendChild(comment);
             }
@@ -858,6 +871,10 @@ public final class HTMLParser {
             if (formWaitingForLostChildren_ != null && "form".equals(element.localpart)) {
                 formWaitingForLostChildren_ = null;
             }
+
+            if (parsingInnerHead_ && "head".equalsIgnoreCase(element.localpart)) {
+                parsingInnerHead_ = false;
+            }
         }
 
         /**
@@ -879,6 +896,10 @@ public final class HTMLParser {
                         }
                     }
                 }
+            }
+
+            if (headParsed_ && "head".equalsIgnoreCase(elem.localpart)) {
+                parsingInnerHead_ = true;
             }
         }
 
@@ -956,13 +977,6 @@ class HTMLScannerForIE extends org.cyberneko.html.HTMLScanner {
         protected void scanComment() throws IOException {
             final String s = nextContent(30); // [if ...
             if (s.startsWith("[if ") && s.contains("]>")) {
-                String commentTill = null;
-                if (s.contains("]><!-->")) {
-                    commentTill = "<![endif]-->";
-                }
-                else if (s.contains("]>-->")) {
-                    commentTill = "<!--<![endif]-->";
-                }
                 final String condition = StringUtils.substringBefore(s.substring(4), "]>");
                 try {
                     if (IEConditionalCommentExpressionEvaluator.evaluate(condition, browserVersion_)) {
@@ -976,21 +990,14 @@ class HTMLScannerForIE extends org.cyberneko.html.HTMLScanner {
                         else if (s.contains("]>-->")) {
                             skip("-->", false);
                         }
-                        return;
                     }
-                    if (commentTill != null) {
-                        final XMLStringBuffer buffer = new XMLStringBuffer();
-                        int ch;
-                        while ((ch = read()) != -1) {
-                            buffer.append((char) ch);
-                            if (buffer.toString().endsWith(commentTill)) {
-                                final XMLStringBuffer trimmedBuffer
-                                    = new XMLStringBuffer(buffer.ch, 0, buffer.length - 3);
-                                fDocumentHandler.comment(trimmedBuffer, locationAugs());
-                                return;
-                            }
+                    else {
+                        final StringBuilder builder = new StringBuilder();
+                        while (!builder.toString().endsWith("-->")) {
+                            builder.append((char) read());
                         }
                     }
+                    return;
                 }
                 catch (final Exception e) { // incorrect expression => handle it as plain text
                     // TODO: report it!

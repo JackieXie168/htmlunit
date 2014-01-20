@@ -16,10 +16,9 @@ package com.gargoylesoftware.htmlunit.html;
 
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.BUTTON_EMPTY_TYPE_BUTTON;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.EVENT_INPUT;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.EVENT_ONCLICK_USES_POINTEREVENT;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.EVENT_PROPERTY_CHANGE;
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.HTMLELEMENT_TRIM_CLASS_ATTRIBUTE;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.KEYBOARD_EVENT_SPECIAL_KEYPRESS;
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.WINDOW_ACTIVE_ELEMENT_FOCUSED;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -59,6 +58,7 @@ import com.gargoylesoftware.htmlunit.javascript.host.Event;
 import com.gargoylesoftware.htmlunit.javascript.host.EventHandler;
 import com.gargoylesoftware.htmlunit.javascript.host.KeyboardEvent;
 import com.gargoylesoftware.htmlunit.javascript.host.MouseEvent;
+import com.gargoylesoftware.htmlunit.javascript.host.PointerEvent;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLElement;
 
 /**
@@ -78,8 +78,60 @@ import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLElement;
  * @author Dmitri Zoubkov
  * @author Sudhan Moghe
  * @author Ronald Brill
+ * @author Frank Danek
  */
 public abstract class HtmlElement extends DomElement {
+
+    /**
+     * Enum for the different display styles.
+     */
+    public enum DisplayStyle {
+        /** none. */
+        NONE("none"),
+        /** block. */
+        BLOCK("block"),
+        /** inline. */
+        INLINE("inline"),
+        /** inline-block. */
+        INLINE_BLOCK("inline-block"),
+        /** list-item. */
+        LIST_ITEM("list-item"),
+        /** table. */
+        TABLE("table"),
+        /** table-cell. */
+        TABLE_CELL("table-cell"),
+        /** table-column. */
+        TABLE_COLUMN("table-column"),
+        /** table-column-group. */
+        TABLE_COLUMN_GROUP("table-column-group"),
+        /** table-row. */
+        TABLE_ROW("table-row"),
+        /** table-row-group. */
+        TABLE_ROW_GROUP("table-row-group"),
+        /** table-header-group. */
+        TABLE_HEADER_GROUP("table-header-group"),
+        /** table-footer-group. */
+        TABLE_FOOTER_GROUP("table-footer-group"),
+        /** table-caption. */
+        TABLE_CAPTION("table-caption"),
+        /** ruby. */
+        RUBY("ruby"),
+        /** ruby-text. */
+        RUBY_TEXT("ruby-text");
+
+        private final String value_;
+        DisplayStyle(final String value) {
+            value_ = value;
+        }
+
+        /**
+         * The string used from js.
+         * @return the value as string
+         */
+        public String value() {
+            return value_;
+        }
+    }
 
     private static final Log LOG = LogFactory.getLog(HtmlElement.class);
 
@@ -100,22 +152,15 @@ public abstract class HtmlElement extends DomElement {
     /**
      * Creates an instance.
      *
-     * @param namespaceURI the URI that identifies an XML namespace
      * @param qualifiedName the qualified name of the element type to instantiate
      * @param page the page that contains this element
      * @param attributes a map ready initialized with the attributes for this element, or
      * <code>null</code>. The map will be stored as is, not copied.
      */
-    protected HtmlElement(final String namespaceURI, final String qualifiedName, final SgmlPage page,
+    protected HtmlElement(final String qualifiedName, final SgmlPage page,
             final Map<String, DomAttr> attributes) {
-        super(namespaceURI, qualifiedName, page, attributes);
+        super(HTMLParser.XHTML_NAMESPACE, qualifiedName, page, attributes);
         attributeListeners_ = new ArrayList<HtmlAttributeChangeListener>();
-        if (page != null && hasFeature(HTMLELEMENT_TRIM_CLASS_ATTRIBUTE)) {
-            final String value = getAttribute("class");
-            if (value != ATTRIBUTE_NOT_DEFINED) {
-                getAttributeNode("class").setValue(value.trim());
-            }
-        }
     }
 
     /**
@@ -647,52 +692,6 @@ public abstract class HtmlElement extends DomElement {
     }
 
     /**
-     * Returns the element in this element's page with the specified ID. If more than one element
-     * has the specified ID (not allowed by the HTML spec), this method returns the first one.
-     *
-     * @param id the ID value to search for
-     * @param <E> the sub-element type
-     * @return the element in this element's page with the specified ID
-     * @exception ElementNotFoundException if no element has the specified ID
-     * @deprecated as of 2.12, please use {@link HtmlPage#getHtmlElementById(String)}
-     */
-    @Deprecated
-    @SuppressWarnings("unchecked")
-    public <E extends HtmlElement> E getElementById(final String id) throws ElementNotFoundException {
-        return (E) ((HtmlPage) getPage()).getHtmlElementById(id);
-    }
-
-    /**
-     * <p>Returns <tt>true</tt> if there is an element in this element's page with the specified ID.
-     * This method is intended for situations where it is enough to know whether a specific
-     * element is present in the document.</p>
-     *
-     * <p>Implementation Note: This method calls {@link #getElementById(String)} internally,
-     * so writing code such as the following would be extremely inefficient:</p>
-     *
-     * <pre>
-     * if (hasHtmlElementWithId(id)) {
-     *     HtmlElement element = getHtmlElementWithId(id)
-     *     ...
-     * }
-     * </pre>
-     *
-     * @param id the id to search for
-     * @return <tt>true</tt> if there is an element in this element's page with the specified ID
-     * @deprecated as of 2.12, please use {@link HtmlPage#getElementById(String)}
-     */
-    @Deprecated
-    public boolean hasHtmlElementWithId(final String id) {
-        try {
-            getElementById(id);
-            return true;
-        }
-        catch (final ElementNotFoundException e) {
-            return false;
-        }
-    }
-
-    /**
      * Returns all elements which are descendants of this element and match the specified search criteria.
      *
      * @param elementName the name of the element to search for
@@ -1080,7 +1079,14 @@ public abstract class HtmlElement extends DomElement {
             return getPage();
         }
         final HtmlPage page = (HtmlPage) getPage();
-        final Event event = new MouseEvent(this, eventType, shiftKey, ctrlKey, altKey, button);
+        final Event event;
+        if (MouseEvent.TYPE_CONTEXT_MENU.equals(eventType)
+            && getPage().getWebClient().getBrowserVersion().hasFeature(EVENT_ONCLICK_USES_POINTEREVENT)) {
+            event = new PointerEvent(this, eventType, shiftKey, ctrlKey, altKey, button);
+        }
+        else {
+            event = new MouseEvent(this, eventType, shiftKey, ctrlKey, altKey, button);
+        }
         final ScriptResult scriptResult = fireEvent(event);
         final Page currentPage;
         if (scriptResult == null) {
@@ -1105,10 +1111,8 @@ public abstract class HtmlElement extends DomElement {
     public void focus() {
         final HtmlPage page = (HtmlPage) getPage();
         page.setFocusedElement(this);
-        if (hasFeature(WINDOW_ACTIVE_ELEMENT_FOCUSED)) {
-            final HTMLElement jsElt = (HTMLElement) getScriptObject();
-            jsElt.setActive();
-        }
+        final HTMLElement jsElt = (HTMLElement) getScriptObject();
+        jsElt.setActive();
     }
 
     /**
@@ -1200,8 +1204,15 @@ public abstract class HtmlElement extends DomElement {
 
             mouseUp(shiftKey, ctrlKey, altKey, MouseEvent.BUTTON_LEFT);
 
-            final Event event = new MouseEvent(getEventTargetElement(), MouseEvent.TYPE_CLICK, shiftKey,
-                    ctrlKey, altKey, MouseEvent.BUTTON_LEFT);
+            final Event event;
+            if (getPage().getWebClient().getBrowserVersion().hasFeature(EVENT_ONCLICK_USES_POINTEREVENT)) {
+                event = new PointerEvent(getEventTargetElement(), MouseEvent.TYPE_CLICK, shiftKey,
+                        ctrlKey, altKey, MouseEvent.BUTTON_LEFT);
+            }
+            else {
+                event = new MouseEvent(getEventTargetElement(), MouseEvent.TYPE_CLICK, shiftKey,
+                        ctrlKey, altKey, MouseEvent.BUTTON_LEFT);
+            }
             return (P) click(event);
         }
     }
@@ -1356,8 +1367,15 @@ public abstract class HtmlElement extends DomElement {
             return (P) clickPage;
         }
 
-        final Event event = new MouseEvent(this, MouseEvent.TYPE_DBL_CLICK, shiftKey, ctrlKey, altKey,
-                MouseEvent.BUTTON_LEFT);
+        final Event event;
+        if (getPage().getWebClient().getBrowserVersion().hasFeature(EVENT_ONCLICK_USES_POINTEREVENT)) {
+            event = new PointerEvent(this, MouseEvent.TYPE_DBL_CLICK, shiftKey, ctrlKey, altKey,
+                    MouseEvent.BUTTON_LEFT);
+        }
+        else {
+            event = new MouseEvent(this, MouseEvent.TYPE_DBL_CLICK, shiftKey, ctrlKey, altKey,
+                    MouseEvent.BUTTON_LEFT);
+        }
         final ScriptResult scriptResult = fireEvent(event);
         if (scriptResult == null) {
             return (P) clickPage;
@@ -1571,5 +1589,16 @@ public abstract class HtmlElement extends DomElement {
     @Override
     public DomNode querySelector(final String selectors) {
         return super.querySelector(selectors);
+    }
+
+    /**
+     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
+     *
+     * Returns the default display style.
+     *
+     * @return the default display style.
+     */
+    public DisplayStyle getDefaultStyleDisplay() {
+        return DisplayStyle.BLOCK;
     }
 }
