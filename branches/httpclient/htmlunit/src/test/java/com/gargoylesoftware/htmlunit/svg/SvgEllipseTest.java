@@ -31,6 +31,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlUnknownElement;
  *
  * @version $Revision$
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class SvgEllipseTest extends WebDriverTestCase {
@@ -39,7 +40,8 @@ public class SvgEllipseTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = "[object SVGEllipseElement]", IE = "[object HTMLGenericElement]")
+    @Alerts(DEFAULT = "[object SVGEllipseElement]",
+            IE8 = "[object HTMLGenericElement]")
     public void simpleScriptable() throws Exception {
         final String html = HtmlPageTest.STANDARDS_MODE_PREFIX_
             + "<html><head>\n"

@@ -31,6 +31,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlUnknownElement;
  *
  * @version $Revision$
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class SvgFeMergeTest extends WebDriverTestCase {
@@ -39,7 +40,8 @@ public class SvgFeMergeTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = "[object SVGFEMergeElement]", IE = "[object HTMLGenericElement]")
+    @Alerts(DEFAULT = "[object SVGFEMergeElement]",
+            IE8 = "[object HTMLGenericElement]")
     public void simpleScriptable() throws Exception {
         final String html = HtmlPageTest.STANDARDS_MODE_PREFIX_
             + "<html><head>\n"

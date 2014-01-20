@@ -31,6 +31,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlStyle;
  *
  * @version $Revision$
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class SvgStyleTest extends WebDriverTestCase {
@@ -39,7 +40,8 @@ public class SvgStyleTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = "[object SVGStyleElement]", IE = "[object HTMLStyleElement]")
+    @Alerts(DEFAULT = "[object SVGStyleElement]",
+            IE8 = "[object HTMLStyleElement]")
     public void simpleScriptable() throws Exception {
         final String html = HtmlPageTest.STANDARDS_MODE_PREFIX_
             + "<html><head>\n"

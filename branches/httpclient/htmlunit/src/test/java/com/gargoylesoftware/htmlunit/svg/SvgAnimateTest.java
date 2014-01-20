@@ -31,6 +31,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlUnknownElement;
  *
  * @version $Revision$
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class SvgAnimateTest extends WebDriverTestCase {
@@ -39,7 +40,9 @@ public class SvgAnimateTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = "[object SVGAnimateElement]", IE = "[object HTMLGenericElement]")
+    @Alerts(FF = "[object SVGAnimateElement]",
+            IE = "[object HTMLGenericElement]",
+            IE11 = "[object SVGElement]")
     public void simpleScriptable() throws Exception {
         final String html = HtmlPageTest.STANDARDS_MODE_PREFIX_
             + "<html><head>\n"
@@ -59,6 +62,9 @@ public class SvgAnimateTest extends WebDriverTestCase {
             final HtmlPage page = (HtmlPage) getWebWindowOf((HtmlUnitDriver) driver).getEnclosedPage();
             if ("[object SVGAnimateElement]".equals(getExpectedAlerts()[0])) {
                 assertTrue(SvgAnimate.class.isInstance(page.getElementById("myId")));
+            }
+            else if ("[object SVGElement]".equals(getExpectedAlerts()[0])) {
+                assertTrue(SvgElement.class.isInstance(page.getElementById("myId")));
             }
             else {
                 assertTrue(HtmlUnknownElement.class.isInstance(page.getElementById("myId")));

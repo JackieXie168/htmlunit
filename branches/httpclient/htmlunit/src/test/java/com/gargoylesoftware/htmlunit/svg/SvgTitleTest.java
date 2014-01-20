@@ -31,6 +31,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlTitle;
  *
  * @version $Revision$
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class SvgTitleTest extends WebDriverTestCase {
@@ -39,7 +40,8 @@ public class SvgTitleTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = "[object SVGTitleElement]", IE = "[object HTMLTitleElement]")
+    @Alerts(DEFAULT = "[object SVGTitleElement]",
+            IE8 = "[object HTMLTitleElement]")
     public void simpleScriptable() throws Exception {
         final String html = HtmlPageTest.STANDARDS_MODE_PREFIX_
             + "<html><head>\n"

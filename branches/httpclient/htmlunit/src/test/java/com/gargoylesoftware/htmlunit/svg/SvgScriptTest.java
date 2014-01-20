@@ -31,6 +31,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlScript;
  *
  * @version $Revision$
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class SvgScriptTest extends WebDriverTestCase {
@@ -39,7 +40,8 @@ public class SvgScriptTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = "[object SVGScriptElement]", IE = "[object HTMLScriptElement]")
+    @Alerts(DEFAULT = "[object SVGScriptElement]",
+            IE8 = "[object HTMLScriptElement]")
     public void simpleScriptable() throws Exception {
         final String html = HtmlPageTest.STANDARDS_MODE_PREFIX_
             + "<html><head>\n"
