@@ -7,7 +7,224 @@
     </properties>
 
     <body>
-        <release version="2.13" date="???" description="Bugfixes">
+        <release version="2.14" date="???" description="FF24, Bugfixes, initial work on IE11">
+            <action type="fix" dev="rbri">
+                CSS: Parsing of the :not pseudo class fixed, only simple selectors are allowed.
+                This was a problem with CSSParser and is fixed in version 0.9.13.
+            </action>
+            <action type="add" dev="asashour" issue="1570">
+                JavaScript: ClientRect: add 'width' and 'height' properties.
+            </action>
+            <action type="fix" dev="asashour" issue="1569">
+                CSSStyleDeclaration: fix serialization of StyleElement.
+            </action>
+            <action type="fix" dev="asashour">
+                JavaScript: enumerating ordered numbers first (Chrome, FF and IE11).
+            </action>
+            <action type="fix" dev="rbri" issue="1568">
+                Do not change the active element when the content of an iframe was changed.
+            </action>
+            <action type="fix" dev="rbri">
+                JavaScript: conversion of anchor element into strings fixed.
+            </action>
+            <action type="fix" dev="rbri" due-to="Frank Danek">
+                JavaScript: hashChangeEvent processing fixed.
+            </action>
+            <action type="add" dev="rbri" due-to="Frank Danek">
+                JavaScript: New event class PointerEvent and BeforeUnloadEvent (required for IE11).
+            </action>
+            <action type="update" dev="rbri">
+                CSS: cssparser updated to 0.9.12.
+            </action>
+            <action type="fix" dev="asashour" issue="1566">
+                JavaScript: window.getComputedStyle and CSSStyleDeclaration.getPropertyValue()
+                are supported starting IE9.
+            </action>
+            <action type="update" dev="rbri">
+                BrowserVersion: deprecate FIREFOX_17, FIREFOX_24 is our preferred Firefox for the next months.
+            </action>
+            <action type="fix" dev="rbri">
+                JavaScript: Document.inputEncoding and Document.characterSet are doing some kind of
+                normalization on the encoding string starting with FF24.
+            </action>
+            <action type="update" dev="rbri">
+                Upgrade Apache commons-lang to 3.2.1.
+            </action>
+            <action type="fix" dev="rbri">
+                JavaScript: Window.opener is settable from javascript (FF24).
+            </action>
+            <action type="fix" dev="rbri">
+                JavaScript: Node.attributes is no longer supported (since FF22).
+            </action>
+            <action type="fix" dev="rbri">
+                JavaScript: XMLHttpRequest event processing fixed for FF24.
+            </action>
+            <action type="fix" dev="rbri">
+                Return value fixed for element.height and element.width when element is not attached to the page.
+            </action>
+            <action type="add" dev="rbri">
+                JavaScript: String.contains() added for FF18 and later.
+            </action>
+            <action type="fix" dev="rbri">
+                Return value fixed for element.height and element.width when element is not attached to the page.
+            </action>
+            <action type="fix" dev="rbri">
+                Element.currentStyle returns null for elements not attached to the page.
+            </action>
+            <action type="update" dev="rbri">
+                Upgrade commons-codec to 1.9.
+            </action>
+            <action type="fix" dev="rbri" due-to="Frank Danek">
+                Some more tests converted into WebDriverTestCase.
+            </action>
+            <action type="fix" dev="rbri" due-to="Frank Danek">
+                Improved HTML parsing to be more compatible with real browsers.
+            </action>
+            <action type="fix" dev="rbri" due-to="Frank Danek">
+                JavaScript: Processing of events for checkbox, radiobutton and select fixed.
+            </action>
+            <action type="fix" dev="rbri" due-to="Frank Danek">
+                JavaScript: namespaceURI returns the correct value for html elements.
+            </action>
+            <action type="fix" dev="asashour" issue="1563">
+                JavaScript: fix parseInt() when the value has a leading 0.
+            </action>
+            <action type="add" dev="asashour" issue="1536">
+                JavaScript: node and window.addEventListener() and .removeEventListener() are supported starting IE 9.
+            </action>
+            <action type="fix" dev="rbri" due-to="Frank Danek">
+                JavaScript: XMLDocument.firstChild() is now enabled to support more nodes at the
+                root level like ProcessingInstruction, Comment.
+            </action>
+            <action type="fix" dev="rbri" due-to="Frank Danek">
+                JavaScript: DomCharacterData.deleteData no longer wipes the string when called with an invalid
+                offset. Also the error handling is fixed.
+            </action>
+            <action type="fix" dev="rbri" issue="1245">
+                Use the same accept headers as browsers do.
+            </action>
+            <action type="fix" dev="rbri" issue="1530">
+                Possible dead lock in CSSStyleDeclaration fixed.
+            </action>
+            <action type="fix" dev="rbri" issue="1558">
+                JavaScript: Setting the value property of a select element does not trigger
+                the onfocus event handler.
+            </action>
+            <action type="fix" dev="rbri" issue="1560">
+                JavaScript: Fixed enctype form property default value.
+            </action>
+            <action type="fix" dev="rbri">
+                JavaScript: location.hash returns '#' in ie mode if the location url ends with '#'
+                (e.g. http://localhost/something/#).
+            </action>
+            <action type="fix" dev="asashour">
+                CSS: correct behavior of setting a style value to null.
+            </action>
+            <action type="fix" dev="asashour">
+                WebClient: .closeAllWindows() to delete all temporary files.
+            </action>
+            <action type="add" dev="asashour">
+                JavaScript: add missing MessageEvent properties.
+            </action>
+            <action type="fix" dev="asashour">
+                JavaScript: fix window.postMessage() to verify protocol, port and hostname.
+            </action>
+            <action type="fix" dev="rbri">
+                JavaScript: XMLHttpRequest CORS handling fixed, some new tests added and implementation fixed.
+            </action>
+            <action type="fix" dev="rbri">
+                JavaScript: Simplified/fixed implementation of the onReadyStateChange handler call.
+            </action>
+            <action type="fix" dev="rbri">
+                JavaScript: XMLHttpRequest status and statusText throws an exception in IE8 depending
+                on the state of the request.
+            </action>
+            <action type="fix" dev="rbri">
+                JavaScript: XMLHttpRequest property 'withCredentials' is not setable in sync mode (browsers specific).
+            </action>
+            <action type="fix" dev="rbri">
+                JavaScript: XMLHttpRequest property 'withCredentials' is not available in IE8.
+            </action>
+            <action type="fix" dev="asashour" issue="1553">
+                JavaScript: element.setAttributeNode() applies to XML as well.
+            </action>
+            <action type="fix" dev="rbri">
+                JavaScript: HTMLElement.insertAdjacentHTML() is available in FF since version 8.
+            </action>
+            <action type="add" dev="rbri">
+                JavaScript: Embed now supports the width and height property.
+            </action>
+            <action type="fix" dev="rbri" issue="1551">
+                JavaScript: send the correct Referer header when changing the location property.
+            </action>
+            <action type="fix" dev="asashour">
+                SSL: use default algorithm for fetching the KeyManagerFactory.
+            </action>
+            <action type="remove" dev="asashour">
+                BrowserVersion: remove deprecated FIREFOX_3_6, FIREFOX_10, CHROME_16, INTERNET_EXPLORER_6
+                and INTERNET_EXPLORER_7.
+            </action>
+            <action type="remove" dev="asashour">
+                HtmlElement: remove deprecated getElementById() and .hasHtmlElementWithId(),
+                and remove UrlUtils.encodeUrl().
+            </action>
+        </release>
+        <release version="2.13" date="Oct 11, 2013" description="Bugfixes">
+            <action type="update" dev="asashour" issue="1541">
+                HtmlImage: close imageReader in finalize().
+            </action>
+            <action type="update" dev="mguillem">
+                Upgrade NekoHtml to 1.9.19.
+            </action>
+            <action type="update" dev="rbri">
+                CSS: cssparser updated to 0.9.11.
+            </action>
+            <action type="fix" dev="mguillem">
+                Fixed wrong scripting scope assignment when handling attachments.
+            </action>
+            <action type="add" dev="asashour" issue="1499">
+                JavaScript: TextRange: add getBookmark() and moveToBookmark().
+            </action>
+            <action type="fix" dev="rbri">
+                JavaScript: .outerHTML don't check for correct tag closing in FF mode.
+            </action>
+            <action type="fix" dev="asashour" issue="1502">
+                IEConditionalCompilationScriptPreProcessor fix when evaluated to false.
+            </action>
+            <action type="add" dev="asashour" issue="1538">
+                JavaScript: add SVGSVGElement.createSVGRect().
+            </action>
+            <action type="fix" dev="asashour" issue="1548">
+                JavaScript: .innerHTML to correctly process nested SVG elements.
+            </action>
+            <action type="fix" dev="rbri">
+                Date.toUTCString and Date.toGMTString now returns the correct format in IE mode.
+            </action>
+            <action type="fix" dev="rbri">
+                Date.toLocaleTimeString fixed in IE8 mode.
+            </action>
+            <action type="fix" dev="rbri" issue="1524">
+                Some debug log output added if HTMLDocument.canAlreadyBeParsed(String) returns false.
+            </action>
+            <action type="update" dev="asashour">
+                Deprecate KeyDataPair.
+            </action>
+            <action type="fix" dev="asashour" issue="1511">
+                JavaScript: array.sort() to use Arrays.LegacyMergeSort with Java 7.
+            </action>
+            <action type="add" dev="mguillem">
+                JavaScript: support click method on any element for FF10+ too.
+            </action>
+            <action type="add" dev="asashour" issue="1539">
+                JavaScript: window.localStorage and .sessionStorage are supported in Chrome.
+            </action>
+            <action type="add" dev="asashour" issue="1545">
+                JavaScript: node and window.addEventListener() and .removeEventListener() are supported in Chrome.
+            </action>
+            <action type="fix" dev="rbri">
+                CSS: Support selectors with more than one pseudo element (like '#list li:not(#item_1):not(#item_3)').
+                This was a problem with CSSParser and is fixed in version 0.9.11.
+            </action>
             <action type="fix" dev="asashour">
                 JavaScript: HTMLStyleElement.type is writable.
             </action>
@@ -15,13 +232,10 @@
                 JavaScript: Missing setter for element.outerHTML in FF17 fixed.
             </action>
             <action type="update" dev="asashour">
-                Upgrade Apache HttpClient to 4.3.
+                Upgrade Apache HttpClient to 4.3.1.
             </action>
             <action type="update" dev="asashour">
                 KeyDataPair: deprecate getContentType().
-            </action>
-            <action type="update" dev="rbri">
-                CSS: cssparser updated to 0.9.10.
             </action>
             <action type="fix" dev="mguillem" issue="1542">
                 JavaScript: fixed ClassCastException on TypedArray creation with start offset specified.

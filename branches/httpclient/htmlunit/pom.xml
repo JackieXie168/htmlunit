@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.sourceforge.htmlunit</groupId>
     <artifactId>htmlunit</artifactId>
-    <version>2.13-SNAPSHOT</version>
+    <version>2.14-SNAPSHOT</version>
     <name>HtmlUnit</name>
     <organization>
         <name>Gargoyle Software Inc.</name>
@@ -34,7 +34,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>2.10</version>
+                <version>2.11</version>
                 <configuration>
                     <configLocation>checkstyle.xml</configLocation>
                     <suppressionsLocation>checkstyle_suppressions.xml</suppressionsLocation>
@@ -749,7 +749,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.1</version>
+            <version>3.2.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
@@ -771,12 +771,12 @@
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-            <version>1.8</version>
+            <version>1.9</version>
         </dependency>
         <dependency>
             <groupId>net.sourceforge.htmlunit</groupId>
             <artifactId>htmlunit-core-js</artifactId>
-            <version>2.13</version>
+            <version>2.14-SNAPSHOT</version>
         </dependency>
         <!-- This is an indirect dependency, used by Xalan and NekoHtml -->
         <dependency>
@@ -798,7 +798,7 @@
         <dependency>
             <groupId>net.sourceforge.cssparser</groupId>
             <artifactId>cssparser</artifactId>
-            <version>0.9.10</version>
+            <version>0.9.13-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
@@ -813,7 +813,7 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-websocket</artifactId>
-            <version>8.1.12.v20130726</version>
+            <version>8.1.14.v20131031</version>
         </dependency>
         <!-- Test dependencies. -->
         <dependency>
@@ -831,7 +831,7 @@
         <dependency>
             <groupId>org.easymock</groupId>
             <artifactId>easymock</artifactId>
-            <version>3.0</version>
+            <version>3.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -849,33 +849,33 @@
         <dependency>
             <groupId>org.mortbay.jetty</groupId>
             <artifactId>jetty-maven-plugin</artifactId>
-            <version>8.1.12.v20130726</version>
+            <version>8.1.14.v20131031</version>
             <scope>test</scope>
         </dependency>
         <!-- The presence of slf4j on the classpath during the unit tests triggers correct logging in Jetty. -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.6.1</version>
+            <version>1.7.5</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-            <version>1.6.1</version>
+            <version>1.7.5</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>jfree</groupId>
             <artifactId>jfreechart</artifactId>
-            <version>1.0.12</version>
+            <version>1.0.13</version>
             <scope>test</scope>
         </dependency>
         <!-- WebDriver -->
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-htmlunit-driver</artifactId>
-            <version>2.35.0</version>
+            <version>2.39.0</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -887,25 +887,25 @@
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-ie-driver</artifactId>
-            <version>2.35.0</version>
+            <version>2.39.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-firefox-driver</artifactId>
-            <version>2.35.0</version>
+            <version>2.39.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-chrome-driver</artifactId>
-            <version>2.35.0</version>
+            <version>2.39.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.tmatesoft.svnkit</groupId>
             <artifactId>svnkit</artifactId>
-            <version>1.7.6</version>
+            <version>1.8.2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
