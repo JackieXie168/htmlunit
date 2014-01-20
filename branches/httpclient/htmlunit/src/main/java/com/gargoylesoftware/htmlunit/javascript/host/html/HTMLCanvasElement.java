@@ -16,6 +16,7 @@ package com.gargoylesoftware.htmlunit.javascript.host.html;
 
 import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.CHROME;
 import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.FF;
+import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.IE;
 
 import com.gargoylesoftware.htmlunit.html.HtmlCanvas;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxClass;
@@ -24,6 +25,7 @@ import com.gargoylesoftware.htmlunit.javascript.configuration.JsxGetter;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxSetter;
 import com.gargoylesoftware.htmlunit.javascript.configuration.WebBrowser;
 import com.gargoylesoftware.htmlunit.javascript.host.canvas.CanvasRenderingContext2D;
+import com.gargoylesoftware.htmlunit.javascript.host.css.ComputedCSSStyleDeclaration;
 
 /**
  * A JavaScript object for {@link HtmlCanvas}.
@@ -31,8 +33,10 @@ import com.gargoylesoftware.htmlunit.javascript.host.canvas.CanvasRenderingConte
  * @version $Revision$
  * @author Ahmed Ashour
  * @author Ronald Brill
+ * @author Frank Danek
  */
-@JsxClass(domClasses = HtmlCanvas.class, browsers = { @WebBrowser(FF), @WebBrowser(CHROME) })
+@JsxClass(domClass = HtmlCanvas.class, browsers = { @WebBrowser(FF), @WebBrowser(CHROME),
+        @WebBrowser(value = IE, minVersion = 11) })
 public class HTMLCanvasElement extends HTMLElement {
 
     /**
@@ -42,7 +46,8 @@ public class HTMLCanvasElement extends HTMLElement {
     @Override
     @JsxGetter
     public int getWidth() {
-        return getCurrentStyle().getCalculatedWidth(false, false);
+        final ComputedCSSStyleDeclaration style = getWindow().getComputedStyle(this, null);
+        return style.getCalculatedWidth(false, false);
     }
 
     /**
@@ -61,7 +66,8 @@ public class HTMLCanvasElement extends HTMLElement {
     @Override
     @JsxGetter
     public int getHeight() {
-        return getCurrentStyle().getCalculatedHeight(false, false);
+        final ComputedCSSStyleDeclaration style = getWindow().getComputedStyle(this, null);
+        return style.getCalculatedHeight(false, false);
     }
 
     /**
@@ -102,14 +108,5 @@ public class HTMLCanvasElement extends HTMLElement {
             + "oAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
             + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
             + "AAAAAAAAAAAAAAAAAAAAAAAAAAAOA1v9QAATX68/0AAAAASUVORK5CYII=";
-    }
-
-    /**
-     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
-     * {@inheritDoc}
-    */
-    @Override
-    public String getDefaultStyleDisplay() {
-        return "inline";
     }
 }

@@ -14,23 +14,15 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.configuration;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.WeakHashMap;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.javascript.NamedNodeMap;
 import com.gargoylesoftware.htmlunit.javascript.SimpleScriptable;
 import com.gargoylesoftware.htmlunit.javascript.host.ActiveXObject;
 import com.gargoylesoftware.htmlunit.javascript.host.Attr;
+import com.gargoylesoftware.htmlunit.javascript.host.BeforeUnloadEvent;
 import com.gargoylesoftware.htmlunit.javascript.host.BoxObject;
 import com.gargoylesoftware.htmlunit.javascript.host.CDATASection;
 import com.gargoylesoftware.htmlunit.javascript.host.CharacterDataImpl;
@@ -64,9 +56,10 @@ import com.gargoylesoftware.htmlunit.javascript.host.Navigator;
 import com.gargoylesoftware.htmlunit.javascript.host.Node;
 import com.gargoylesoftware.htmlunit.javascript.host.NodeFilter;
 import com.gargoylesoftware.htmlunit.javascript.host.NodeList;
-import com.gargoylesoftware.htmlunit.javascript.host.OfflineResourceList;
+import com.gargoylesoftware.htmlunit.javascript.host.ApplicationCache;
 import com.gargoylesoftware.htmlunit.javascript.host.Plugin;
 import com.gargoylesoftware.htmlunit.javascript.host.PluginArray;
+import com.gargoylesoftware.htmlunit.javascript.host.PointerEvent;
 import com.gargoylesoftware.htmlunit.javascript.host.Popup;
 import com.gargoylesoftware.htmlunit.javascript.host.ProcessingInstruction;
 import com.gargoylesoftware.htmlunit.javascript.host.Range;
@@ -130,13 +123,17 @@ import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLBGSoundElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLBRElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLBaseElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLBaseFontElement;
+import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLBlockElement;
+import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLBlockQuoteElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLBodyElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLButtonElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLCanvasElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLCollection;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLCollectionTags;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLDListElement;
-import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLDelElement;
+import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLDataListElement;
+import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLDefinitionDescriptionElement;
+import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLDefinitionTermElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLDirectoryElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLDivElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLDocument;
@@ -153,43 +150,52 @@ import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLHeadingElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLHtmlElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLIFrameElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLImageElement;
+import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLInlineQuotationElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLInputElement;
-import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLInsElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLIsIndexElement;
+import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLKeygenElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLLIElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLLabelElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLLegendElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLLinkElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLListElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLMapElement;
+import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLMarqueeElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLMediaElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLMenuElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLMetaElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLMeterElement;
+import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLModElement;
+import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLNextIdElement;
+import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLNoShowElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLOListElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLObjectElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLOptGroupElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLOptionElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLOptionsCollection;
+import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLOutputElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLParagraphElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLParamElement;
+import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLPhraseElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLPreElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLProgressElement;
-import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLQuoteElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLScriptElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLSelectElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLSourceElement;
-import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLSpacerElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLSpanElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLStyleElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLTableCaptionElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLTableCellElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLTableColElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLTableComponent;
+import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLTableDataCellElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLTableElement;
+import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLTableHeaderCellElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLTableRowElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLTableSectionElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLTextAreaElement;
+import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLTextElement;
+import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLTimeElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLTitleElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLUListElement;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLUnknownElement;
@@ -247,6 +253,7 @@ import com.gargoylesoftware.htmlunit.javascript.host.svg.SVGPatternElement;
 import com.gargoylesoftware.htmlunit.javascript.host.svg.SVGPolygonElement;
 import com.gargoylesoftware.htmlunit.javascript.host.svg.SVGPolylineElement;
 import com.gargoylesoftware.htmlunit.javascript.host.svg.SVGRadialGradientElement;
+import com.gargoylesoftware.htmlunit.javascript.host.svg.SVGRect;
 import com.gargoylesoftware.htmlunit.javascript.host.svg.SVGRectElement;
 import com.gargoylesoftware.htmlunit.javascript.host.svg.SVGSVGElement;
 import com.gargoylesoftware.htmlunit.javascript.host.svg.SVGScriptElement;
@@ -260,8 +267,7 @@ import com.gargoylesoftware.htmlunit.javascript.host.svg.SVGTextElement;
 import com.gargoylesoftware.htmlunit.javascript.host.svg.SVGTextPathElement;
 import com.gargoylesoftware.htmlunit.javascript.host.svg.SVGTitleElement;
 import com.gargoylesoftware.htmlunit.javascript.host.svg.SVGUseElement;
-import com.gargoylesoftware.htmlunit.javascript.host.xml.XMLAttr;
-import com.gargoylesoftware.htmlunit.javascript.host.xml.XMLDOMParseError;
+import com.gargoylesoftware.htmlunit.javascript.host.svg.SVGViewElement;
 import com.gargoylesoftware.htmlunit.javascript.host.xml.XMLDocument;
 import com.gargoylesoftware.htmlunit.javascript.host.xml.XMLHttpRequest;
 import com.gargoylesoftware.htmlunit.javascript.host.xml.XMLSerializer;
@@ -273,15 +279,16 @@ import com.gargoylesoftware.htmlunit.javascript.host.xml.XMLSerializer;
  * @author <a href="mailto:mbowler@GargoyleSoftware.com">Mike Bowler</a>
  * @author Chris Erskine
  * @author Ahmed Ashour
+ * @author Ronald Brill
+ * @author Frank Danek
  */
-public final class JavaScriptConfiguration {
-
-    private static final Log LOG = LogFactory.getLog(JavaScriptConfiguration.class);
+public final class JavaScriptConfiguration extends AbstractJavaScriptConfiguration {
 
     @SuppressWarnings("unchecked")
     static final Class<? extends SimpleScriptable>[] CLASSES_ = new Class[] {
         ArrayBuffer.class, ArrayBufferView.class, ArrayBufferViewBase.class,
-        Attr.class, ActiveXObject.class, BoxObject.class, CDATASection.class, ClipboardData.class,
+        Attr.class, ActiveXObject.class, ApplicationCache.class,
+        BeforeUnloadEvent.class, BoxObject.class, CDATASection.class, ClipboardData.class,
         CSSCharsetRule.class, CSSFontFaceRule.class, CSSImportRule.class, CSSMediaRule.class, CSSPrimitiveValue.class,
         CSSRule.class,
         CSSRuleList.class, CSSStyleDeclaration.class, CSSStyleRule.class, CSSStyleSheet.class, CSSValue.class,
@@ -291,32 +298,50 @@ public final class JavaScriptConfiguration {
         DOMTokenList.class, Document.class, DocumentFragment.class,
         DocumentType.class, Element.class, Enumerator.class, Event.class, EventNode.class, External.class,
         Float32Array.class, Float64Array.class,
-        FormChild.class, FormField.class, Geolocation.class, History.class,
+        FormChild.class, FormField.class, Geolocation.class,
+        HashChangeEvent.class, History.class,
         HTMLAnchorElement.class, HTMLAppletElement.class, HTMLAreaElement.class, HTMLAudioElement.class,
-        HTMLBRElement.class, HTMLBaseElement.class, HTMLBaseFontElement.class, HTMLBGSoundElement.class,
-        HTMLBodyElement.class, HTMLButtonElement.class, HTMLCanvasElement.class, HTMLCollection.class,
-        HTMLCollectionTags.class, HTMLDListElement.class, HTMLDelElement.class, HTMLDirectoryElement.class,
+        HTMLBGSoundElement.class,
+        HTMLBRElement.class, HTMLBaseElement.class, HTMLBaseFontElement.class,
+        HTMLBlockElement.class,
+        HTMLBlockQuoteElement.class, HTMLBodyElement.class, HTMLButtonElement.class, HTMLCanvasElement.class,
+        HTMLCollection.class, HTMLCollectionTags.class,
+        HTMLDataListElement.class,
+        HTMLDefinitionDescriptionElement.class, HTMLDefinitionTermElement.class,
+        HTMLDListElement.class,
+        HTMLDirectoryElement.class,
         HTMLDivElement.class, HTMLDocument.class, HTMLElement.class, HTMLEmbedElement.class, HTMLFieldSetElement.class,
         HTMLFontElement.class, HTMLFormElement.class, HTMLFrameElement.class, HTMLFrameSetElement.class,
         HTMLHRElement.class, HTMLHeadElement.class, HTMLHeadingElement.class, HTMLHtmlElement.class,
-        HTMLIFrameElement.class, HTMLImageElement.class, HTMLInputElement.class, HTMLInsElement.class,
-        HTMLIsIndexElement.class, HTMLLIElement.class, HTMLLabelElement.class, HTMLLegendElement.class,
-        HTMLLinkElement.class, HTMLListElement.class, HTMLMapElement.class,
+        HTMLIFrameElement.class, HTMLImageElement.class, HTMLInlineQuotationElement.class, HTMLInputElement.class,
+        HTMLIsIndexElement.class,
+        HTMLKeygenElement.class,
+        HTMLLIElement.class, HTMLLabelElement.class,
+        HTMLLegendElement.class, HTMLLinkElement.class, HTMLListElement.class, HTMLMapElement.class,
+        HTMLMarqueeElement.class,
         HTMLMediaElement.class, HTMLMenuElement.class, HTMLMetaElement.class, HTMLMeterElement.class,
+        HTMLModElement.class,
+        HTMLNoShowElement.class,
+        HTMLNextIdElement.class,
         HTMLOListElement.class, HTMLObjectElement.class, HTMLOptGroupElement.class,
-        HTMLOptionElement.class, HTMLOptionsCollection.class, HTMLParagraphElement.class, HTMLParamElement.class,
-        HTMLPreElement.class, HTMLProgressElement.class, HTMLQuoteElement.class, HTMLScriptElement.class,
-        HTMLSelectElement.class, HTMLSourceElement.class, HTMLSpacerElement.class, HTMLSpanElement.class,
+        HTMLOptionElement.class, HTMLOptionsCollection.class, HTMLOutputElement.class,
+        HTMLParagraphElement.class, HTMLParamElement.class,
+        HTMLPhraseElement.class,
+        HTMLPreElement.class, HTMLProgressElement.class, HTMLScriptElement.class,
+        HTMLSelectElement.class, HTMLSourceElement.class, HTMLSpanElement.class,
         HTMLStyleElement.class, HTMLTableCaptionElement.class, HTMLTableCellElement.class, HTMLTableColElement.class,
-        HTMLTableComponent.class, HTMLTableElement.class, HTMLTableRowElement.class, HTMLTableSectionElement.class,
-        HTMLTextAreaElement.class, HTMLTitleElement.class, HTMLUListElement.class, HTMLUnknownElement.class,
-        HTMLVideoElement.class, HTMLWBRElement.class, HashChangeEvent.class, History.class,
+        HTMLTableComponent.class, HTMLTableDataCellElement.class, HTMLTableElement.class,
+        HTMLTableHeaderCellElement.class, HTMLTableRowElement.class, HTMLTableSectionElement.class,
+        HTMLTextElement.class, HTMLTextAreaElement.class, HTMLTimeElement.class, HTMLTitleElement.class,
+        HTMLUListElement.class, HTMLUnknownElement.class,
+        HTMLWBRElement.class,
+        HTMLVideoElement.class,
         Int16Array.class, Int32Array.class, Int8Array.class,
         KeyboardEvent.class,
         Location.class, MediaList.class, MessageEvent.class, MimeType.class, MimeTypeArray.class, MouseEvent.class,
         MutationEvent.class, NamedNodeMap.class, Namespace.class, NamespaceCollection.class, Navigator.class,
-        Node.class, NodeFilter.class, NodeList.class, OfflineResourceList.class,
-        Plugin.class, PluginArray.class, Popup.class, Position.class, ProcessingInstruction.class,
+        Node.class, NodeFilter.class, NodeList.class,
+        Plugin.class, PluginArray.class, PointerEvent.class, Popup.class, Position.class, ProcessingInstruction.class,
         Range.class, RowContainer.class,
         SVGAElement.class, SVGAltGlyphElement.class, SVGAngle.class, SVGAnimateElement.class,
         SVGAnimateMotionElement.class, SVGAnimateTransformElement.class, SVGCircleElement.class,
@@ -332,32 +357,29 @@ public final class JavaScriptConfiguration {
         SVGGElement.class, SVGImageElement.class, SVGLineElement.class, SVGLinearGradientElement.class,
         SVGMarkerElement.class, SVGMaskElement.class, SVGMatrix.class, SVGMetadataElement.class, SVGMpathElement.class,
         SVGPathElement.class, SVGPatternElement.class, SVGPolygonElement.class, SVGPolylineElement.class,
-        SVGRadialGradientElement.class, SVGRectElement.class, SVGSVGElement.class, SVGScriptElement.class,
+        SVGRadialGradientElement.class,
+        SVGRect.class, SVGRectElement.class,
+        SVGSVGElement.class, SVGScriptElement.class,
         SVGSetElement.class, SVGStopElement.class, SVGStyleElement.class, SVGSwitchElement.class,
         SVGSymbolElement.class, SVGTSpanElement.class, SVGTextElement.class, SVGTextPathElement.class,
-        SVGTitleElement.class, SVGUseElement.class, Screen.class, Selection.class, SimpleArray.class,
+        SVGTitleElement.class, SVGUseElement.class, SVGViewElement.class,
+        Screen.class, Selection.class, SimpleArray.class,
         StaticNodeList.class, Storage.class, StyleSheetList.class, Text.class, TextRange.class, TreeWalker.class,
         UIEvent.class, Uint16Array.class, Uint32Array.class, Uint8Array.class, Uint8ClampedArray.class,
-        WebSocket.class, Window.class, XMLAttr.class, XMLDocument.class, XMLDOMParseError.class,
+        WebSocket.class, Window.class, XMLDocument.class,
         XMLHttpRequest.class, XMLSerializer.class, XPathEvaluator.class, XPathNSResolver.class, XPathResult.class,
         XSLTProcessor.class, XSLTemplate.class};
 
     /** Cache of browser versions and their corresponding JavaScript configurations. */
-    private static final Map<BrowserVersion, JavaScriptConfiguration> ConfigurationMap_ =
+    private static final Map<BrowserVersion, JavaScriptConfiguration> CONFIGURATION_MAP_ =
         new WeakHashMap<BrowserVersion, JavaScriptConfiguration>();
-
-    private static final Map<String, String> ClassnameMap_ = new HashMap<String, String>();
-
-    private Map<Class<?>, Class<? extends SimpleScriptable>> domJavaScriptMap_;
-
-    private final Map<String, ClassConfiguration> configuration_;
 
     /**
      * Constructor is only called from {@link #getInstance(BrowserVersion)} which is synchronized.
      * @param browser the browser version to use
      */
-    private JavaScriptConfiguration(final BrowserVersion browser) {
-        configuration_ = buildUsageMap(browser);
+    protected JavaScriptConfiguration(final BrowserVersion browser) {
+        super(browser);
     }
 
     /**
@@ -370,201 +392,17 @@ public final class JavaScriptConfiguration {
         if (browserVersion == null) {
             throw new IllegalStateException("BrowserVersion must be defined");
         }
-        JavaScriptConfiguration configuration = ConfigurationMap_.get(browserVersion);
+        JavaScriptConfiguration configuration = CONFIGURATION_MAP_.get(browserVersion);
 
         if (configuration == null) {
             configuration = new JavaScriptConfiguration(browserVersion);
-            ConfigurationMap_.put(browserVersion, configuration);
+            CONFIGURATION_MAP_.put(browserVersion, configuration);
         }
         return configuration;
     }
 
-    /**
-     * Returns the configuration that has all entries. No constraints are put on the returned entries.
-     *
-     * @return the instance containing all entries from the configuration file
-     */
-    static JavaScriptConfiguration getAllEntries() {
-        final JavaScriptConfiguration configuration = new JavaScriptConfiguration(null);
-        return configuration;
-    }
-
-    /**
-     * Gets all the configurations.
-     * @return the class configurations
-     */
-    public Iterable<ClassConfiguration> getAll() {
-        return configuration_.values();
-    }
-
-    private Map<String, ClassConfiguration> buildUsageMap(final BrowserVersion browser) {
-        final Map<String, ClassConfiguration> classMap = new HashMap<String, ClassConfiguration>(CLASSES_.length);
-
-        for (final Class<? extends SimpleScriptable> klass : CLASSES_) {
-            final ClassConfiguration config = processClass(klass, browser);
-            if (config != null) {
-                classMap.put(config.getHostClass().getSimpleName(), config);
-            }
-        }
-        return Collections.unmodifiableMap(classMap);
-    }
-
-    private ClassConfiguration processClass(final Class<? extends SimpleScriptable> klass,
-            final BrowserVersion browser) {
-        if (browser != null) {
-            final JsxClass jsxClass = klass.getAnnotation(JsxClass.class);
-            final String expectedBrowserName;
-            if (browser.isIE()) {
-                expectedBrowserName = "IE";
-            }
-            else if (browser.isFirefox()) {
-                expectedBrowserName = "FF";
-            }
-            else {
-                expectedBrowserName = "CHROME";
-            }
-            final float browserVersionNumeric = browser.getBrowserVersionNumeric();
-            if (jsxClass != null && isSupported(jsxClass.browsers(), expectedBrowserName, browserVersionNumeric)) {
-                final String hostClassName = klass.getName();
-
-                final Class<?>[] domClasses = jsxClass.domClasses();
-
-                final boolean isJsObject = jsxClass.isJSObject();
-                final ClassConfiguration classConfiguration = new ClassConfiguration(klass, domClasses, isJsObject);
-
-                final String simpleClassName = hostClassName.substring(hostClassName.lastIndexOf('.') + 1);
-                ClassnameMap_.put(hostClassName, simpleClassName);
-                final Map<String, Method> allGetters = new HashMap<String, Method>();
-                final Map<String, Method> allSetters = new HashMap<String, Method>();
-                for (final Method method : classConfiguration.getHostClass().getDeclaredMethods()) {
-                    for (final Annotation annotation : method.getAnnotations()) {
-                        if (annotation instanceof JsxGetter) {
-                            final JsxGetter jsxGetter = (JsxGetter) annotation;
-                            if (isSupported(jsxGetter.value(), expectedBrowserName, browserVersionNumeric)) {
-                                String property;
-                                if (jsxGetter.propertyName().isEmpty()) {
-                                    property = method.getName().substring(3);
-                                    property = Character.toLowerCase(property.charAt(0)) + property.substring(1);
-                                }
-                                else {
-                                    property = jsxGetter.propertyName();
-                                }
-                                allGetters.put(property, method);
-                            }
-                        }
-                        else if (annotation instanceof JsxSetter) {
-                            final JsxSetter jsxSetter = (JsxSetter) annotation;
-                            if (isSupported(jsxSetter.value(), expectedBrowserName, browserVersionNumeric)) {
-                                String property;
-                                if (jsxSetter.propertyName().isEmpty()) {
-                                    property = method.getName().substring(3);
-                                    property = Character.toLowerCase(property.charAt(0)) + property.substring(1);
-                                }
-                                else {
-                                    property = jsxSetter.propertyName();
-                                }
-                                allSetters.put(property, method);
-                            }
-                        }
-                        else if (annotation instanceof JsxFunction) {
-                            if (isSupported(((JsxFunction) annotation).value(),
-                                    expectedBrowserName, browserVersionNumeric)) {
-                                classConfiguration.addFunction(method);
-                            }
-                        }
-                        else if (annotation instanceof JsxConstructor) {
-                            classConfiguration.setJSConstructor(method);
-                        }
-                    }
-                }
-                for (final Field field : classConfiguration.getHostClass().getDeclaredFields()) {
-                    final JsxConstant jsxConstant = field.getAnnotation(JsxConstant.class);
-                    if (jsxConstant != null
-                            && isSupported(jsxConstant.value(), expectedBrowserName, browserVersionNumeric)) {
-                        classConfiguration.addConstant(field.getName());
-                    }
-                }
-                for (final Entry<String, Method> getterEntry : allGetters.entrySet()) {
-                    final String property = getterEntry.getKey();
-                    classConfiguration.addProperty(property,
-                            getterEntry.getValue(), allSetters.get(property));
-                }
-                return classConfiguration;
-            }
-        }
-        return null;
-    }
-
-    private static boolean isSupported(final WebBrowser[] browsers, final String expectedBrowserName,
-            final float expectedVersionNumeric) {
-        for (final WebBrowser browser : browsers) {
-            if (browser.value().name().equals(expectedBrowserName)
-                    && browser.minVersion() <= expectedVersionNumeric
-                    && browser.maxVersion() >= expectedVersionNumeric) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Gets the class configuration for the supplied JavaScript class name.
-     * @param hostClassName the js class name
-     * @return the class configuration for the supplied JavaScript class name
-     */
-    public ClassConfiguration getClassConfiguration(final String hostClassName) {
-        return configuration_.get(hostClassName);
-    }
-
-    /**
-     * Returns the classname that the given class implements. If the class is
-     * the input class, then the name is extracted from the type that the Input class
-     * is masquerading as.
-     * FIXME - Implement the Input class processing
-     * @param clazz
-     * @return the classname
-     */
-    String getClassnameForClass(final Class<?> clazz) {
-        final String name = ClassnameMap_.get(clazz.getName());
-        if (name == null) {
-            throw new IllegalStateException("Did not find the mapping of the class to the classname for "
-                + clazz.getName());
-        }
-        return name;
-    }
-
-    /**
-     * Returns an immutable map containing the DOM to JavaScript mappings. Keys are
-     * java classes for the various DOM classes (e.g. HtmlInput.class) and the values
-     * are the JavaScript class names (e.g. "HTMLAnchorElement").
-     * @return the mappings
-     */
-    public Map<Class<?>, Class<? extends SimpleScriptable>>
-    getDomJavaScriptMapping() {
-        if (domJavaScriptMap_ != null) {
-            return domJavaScriptMap_;
-        }
-
-        final Map<Class<?>, Class<? extends SimpleScriptable>> map =
-            new HashMap<Class<?>, Class<? extends SimpleScriptable>>();
-
-        for (String hostClassName : configuration_.keySet()) {
-            ClassConfiguration classConfig = getClassConfiguration(hostClassName);
-            for (final Class<?> domClass : classConfig.getDomClasses()) {
-                // preload and validate that the class exists
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Mapping " + domClass.getName() + " to " + hostClassName);
-                }
-                while (!classConfig.isJsObject()) {
-                    hostClassName = classConfig.getExtendedClassName();
-                    classConfig = getClassConfiguration(hostClassName);
-                }
-                map.put(domClass, classConfig.getHostClass());
-            }
-        }
-
-        domJavaScriptMap_ = Collections.unmodifiableMap(map);
-
-        return domJavaScriptMap_;
+    @Override
+    protected Class<? extends SimpleScriptable>[] getClasses() {
+        return CLASSES_;
     }
 }

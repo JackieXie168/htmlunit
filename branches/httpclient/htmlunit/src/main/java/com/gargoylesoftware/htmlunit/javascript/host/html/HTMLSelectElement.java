@@ -14,11 +14,8 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host.html;
 
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.CSS_DISPLAY_DEFAULT;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_SELECT_ADD_SECOND_PARAM_IS_INDEX;
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_SELECT_ADD_SECOND_PARAM_IS_REQUIRED;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_SELECT_ITEM_THROWS_IF_NEGATIVE;
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_SELECT_SELECTED_INDEX_THROWS_IF_BAD;
 
 import java.util.List;
 
@@ -47,7 +44,7 @@ import com.gargoylesoftware.htmlunit.javascript.host.FormField;
  * @author Ahmed Ashour
  * @author Ronald Brill
  */
-@JsxClass(domClasses = HtmlSelect.class)
+@JsxClass(domClass = HtmlSelect.class)
 public class HTMLSelectElement extends FormField {
 
     private HTMLOptionsCollection optionsArray_;
@@ -172,9 +169,6 @@ public class HTMLSelectElement extends FormField {
             beforeOption = null;
         }
         else if (Context.getUndefinedValue().equals(beforeOptionObject)) {
-            if (getBrowserVersion().hasFeature(JS_SELECT_ADD_SECOND_PARAM_IS_REQUIRED)) {
-                throw Context.reportRuntimeError("Not enough arguments [SelectElement.add]");
-            }
             beforeOption = null;
         }
         else if (beforeOptionObject instanceof Number) {
@@ -266,11 +260,6 @@ public class HTMLSelectElement extends FormField {
     @JsxSetter
     public void setSelectedIndex(final int index) {
         final HtmlSelect htmlSelect = getHtmlSelect();
-
-        if (index != 0 && getBrowserVersion().hasFeature(JS_SELECT_SELECTED_INDEX_THROWS_IF_BAD)
-                && (index < -1 || index >= htmlSelect.getOptionSize())) {
-            throw Context.reportRuntimeError("Invalid index for select node: " + index);
-        }
 
         for (final HtmlOption itemToUnSelect : htmlSelect.getSelectedOptions()) {
             htmlSelect.setSelectedAttribute(itemToUnSelect, false);
@@ -367,7 +356,7 @@ public class HTMLSelectElement extends FormField {
      */
     @Override
     public void setValue(final String newValue) {
-        getHtmlSelect().setSelectedAttribute(newValue, true);
+        getHtmlSelect().setSelectedAttribute(newValue, true, false);
     }
 
     /**
@@ -429,17 +418,5 @@ public class HTMLSelectElement extends FormField {
         else if (getSelectedIndex() == -1) {
             setSelectedIndex(0);
         }
-    }
-
-    /**
-     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
-     * {@inheritDoc}
-    */
-    @Override
-    public String getDefaultStyleDisplay() {
-        if (getBrowserVersion().hasFeature(CSS_DISPLAY_DEFAULT)) {
-            return "inline";
-        }
-        return "inline-block";
     }
 }

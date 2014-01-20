@@ -15,9 +15,10 @@
 package com.gargoylesoftware.htmlunit.javascript.host.css;
 
 import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.FF;
+import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.IE;
 
 import com.gargoylesoftware.htmlunit.javascript.SimpleScriptable;
-import com.gargoylesoftware.htmlunit.javascript.configuration.JsxClass;
+import com.gargoylesoftware.htmlunit.javascript.configuration.JsxClasses;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxGetter;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxSetter;
 import com.gargoylesoftware.htmlunit.javascript.configuration.WebBrowser;
@@ -27,8 +28,11 @@ import com.gargoylesoftware.htmlunit.javascript.configuration.WebBrowser;
  *
  * @version $Revision$
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
-@JsxClass(isJSObject = false)
+@JsxClasses(
+        isJSObject = false
+)
 public class CSSRule extends SimpleScriptable {
 
     /**
@@ -113,7 +117,7 @@ public class CSSRule extends SimpleScriptable {
      * Returns the type of the rule.
      * @return the type of the rule.
      */
-    @JsxGetter(@WebBrowser(FF))
+    @JsxGetter({ @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public short getType() {
         return rule_.getType();
     }
@@ -123,7 +127,7 @@ public class CSSRule extends SimpleScriptable {
      * This reflects the current state of the rule and not its initial value.
      * @return the parsable textual representation of the rule.
      */
-    @JsxGetter(@WebBrowser(FF))
+    @JsxGetter({ @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public String getCssText() {
         return rule_.getCssText();
     }
@@ -132,7 +136,7 @@ public class CSSRule extends SimpleScriptable {
      * Sets the parsable textual representation of the rule.
      * @param cssText the parsable textual representation of the rule
      */
-    @JsxSetter(@WebBrowser(FF))
+    @JsxSetter({ @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public void setCssText(final String cssText) {
         rule_.setCssText(cssText);
     }
@@ -141,7 +145,7 @@ public class CSSRule extends SimpleScriptable {
      * Returns the style sheet that contains this rule.
      * @return the style sheet that contains this rule.
      */
-    @JsxGetter(@WebBrowser(FF))
+    @JsxGetter({ @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public CSSStyleSheet getParentStyleSheet() {
         return stylesheet_;
     }
@@ -151,7 +155,7 @@ public class CSSRule extends SimpleScriptable {
      * this is the containing rule. If this rule is not nested inside any other rules, this returns <code>null</code>.
      * @return the parent rule
      */
-    @JsxGetter(@WebBrowser(FF))
+    @JsxGetter({ @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public CSSRule getParentRule() {
         final org.w3c.dom.css.CSSRule parentRule = rule_.getParentRule();
         if (parentRule != null) {

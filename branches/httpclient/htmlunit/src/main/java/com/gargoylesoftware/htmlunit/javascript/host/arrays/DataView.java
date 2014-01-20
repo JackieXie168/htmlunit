@@ -16,13 +16,14 @@ package com.gargoylesoftware.htmlunit.javascript.host.arrays;
 
 import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.CHROME;
 import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.FF;
+import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.IE;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import net.sourceforge.htmlunit.corejs.javascript.Undefined;
 
-import com.gargoylesoftware.htmlunit.javascript.configuration.JsxClass;
+import com.gargoylesoftware.htmlunit.javascript.configuration.JsxClasses;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxConstructor;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxFunction;
 import com.gargoylesoftware.htmlunit.javascript.configuration.WebBrowser;
@@ -32,8 +33,12 @@ import com.gargoylesoftware.htmlunit.javascript.configuration.WebBrowser;
  *
  * @version $Revision$
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
-@JsxClass(isJSObject = false, browsers = { @WebBrowser(value = FF, minVersion = 15), @WebBrowser(CHROME) })
+@JsxClasses(
+        isJSObject = false,
+        browsers = { @WebBrowser(value = FF, minVersion = 15), @WebBrowser(CHROME),
+            @WebBrowser(value = IE, minVersion = 11) })
 public class DataView extends ArrayBufferView {
 
     /**

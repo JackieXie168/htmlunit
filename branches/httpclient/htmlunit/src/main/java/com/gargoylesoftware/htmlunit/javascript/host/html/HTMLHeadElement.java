@@ -14,16 +14,47 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host.html;
 
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_INNER_HTML_READONLY_FOR_SOME_TAGS;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_OUTER_HTML_BODY_HEAD_READONLY;
+import net.sourceforge.htmlunit.corejs.javascript.Context;
+
 import com.gargoylesoftware.htmlunit.html.HtmlHead;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxClass;
+import com.gargoylesoftware.htmlunit.javascript.configuration.JsxSetter;
 
 /**
  * The JavaScript object "HTMLHeadElement".
  *
  * @version $Revision$
  * @author Ahmed Ashour
+ * @author Ronald Brill
  */
-@JsxClass(domClasses = HtmlHead.class)
+@JsxClass(domClass = HtmlHead.class)
 public class HTMLHeadElement extends HTMLElement {
 
+    /**
+     * Overwritten to throw an exception in IE8/9.
+     * @param value the new value for replacing this node
+     */
+    @JsxSetter
+    @Override
+    public void setOuterHTML(final String value) {
+        if (getBrowserVersion().hasFeature(JS_OUTER_HTML_BODY_HEAD_READONLY)) {
+            throw Context.reportRuntimeError("outerHTML is read-only for tag 'html'");
+        }
+        super.setOuterHTML(value);
+    }
+
+    /**
+     * Overwritten to throw an exception in IE8/9.
+     * @param value the new value for the contents of this node
+     */
+    @JsxSetter
+    @Override
+    public void setInnerHTML(final Object value) {
+        if (getBrowserVersion().hasFeature(JS_INNER_HTML_READONLY_FOR_SOME_TAGS)) {
+            throw Context.reportRuntimeError("innerHTML is read-only for tag 'head'");
+        }
+        super.setInnerHTML(value);
+    }
 }

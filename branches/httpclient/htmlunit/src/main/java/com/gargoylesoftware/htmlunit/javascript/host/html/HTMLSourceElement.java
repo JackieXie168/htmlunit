@@ -16,6 +16,7 @@ package com.gargoylesoftware.htmlunit.javascript.host.html;
 
 import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.CHROME;
 import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.FF;
+import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.IE;
 
 import com.gargoylesoftware.htmlunit.html.HtmlSource;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxClass;
@@ -27,16 +28,10 @@ import com.gargoylesoftware.htmlunit.javascript.configuration.WebBrowser;
  * @version $Revision$
  * @author Ahmed Ashour
  * @author Ronald Brill
+ * @author Frank Danek
  */
-@JsxClass(domClasses = HtmlSource.class, browsers = { @WebBrowser(FF), @WebBrowser(CHROME) })
+@JsxClass(domClass = HtmlSource.class, browsers = { @WebBrowser(FF),
+        @WebBrowser(value = IE, minVersion = 11), @WebBrowser(CHROME) })
 public class HTMLSourceElement extends HTMLElement {
-
-    /**
-     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
-     * {@inheritDoc}
-    */
-    @Override
-    public String getDefaultStyleDisplay() {
-        return "inline";
-    }
+    // nothing so far
 }

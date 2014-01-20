@@ -14,8 +14,13 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host.html;
 
+import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.FF;
+
 import com.gargoylesoftware.htmlunit.html.HtmlEmbed;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxClass;
+import com.gargoylesoftware.htmlunit.javascript.configuration.JsxGetter;
+import com.gargoylesoftware.htmlunit.javascript.configuration.JsxSetter;
+import com.gargoylesoftware.htmlunit.javascript.configuration.WebBrowser;
 
 /**
  * A JavaScript object for {@link HtmlEmbed}.
@@ -24,8 +29,62 @@ import com.gargoylesoftware.htmlunit.javascript.configuration.JsxClass;
  * @author Ahmed Ashour
  * @author Ronald Brill
  */
-@JsxClass(domClasses = HtmlEmbed.class)
+@JsxClass(domClass = HtmlEmbed.class)
 public class HTMLEmbedElement extends HTMLElement {
+
+    /**
+     * Returns the value of the "align" property.
+     * @return the value of the "align" property
+     */
+    @JsxGetter(@WebBrowser(value = FF, minVersion = 17))
+    public String getAlign() {
+        return getAlign(true);
+    }
+
+    /**
+     * Sets the value of the "align" property.
+     * @param align the value of the "align" property
+     */
+    @JsxSetter(@WebBrowser(value = FF, minVersion = 17))
+    public void setAlign(final String align) {
+        setAlign(align, false);
+    }
+
+    /**
+     * Returns the value of the "height" property.
+     * @return the value of the "height" property
+     */
+    @JsxGetter(propertyName = "height")
+    public String getHeightString() {
+        return getDomNodeOrDie().getAttribute("height");
+    }
+
+    /**
+     * Sets the value of the "height" property.
+     * @param height the value of the "height" property
+     */
+    @JsxSetter(propertyName = "height")
+    public void setHeightString(final String height) {
+        getDomNodeOrDie().setAttribute("height", height);
+    }
+
+    /**
+     * Returns the value of the "width" property.
+     * @return the value of the "width" property
+     */
+    @JsxGetter(propertyName = "width")
+    public String getWidthString() {
+        return getDomNodeOrDie().getAttribute("width");
+    }
+
+    /**
+     * Sets the value of the "width" property.
+     * @param width the value of the "width" property
+     */
+    @JsxSetter(propertyName = "width")
+    public void setWidthString(final String width) {
+        getDomNodeOrDie().setAttribute("width", width);
+    }
 
     /**
      * {@inheritDoc}
@@ -33,14 +92,5 @@ public class HTMLEmbedElement extends HTMLElement {
     @Override
     protected boolean isEndTagForbidden() {
         return true;
-    }
-
-    /**
-     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
-     * {@inheritDoc}
-    */
-    @Override
-    public String getDefaultStyleDisplay() {
-        return "inline";
     }
 }

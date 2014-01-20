@@ -46,7 +46,7 @@ import com.gargoylesoftware.htmlunit.util.UrlUtils;
  * @author Daniel Gredler
  * @author Ronald Brill
  */
-@JsxClass(domClasses = HtmlAnchor.class)
+@JsxClass(domClass = HtmlAnchor.class)
 public class HTMLAnchorElement extends HTMLElement {
 
     /**
@@ -397,23 +397,8 @@ public class HTMLAnchorElement extends HTMLElement {
             return href;
         }
 
-        final int indexAnchor = href.indexOf('#');
-        final String beforeAnchor;
-        final String anchorPart;
-        if (indexAnchor == -1) {
-            beforeAnchor = href;
-            anchorPart = "";
-        }
-        else {
-            beforeAnchor = href.substring(0, indexAnchor);
-            anchorPart = href.substring(indexAnchor);
-        }
-
-        final HtmlPage htmlPage = (HtmlPage) page;
         try {
-            final String response =
-                htmlPage.getFullyQualifiedUrl(beforeAnchor).toExternalForm() + anchorPart;
-            return response;
+            return HtmlAnchor.getTargetUrl(href, (HtmlPage) page).toExternalForm();
         }
         catch (final MalformedURLException e) {
             return href;
@@ -436,14 +421,5 @@ public class HTMLAnchorElement extends HTMLElement {
     @JsxSetter(@WebBrowser(FF))
     public void setAccessKey(final String accessKey) {
         super.setAccessKey(accessKey);
-    }
-
-    /**
-     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
-     * {@inheritDoc}
-    */
-    @Override
-    public String getDefaultStyleDisplay() {
-        return "inline";
     }
 }

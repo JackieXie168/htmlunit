@@ -16,10 +16,10 @@ package com.gargoylesoftware.htmlunit.javascript.host;
 
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_DOCTYPE_ENTITIES_EMPTY_STRING;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_DOCTYPE_ENTITIES_NULL;
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_DOCTYPE_INTERNALSUBSET_EMPTY_STRING;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_DOCTYPE_NOTATIONS_EMPTY_STRING;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_DOCTYPE_NOTATIONS_NULL;
 import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.FF;
+import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.IE;
 import net.sourceforge.htmlunit.corejs.javascript.Context;
 
 import org.apache.commons.lang3.StringUtils;
@@ -35,10 +35,11 @@ import com.gargoylesoftware.htmlunit.javascript.configuration.WebBrowser;
  *
  * @version $Revision$
  * @author Ahmed Ashour
+ * @author Frank Danek
  * @see <a href="http://msdn.microsoft.com/en-us/library/ms762752.aspx">MSDN documentation</a>
  * @see <a href="http://www.xulplanet.com/references/objref/DocumentType.html">XUL Planet</a>
  */
-@JsxClass(domClasses = DomDocumentType.class)
+@JsxClass(domClass = DomDocumentType.class)
 public class DocumentType extends Node {
 
     /**
@@ -62,7 +63,7 @@ public class DocumentType extends Node {
      * Returns the publicId.
      * @return the publicId
      */
-    @JsxGetter(@WebBrowser(FF))
+    @JsxGetter({ @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public String getPublicId() {
         return ((DomDocumentType) getDomNodeOrDie()).getPublicId();
     }
@@ -71,7 +72,7 @@ public class DocumentType extends Node {
      * Returns the systemId.
      * @return the systemId
      */
-    @JsxGetter(@WebBrowser(FF))
+    @JsxGetter({ @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public String getSystemId() {
         return ((DomDocumentType) getDomNodeOrDie()).getSystemId();
     }
@@ -80,16 +81,13 @@ public class DocumentType extends Node {
      * Returns the internal subset.
      * @return the internal subset
      */
-    @JsxGetter(@WebBrowser(FF))
+    @JsxGetter({ @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public String getInternalSubset() {
         final String subset = ((DomDocumentType) getDomNodeOrDie()).getInternalSubset();
         if (StringUtils.isNotEmpty(subset)) {
             return subset;
         }
 
-        if (getBrowserVersion().hasFeature(JS_DOCTYPE_INTERNALSUBSET_EMPTY_STRING)) {
-            return "";
-        }
         return null;
     }
 

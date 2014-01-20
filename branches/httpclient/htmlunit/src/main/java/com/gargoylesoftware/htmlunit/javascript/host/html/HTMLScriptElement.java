@@ -14,7 +14,6 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host.html;
 
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.CSS_DISPLAY_DEFAULT;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_SCRIPT_ALWAYS_REEXECUTE_ON_SET_TEXT;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_SCRIPT_APPEND_CHILD_THROWS_EXCEPTION;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_SCRIPT_INSERT_BEFORE_THROWS_EXCEPTION;
@@ -39,8 +38,9 @@ import com.gargoylesoftware.htmlunit.javascript.configuration.WebBrowser;
  * @author Marc Guillemot
  * @author Ahmed Ashour
  * @author Ronald Brill
+ * @author Frank Danek
  */
-@JsxClass(domClasses = HtmlScript.class)
+@JsxClass(domClass = HtmlScript.class)
 public class HTMLScriptElement extends HTMLElement {
 
     /**
@@ -136,7 +136,7 @@ public class HTMLScriptElement extends HTMLElement {
      * Returns the event handler that fires on load.
      * @return the event handler that fires on load
      */
-    @JsxGetter(@WebBrowser(FF))
+    @JsxGetter({ @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public Object getOnload() {
         return getEventHandlerProp("onload");
     }
@@ -145,7 +145,7 @@ public class HTMLScriptElement extends HTMLElement {
      * Sets the event handler that fires on load.
      * @param handler the event handler that fires on load
      */
-    @JsxSetter(@WebBrowser(FF))
+    @JsxSetter({ @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public void setOnload(final Object handler) {
         setEventHandlerProp("onload", handler);
     }
@@ -198,17 +198,5 @@ public class HTMLScriptElement extends HTMLElement {
             throw Context.reportRuntimeError("Unexpected call to method or property access");
         }
         return super.insertBeforeImpl(args);
-    }
-
-    /**
-     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
-     * {@inheritDoc}
-    */
-    @Override
-    public String getDefaultStyleDisplay() {
-        if (getBrowserVersion().hasFeature(CSS_DISPLAY_DEFAULT)) {
-            return "none";
-        }
-        return "inline";
     }
 }

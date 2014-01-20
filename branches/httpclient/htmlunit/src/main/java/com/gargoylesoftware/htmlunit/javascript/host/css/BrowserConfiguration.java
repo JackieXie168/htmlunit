@@ -23,6 +23,7 @@ import com.gargoylesoftware.htmlunit.BrowserVersion;
  *
  * @version $Revision$
  * @author Marc Guillemot
+ * @author Frank Danek
  *
  */
 class BrowserConfiguration {
@@ -53,8 +54,24 @@ class BrowserConfiguration {
         return ff(defaultValue).startingWith(17);
     }
 
+    public static BrowserConfiguration ffBelow24(final String defaultValue) {
+        return ff(defaultValue).upTo(23);
+    }
+
+    public static BrowserConfiguration ff24up(final String defaultValue) {
+        return ff(defaultValue).startingWith(24);
+    }
+
     public static BrowserConfiguration ie8up(final String defaultValue) {
         return ie(defaultValue).startingWith(8);
+    }
+
+    public static BrowserConfiguration ieBelow11(final String defaultValue) {
+        return ie(defaultValue).upTo(10);
+    }
+
+    public static BrowserConfiguration ie11up(final String defaultValue) {
+        return ie(defaultValue).startingWith(11);
     }
 
     public static boolean isDefined(final BrowserVersion browserVersion,

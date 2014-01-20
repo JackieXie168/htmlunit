@@ -28,7 +28,7 @@ import com.gargoylesoftware.htmlunit.javascript.configuration.JsxSetter;
  * @author Ahmed Ashour
  * @author Ronald Brill
  */
-@JsxClass(domClasses = HtmlFont.class)
+@JsxClass(domClass = HtmlFont.class)
 public class HTMLFontElement extends HTMLElement {
 
     /**
@@ -83,14 +83,5 @@ public class HTMLFontElement extends HTMLElement {
     @JsxSetter
     public void setSize(final int size) {
         getDomNodeOrDie().setAttribute("size", Context.toString(size));
-    }
-
-    /**
-     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
-     * {@inheritDoc}
-    */
-    @Override
-    public String getDefaultStyleDisplay() {
-        return "inline";
     }
 }

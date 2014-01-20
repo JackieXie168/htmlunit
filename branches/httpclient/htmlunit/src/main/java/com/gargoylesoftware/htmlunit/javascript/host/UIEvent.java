@@ -15,12 +15,14 @@
 package com.gargoylesoftware.htmlunit.javascript.host;
 
 import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.FF;
+import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.IE;
 
 import com.gargoylesoftware.htmlunit.html.DomNode;
 import com.gargoylesoftware.htmlunit.javascript.SimpleScriptable;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxClass;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxFunction;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxGetter;
+import com.gargoylesoftware.htmlunit.javascript.configuration.JsxSetter;
 import com.gargoylesoftware.htmlunit.javascript.configuration.WebBrowser;
 
 /**
@@ -30,6 +32,7 @@ import com.gargoylesoftware.htmlunit.javascript.configuration.WebBrowser;
  * @version $Revision$
  * @author Daniel Gredler
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 @JsxClass
 public class UIEvent extends Event {
@@ -73,7 +76,7 @@ public class UIEvent extends Event {
      *
      * @return some detail information about the event, depending on the event type
      */
-    @JsxGetter(@WebBrowser(FF))
+    @JsxGetter({ @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public long getDetail() {
         return detail_;
     }
@@ -88,11 +91,27 @@ public class UIEvent extends Event {
     }
 
     /**
+     * @return indicates if event propagation is stopped
+     */
+    @JsxGetter
+    public boolean getCancelBubble() {
+        return super.getCancelBubble();
+    }
+
+    /**
+     * @param newValue indicates if event propagation is stopped
+     */
+    @JsxSetter
+    public void setCancelBubble(final boolean newValue) {
+        super.setCancelBubble(newValue);
+    }
+
+    /**
      * Returns the view from which the event was generated. In browsers, this is the originating window.
      *
      * @return the view from which the event was generated
      */
-    @JsxGetter(@WebBrowser(FF))
+    @JsxGetter({ @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public Object getView() {
         return getWindow();
     }
@@ -106,7 +125,7 @@ public class UIEvent extends Event {
      * @param view the view to use for this event
      * @param detail the detail to set for the event
      */
-    @JsxFunction(@WebBrowser(FF))
+    @JsxFunction({ @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public void initUIEvent(
             final String type,
             final boolean bubbles,
@@ -122,7 +141,7 @@ public class UIEvent extends Event {
      * Returns whether or not the "meta" key was pressed during the event firing.
      * @return whether or not the "meta" key was pressed during the event firing
      */
-    @JsxGetter(@WebBrowser(FF))
+    @JsxGetter({ @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public boolean getMetaKey() {
         return metaKey_;
     }

@@ -14,7 +14,11 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host.dom;
 
+import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.CHROME;
 import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.FF;
+import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.IE;
+import net.sourceforge.htmlunit.corejs.javascript.Context;
+import net.sourceforge.htmlunit.corejs.javascript.Undefined;
 
 import com.gargoylesoftware.htmlunit.javascript.SimpleScriptable;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxClass;
@@ -28,10 +32,11 @@ import com.gargoylesoftware.htmlunit.javascript.host.xml.XMLDocument;
  *
  * @version $Revision$
  * @author Ahmed Ashour
+ * @author Frank Danek
  *
  * @see <a href="http://www.xulplanet.com/references/objref/DOMParser.html">XUL Planet</a>
  */
-@JsxClass(browsers = @WebBrowser(FF))
+@JsxClass(browsers = { @WebBrowser(CHROME), @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
 public class DOMParser extends SimpleScriptable {
 
     /**
@@ -50,7 +55,10 @@ public class DOMParser extends SimpleScriptable {
      * @return the generated document
      */
     @JsxFunction
-    public XMLDocument parseFromString(final String str, final String contentType) {
+    public XMLDocument parseFromString(final String str, final Object contentType) {
+        if (Undefined.instance == contentType) {
+            throw Context.reportRuntimeError("Missing 'contentType' parameter");
+        }
         final XMLDocument document = new XMLDocument();
         document.setParentScope(getParentScope());
         document.setPrototype(getPrototype(XMLDocument.class));

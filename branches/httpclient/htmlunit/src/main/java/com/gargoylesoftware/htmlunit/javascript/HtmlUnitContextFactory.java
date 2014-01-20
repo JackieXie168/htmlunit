@@ -266,7 +266,7 @@ public class HtmlUnitContextFactory extends ContextFactory {
         }
 
         // register custom RegExp processing
-        ScriptRuntime.setRegExpProxy(cx, new HtmlUnitRegExpProxy(ScriptRuntime.getRegExpProxy(cx)));
+        ScriptRuntime.setRegExpProxy(cx, new HtmlUnitRegExpProxy(ScriptRuntime.getRegExpProxy(cx), browserVersion_));
 
         cx.setMaximumInterpreterStackDepth(10000);
 
@@ -341,6 +341,10 @@ public class HtmlUnitContextFactory extends ContextFactory {
                 return browserVersion_.hasFeature(BrowserVersionFeatures.JS_FUNCTION_OBJECT_METHOD);
             case Context.FEATURE_HTMLUNIT_FUNCTION_DECLARED_FORWARD_IN_BLOCK:
                 return browserVersion_.hasFeature(BrowserVersionFeatures.JS_FUNCTION_DECLARED_FORWARD_IN_BLOCK);
+            case Context.FEATURE_HTMLUNIT_PARSE_INT_RADIX_10:
+                return browserVersion_.hasFeature(BrowserVersionFeatures.JS_PARSE_INT_RADIX_10);
+            case Context.FEATURE_HTMLUNIT_ENUM_NUMBERS_FIRST:
+                return browserVersion_.hasFeature(BrowserVersionFeatures.JS_ENUM_NUMBERS_FIRST);
             default:
                 return super.hasFeature(cx, featureIndex);
         }

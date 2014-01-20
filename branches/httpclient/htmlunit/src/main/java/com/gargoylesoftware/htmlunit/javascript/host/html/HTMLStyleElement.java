@@ -14,10 +14,13 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host.html;
 
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_INNER_HTML_READONLY_FOR_SOME_TAGS;
 import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.FF;
 import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.IE;
 
 import java.io.StringReader;
+
+import net.sourceforge.htmlunit.corejs.javascript.Context;
 
 import org.w3c.css.sac.InputSource;
 
@@ -36,8 +39,9 @@ import com.gargoylesoftware.htmlunit.javascript.host.css.CSSStyleSheet;
  * @author Ahmed Ashour
  * @author Marc Guillemot
  * @author Ronald Brill
+ * @author Frank Danek
  */
-@JsxClass(domClasses = HtmlStyle.class)
+@JsxClass(domClass = HtmlStyle.class)
 public class HTMLStyleElement extends HTMLElement {
 
     private CSSStyleSheet sheet_;
@@ -47,7 +51,7 @@ public class HTMLStyleElement extends HTMLElement {
      * @see <a href="http://www.xulplanet.com/references/objref/HTMLStyleElement.html">Mozilla doc</a>
      * @return the sheet
      */
-    @JsxGetter(@WebBrowser(FF))
+    @JsxGetter({ @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public CSSStyleSheet getSheet() {
         if (sheet_ != null) {
             return sheet_;
@@ -76,7 +80,7 @@ public class HTMLStyleElement extends HTMLElement {
      * Gets the associated sheet (IE).
      * @return the sheet
      */
-    @JsxGetter(@WebBrowser(IE))
+    @JsxGetter(@WebBrowser(value = IE, maxVersion = 9))
     public CSSStyleSheet getStyleSheet() {
         return getSheet();
     }
@@ -109,5 +113,18 @@ public class HTMLStyleElement extends HTMLElement {
     public String getMedia() {
         final HtmlStyle style = (HtmlStyle) getDomNodeOrDie();
         return style.getAttribute("media");
+    }
+
+    /**
+     * Overwritten to throw an exception in IE8/9.
+     * @param value the new value for the contents of this node
+     */
+    @JsxSetter
+    @Override
+    public void setInnerHTML(final Object value) {
+        if (getBrowserVersion().hasFeature(JS_INNER_HTML_READONLY_FOR_SOME_TAGS)) {
+            throw Context.reportRuntimeError("innerHTML is read-only for tag 'style'");
+        }
+        super.setInnerHTML(value);
     }
 }

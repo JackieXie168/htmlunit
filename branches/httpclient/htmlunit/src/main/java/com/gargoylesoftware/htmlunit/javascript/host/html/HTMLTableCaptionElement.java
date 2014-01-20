@@ -17,6 +17,7 @@ package com.gargoylesoftware.htmlunit.javascript.host.html;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.GENERATED_91;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.HTMLELEMENT_ALIGN_INVALID;
 import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.IE;
+import net.sourceforge.htmlunit.corejs.javascript.Context;
 
 import com.gargoylesoftware.htmlunit.html.HtmlCaption;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxClass;
@@ -31,7 +32,7 @@ import com.gargoylesoftware.htmlunit.javascript.configuration.WebBrowser;
  * @author Ahmed Ashour
  * @author Ronald Brill
  */
-@JsxClass(domClasses = HtmlCaption.class)
+@JsxClass(domClass = HtmlCaption.class)
 public class HTMLTableCaptionElement extends HTMLElement {
 
     /** The valid <tt>vAlign</tt> values for this element, when emulating IE. */
@@ -93,11 +94,12 @@ public class HTMLTableCaptionElement extends HTMLElement {
     }
 
     /**
-     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
-     * {@inheritDoc}
-    */
+     * Overwritten to throw an exception in IE8/9.
+     * @param value the new value for replacing this node
+     */
+    @JsxSetter
     @Override
-    public String getDefaultStyleDisplay() {
-        return "table-caption";
+    public void setOuterHTML(final String value) {
+        throw Context.reportRuntimeError("outerHTML is read-only for tag 'caption'");
     }
 }

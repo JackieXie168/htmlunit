@@ -15,6 +15,7 @@
 package com.gargoylesoftware.htmlunit.javascript.host.html;
 
 import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.FF;
+import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.IE;
 
 import com.gargoylesoftware.htmlunit.html.HtmlProgress;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxClass;
@@ -28,8 +29,10 @@ import com.gargoylesoftware.htmlunit.javascript.configuration.WebBrowser;
  * @author Ahmed Ashour
  * @author Marc Guillemot
  * @author Ronald Brill
+ * @author Frank Danek
  */
-@JsxClass(domClasses = HtmlProgress.class, browsers = @WebBrowser(value = FF, minVersion = 10))
+@JsxClass(domClass = HtmlProgress.class, browsers = { @WebBrowser(value = FF, minVersion = 10),
+        @WebBrowser(value = IE, minVersion = 11) })
 public class HTMLProgressElement extends HTMLElement {
 
     /**
@@ -57,14 +60,5 @@ public class HTMLProgressElement extends HTMLElement {
         catch (final NumberFormatException e) {
             return defaultValue;
         }
-    }
-
-    /**
-     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
-     * {@inheritDoc}
-    */
-    @Override
-    public String getDefaultStyleDisplay() {
-        return "inline-block";
     }
 }

@@ -14,15 +14,14 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host.html;
 
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.CSS_DISPLAY_DEFAULT;
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_TEXT_AREA_COLS_RETURNS_MINUS1;
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_TEXT_AREA_ROWS_RETURNS_MINUS1;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_TEXT_AREA_SET_COLS_NEGATIVE_THROWS_EXCEPTION;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_TEXT_AREA_SET_COLS_THROWS_EXCEPTION;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_TEXT_AREA_SET_ROWS_NEGATIVE_THROWS_EXCEPTION;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_TEXT_AREA_SET_ROWS_THROWS_EXCEPTION;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.TEXTAREA_CRNL;
+import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.CHROME;
 import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.FF;
+import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.IE;
 
 import java.util.regex.Pattern;
 
@@ -46,8 +45,9 @@ import com.gargoylesoftware.htmlunit.javascript.host.FormField;
  * @author Ahmed Ashour
  * @author Daniel Gredler
  * @author Ronald Brill
+ * @author Frank Danek
  */
-@JsxClass(domClasses = HtmlTextArea.class)
+@JsxClass(domClass = HtmlTextArea.class)
 public class HTMLTextAreaElement extends FormField {
 
     private static final Pattern NORMALIZE_VALUE_PATTERN = Pattern.compile("([^\\r])\\n");
@@ -94,9 +94,6 @@ public class HTMLTextAreaElement extends FormField {
             return Integer.parseInt(s);
         }
         catch (final NumberFormatException e) {
-            if (getBrowserVersion().hasFeature(JS_TEXT_AREA_COLS_RETURNS_MINUS1)) {
-                return -1;
-            }
             return 20;
         }
     }
@@ -111,8 +108,7 @@ public class HTMLTextAreaElement extends FormField {
         try {
             i = Float.valueOf(cols).intValue();
             if (i < 0) {
-                if (getBrowserVersion().hasFeature(JS_TEXT_AREA_SET_COLS_NEGATIVE_THROWS_EXCEPTION)
-                        || getBrowserVersion().hasFeature(JS_TEXT_AREA_COLS_RETURNS_MINUS1)) {
+                if (getBrowserVersion().hasFeature(JS_TEXT_AREA_SET_COLS_NEGATIVE_THROWS_EXCEPTION)) {
                     throw new NumberFormatException("New value for cols '" + cols + "' is smaller than zero.");
                 }
                 getDomNodeOrDie().setAttribute("cols", null);
@@ -123,10 +119,7 @@ public class HTMLTextAreaElement extends FormField {
             if (getBrowserVersion().hasFeature(JS_TEXT_AREA_SET_COLS_THROWS_EXCEPTION)) {
                 throw Context.throwAsScriptRuntimeEx(e);
             }
-            if (!getBrowserVersion().hasFeature(JS_TEXT_AREA_COLS_RETURNS_MINUS1)) {
-                return;
-            }
-            i = 0;
+            return;
         }
         getDomNodeOrDie().setAttribute("cols", Integer.toString(i));
     }
@@ -142,9 +135,6 @@ public class HTMLTextAreaElement extends FormField {
             return Integer.parseInt(s);
         }
         catch (final NumberFormatException e) {
-            if (getBrowserVersion().hasFeature(JS_TEXT_AREA_ROWS_RETURNS_MINUS1)) {
-                return -1;
-            }
             return 2;
         }
     }
@@ -159,8 +149,7 @@ public class HTMLTextAreaElement extends FormField {
         try {
             i = new Float(rows).intValue();
             if (i < 0) {
-                if (getBrowserVersion().hasFeature(JS_TEXT_AREA_SET_ROWS_NEGATIVE_THROWS_EXCEPTION)
-                        || getBrowserVersion().hasFeature(JS_TEXT_AREA_COLS_RETURNS_MINUS1)) {
+                if (getBrowserVersion().hasFeature(JS_TEXT_AREA_SET_ROWS_NEGATIVE_THROWS_EXCEPTION)) {
                     throw new NumberFormatException("New value for rows '" + rows + "' is smaller than zero.");
                 }
                 getDomNodeOrDie().setAttribute("rows", null);
@@ -171,10 +160,7 @@ public class HTMLTextAreaElement extends FormField {
             if (getBrowserVersion().hasFeature(JS_TEXT_AREA_SET_ROWS_THROWS_EXCEPTION)) {
                 throw Context.throwAsScriptRuntimeEx(e);
             }
-            if (!getBrowserVersion().hasFeature(JS_TEXT_AREA_COLS_RETURNS_MINUS1)) {
-                return;
-            }
-            i = 0;
+            return;
         }
         getDomNodeOrDie().setAttribute("rows", Integer.toString(i));
     }
@@ -207,7 +193,7 @@ public class HTMLTextAreaElement extends FormField {
      * Gets the value of "textLength" attribute.
      * @return the text length
      */
-    @JsxGetter(@WebBrowser(FF))
+    @JsxGetter({ @WebBrowser(CHROME), @WebBrowser(FF) })
     public int getTextLength() {
         return getValue().length();
     }
@@ -216,7 +202,7 @@ public class HTMLTextAreaElement extends FormField {
      * Gets the value of "selectionStart" attribute.
      * @return the selection start
      */
-    @JsxGetter(@WebBrowser(FF))
+    @JsxGetter({ @WebBrowser(CHROME), @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public int getSelectionStart() {
         return ((HtmlTextArea) getDomNodeOrDie()).getSelectionStart();
     }
@@ -225,7 +211,7 @@ public class HTMLTextAreaElement extends FormField {
      * Sets the value of "selectionStart" attribute.
      * @param start selection start
      */
-    @JsxSetter(@WebBrowser(FF))
+    @JsxSetter({ @WebBrowser(CHROME), @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public void setSelectionStart(final int start) {
         ((HtmlTextArea) getDomNodeOrDie()).setSelectionStart(start);
     }
@@ -234,7 +220,7 @@ public class HTMLTextAreaElement extends FormField {
      * Gets the value of "selectionEnd" attribute.
      * @return the selection end
      */
-    @JsxGetter(@WebBrowser(FF))
+    @JsxGetter({ @WebBrowser(CHROME), @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public int getSelectionEnd() {
         return ((HtmlTextArea) getDomNodeOrDie()).getSelectionEnd();
     }
@@ -243,7 +229,7 @@ public class HTMLTextAreaElement extends FormField {
      * Sets the value of "selectionEnd" attribute.
      * @param end selection end
      */
-    @JsxSetter(@WebBrowser(FF))
+    @JsxSetter({ @WebBrowser(CHROME), @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public void setSelectionEnd(final int end) {
         ((HtmlTextArea) getDomNodeOrDie()).setSelectionEnd(end);
     }
@@ -253,7 +239,7 @@ public class HTMLTextAreaElement extends FormField {
      * @param start the index of the first character to select
      * @param end the index of the character after the selection
      */
-    @JsxFunction(@WebBrowser(FF))
+    @JsxFunction({ @WebBrowser(CHROME), @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public void setSelectionRange(final int start, final int end) {
         setSelectionStart(start);
         setSelectionEnd(end);
@@ -289,7 +275,7 @@ public class HTMLTextAreaElement extends FormField {
      * {@inheritDoc} Overridden to modify browser configurations.
      */
     @Override
-    @JsxGetter(@WebBrowser(FF))
+    @JsxGetter({ @WebBrowser(CHROME), @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public String getAccessKey() {
         return super.getAccessKey();
     }
@@ -298,20 +284,8 @@ public class HTMLTextAreaElement extends FormField {
      * {@inheritDoc} Overridden to modify browser configurations.
      */
     @Override
-    @JsxSetter(@WebBrowser(FF))
+    @JsxSetter({ @WebBrowser(CHROME), @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public void setAccessKey(final String accessKey) {
         super.setAccessKey(accessKey);
-    }
-
-    /**
-     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
-     * {@inheritDoc}
-    */
-    @Override
-    public String getDefaultStyleDisplay() {
-        if (getBrowserVersion().hasFeature(CSS_DISPLAY_DEFAULT)) {
-            return "inline";
-        }
-        return "inline-block";
     }
 }

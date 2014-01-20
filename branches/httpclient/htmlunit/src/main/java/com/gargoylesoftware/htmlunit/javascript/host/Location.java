@@ -15,7 +15,10 @@
 package com.gargoylesoftware.htmlunit.javascript.host;
 
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.ANCHOR_EMPTY_HREF_NO_FILENAME;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.EVENT_TYPE_HASHCHANGEEVENT;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_LOCATION_HASH_IS_DECODED;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_LOCATION_HASH_IS_ENCODED;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_LOCATION_HASH_RETURNS_HASH_FOR_EMPTY_DEFINED;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.URL_ABOUT_BLANK_HAS_EMPTY_PATH;
 
 import java.io.IOException;
@@ -53,6 +56,7 @@ import com.gargoylesoftware.htmlunit.util.UrlUtils;
  * @author David K. Taylor
  * @author Ahmed Ashour
  * @author Ronald Brill
+ * @author Frank Danek
  *
  * @see <a href="http://msdn.microsoft.com/en-us/library/ms535866.aspx">MSDN Documentation</a>
  */
@@ -172,7 +176,7 @@ public class Location extends SimpleScriptable {
         }
         try {
             URL url = page.getUrl();
-            final boolean encodeHash = getBrowserVersion().hasFeature(JS_LOCATION_HASH_IS_DECODED);
+            final boolean encodeHash = getBrowserVersion().hasFeature(JS_LOCATION_HASH_IS_ENCODED);
             final String hash = getHash(encodeHash);
             if (hash != null) {
                 url = UrlUtils.getUrlWithNewRef(url, hash);
@@ -222,8 +226,11 @@ public class Location extends SimpleScriptable {
                 }
             }
 
+            final WebRequest request = new WebRequest(url);
+            request.setAdditionalHeader("Referer", page.getUrl().toExternalForm());
+
             final WebWindow webWindow = getWindow().getWebWindow();
-            webWindow.getWebClient().download(webWindow, "", new WebRequest(url),
+            webWindow.getWebClient().download(webWindow, "", request,
                     newLocation.endsWith("#"), "JS set location");
         }
         catch (final MalformedURLException e) {
@@ -270,7 +277,13 @@ public class Location extends SimpleScriptable {
             hash = decodeHash(hash);
         }
 
-        if (!StringUtils.isEmpty(hash)) {
+        if (StringUtils.isEmpty(hash)) {
+            if (getBrowserVersion().hasFeature(JS_LOCATION_HASH_RETURNS_HASH_FOR_EMPTY_DEFINED)
+                    && getHref().endsWith("#")) {
+                return "#";
+            }
+        }
+        else {
             return "#" + hash;
         }
 
@@ -294,7 +307,19 @@ public class Location extends SimpleScriptable {
      * @see <a href="http://msdn.microsoft.com/en-us/library/ms533775.aspx">MSDN Documentation</a>
      */
     @JsxSetter
-    public void setHash(String hash) {
+    public void setHash(final String hash) {
+        // IMPORTANT: This method must not call setUrl(), because
+        // we must not hit the server just to change the hash!
+        setHash(getHref(), hash);
+    }
+
+    /**
+     * Sets the hash portion of the location URL (the portion following the '#').
+     *
+     * @param oldURL the old URL
+     * @param hash the new hash portion of the location URL
+     */
+    public void setHash(final String oldURL, String hash) {
         // IMPORTANT: This method must not call setUrl(), because
         // we must not hit the server just to change the hash!
         if (hash != null) {
@@ -303,13 +328,18 @@ public class Location extends SimpleScriptable {
             }
         }
         final boolean hasChanged = hash != null && !hash.equals(hash_);
-        final String oldUrl = getHref();
         hash_ = hash;
-        final String newUrl = getHref();
+        final String newURL = getHref();
 
         if (hasChanged) {
-            final HashChangeEvent event = new HashChangeEvent(getWindow(), Event.TYPE_HASH_CHANGE,
-                    oldUrl, newUrl);
+            final Event event;
+            if (getBrowserVersion().hasFeature(EVENT_TYPE_HASHCHANGEEVENT)) {
+                event = new HashChangeEvent(getWindow(), Event.TYPE_HASH_CHANGE, oldURL, newURL);
+            }
+            else {
+                event = new Event(getWindow(), Event.TYPE_HASH_CHANGE);
+                event.initEvent(Event.TYPE_HASH_CHANGE, false, false);
+            }
             getWindow().executeEvent(event);
         }
     }

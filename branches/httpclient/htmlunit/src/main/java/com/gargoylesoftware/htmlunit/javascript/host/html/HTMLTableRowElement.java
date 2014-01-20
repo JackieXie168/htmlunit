@@ -14,8 +14,9 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host.html;
 
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.GENERATED_108;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.GENERATED_172;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_INNER_HTML_READONLY_FOR_SOME_TAGS;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_TABLE_ROW_SECTION_INDEX_BIG_INT_IF_UNATTACHED;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,8 +42,9 @@ import com.gargoylesoftware.htmlunit.javascript.configuration.JsxSetter;
  * @author Chris Erskine
  * @author Ahmed Ashour
  * @author Ronald Brill
+ * @author Frank Danek
  */
-@JsxClass(domClasses = HtmlTableRow.class)
+@JsxClass(domClass = HtmlTableRow.class)
 public class HTMLTableRowElement extends HTMLTableComponent {
 
     private HTMLCollection cells_; // has to be a member to have equality (==) working
@@ -74,7 +76,7 @@ public class HTMLTableRowElement extends HTMLTableComponent {
         DomNode row = getDomNodeOrDie();
         final HtmlTable table = ((HtmlTableRow) row).getEnclosingTable();
         if (table == null) { // a not attached document.createElement('TR')
-            if (!getBrowserVersion().hasFeature(GENERATED_108)) {
+            if (!getBrowserVersion().hasFeature(JS_TABLE_ROW_SECTION_INDEX_BIG_INT_IF_UNATTACHED)) {
                 return -1;
             }
             // IE 6, 7 and 8 return really strange values: large integers that are not constants
@@ -191,11 +193,34 @@ public class HTMLTableRowElement extends HTMLTableComponent {
     }
 
     /**
-     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
-     * {@inheritDoc}
-    */
+     * Overwritten to throw an exception in IE8/9.
+     * @param value the new value for replacing this node
+     */
+    @JsxSetter
     @Override
-    public String getDefaultStyleDisplay() {
-        return "table-row";
+    public void setOuterHTML(final String value) {
+        throw Context.reportRuntimeError("outerHTML is read-only for tag 'tr'");
+    }
+
+    /**
+     * Overwritten to throw an exception in IE8/9.
+     * @param value the new value for the contents of this node
+     */
+    @JsxSetter
+    @Override
+    public void setInnerHTML(final Object value) {
+        if (getBrowserVersion().hasFeature(JS_INNER_HTML_READONLY_FOR_SOME_TAGS)) {
+            throw Context.reportRuntimeError("innerHTML is read-only for tag 'tr'");
+        }
+        super.setInnerHTML(value);
+    }
+
+    /**
+     * Overwritten to throw an exception because this is readonly.
+     * @param value the new value for the contents of this node
+     */
+    @Override
+    protected void setInnerTextImpl(final String value) {
+        throw Context.reportRuntimeError("innerText is read-only for tag 'tr'");
     }
 }

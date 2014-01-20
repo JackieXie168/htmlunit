@@ -14,11 +14,11 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host.html;
 
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.GENERATED_48;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.HTMLCOLLECTION_NULL_IF_NOT_FOUND;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.GENERATED_50;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.HTMLCOLLECTION_COMMENT_IS_ELEMENT;
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.HTMLCOLLECTION_IDENTICAL_IDS;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.HTMLCOLLECTION_OBJECT_DETECTION;
+import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.CHROME;
 import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.IE;
 
 import java.util.ArrayList;
@@ -54,6 +54,7 @@ import com.gargoylesoftware.htmlunit.javascript.host.Window;
  * @author Marc Guillemot
  * @author Chris Erskine
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 @JsxClass
 public class HTMLCollection extends NodeList {
@@ -200,9 +201,6 @@ public class HTMLCollection extends NodeList {
             if (next instanceof DomElement) {
                 final String id = ((DomElement) next).getAttribute("id");
                 if (name.equals(id)) {
-                    if (!getBrowserVersion().hasFeature(HTMLCOLLECTION_IDENTICAL_IDS)) {
-                        return getScriptableForElement(next);
-                    }
                     matchingElements.add(next);
                 }
             }
@@ -223,9 +221,6 @@ public class HTMLCollection extends NodeList {
             if (next instanceof DomElement) {
                 final String nodeName = ((DomElement) next).getAttribute("name");
                 if (name.equals(nodeName)) {
-                    if (!getBrowserVersion().hasFeature(HTMLCOLLECTION_IDENTICAL_IDS)) {
-                        return getScriptableForElement(next);
-                    }
                     matchingElements.add(next);
                 }
             }
@@ -254,7 +249,7 @@ public class HTMLCollection extends NodeList {
      */
     private Object nullIfNotFound(final Object object) {
         if (object == NOT_FOUND) {
-            if (getBrowserVersion().hasFeature(GENERATED_48)) {
+            if (getBrowserVersion().hasFeature(HTMLCOLLECTION_NULL_IF_NOT_FOUND)) {
                 return null;
             }
             return Context.getUndefinedValue();
@@ -308,7 +303,7 @@ public class HTMLCollection extends NodeList {
      * @return all the elements in this element array that have the specified tag name
      * @see <a href="http://msdn.microsoft.com/en-us/library/ms536776.aspx">MSDN doc</a>
      */
-    @JsxFunction(@WebBrowser(IE))
+    @JsxFunction({ @WebBrowser(CHROME), @WebBrowser(IE) })
     public Object tags(final String tagName) {
         final HTMLCollection collection = new HTMLSubCollection(this, ".tags('" + tagName + "')") {
             @Override

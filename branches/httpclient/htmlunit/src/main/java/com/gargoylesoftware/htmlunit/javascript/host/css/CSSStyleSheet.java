@@ -17,6 +17,7 @@ package com.gargoylesoftware.htmlunit.javascript.host.css;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.CSS_SELECTOR_LANG;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.QUERYSELECTORALL_NOT_IN_QUIRKS;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.SELECTOR_ATTRIBUTE_ESCAPING;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.STYLESHEET_HREF_EMPTY_IS_NULL;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.STYLESHEET_HREF_EXPANDURL;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.STYLESHEET_HREF_STYLE_EMPTY;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.STYLESHEET_HREF_STYLE_NULL;
@@ -119,6 +120,7 @@ import com.steadystate.css.parser.selectors.SuffixAttributeConditionImpl;
  * @author Ahmed Ashour
  * @author Ronald Brill
  * @author Guy Burton
+ * @author Frank Danek
  */
 @JsxClass
 public class CSSStyleSheet extends SimpleScriptable {
@@ -289,26 +291,34 @@ public class CSSStyleSheet extends SimpleScriptable {
         try {
             // Retrieve the associated content and respect client settings regarding failing HTTP status codes.
             final WebRequest request;
+            final String accept = page.getWebClient().getBrowserVersion().getCssAcceptHeader();
             final WebClient client = page.getWebClient();
             if (link != null) {
                 // Use link.
                 request = link.getWebRequest();
+                request.setAdditionalHeader("Accept", accept);
             }
             else {
                 // Use href.
-                request = new WebRequest(new URL(url));
+                request = new WebRequest(new URL(url), accept);
                 final String referer = page.getUrl().toExternalForm();
                 request.setAdditionalHeader("Referer", referer);
             }
 
-            uri = request.getUrl().toExternalForm();
+            // our cache is a bit strange;
+            // loadWebResponse check the cache for the web response
+            // AND also fixes the request url for the following cache lookups
+            final WebResponse response = client.loadWebResponse(request);
+
+            // now we can look into the cache with the fixed request for
+            // a cached script
             final Cache cache = client.getCache();
             final Object fromCache = cache.getCachedObject(request);
             if (fromCache != null && fromCache instanceof org.w3c.dom.css.CSSStyleSheet) {
+                uri = request.getUrl().toExternalForm();
                 sheet = new CSSStyleSheet(element, (org.w3c.dom.css.CSSStyleSheet) fromCache, uri);
             }
             else {
-                final WebResponse response = client.loadWebResponse(request);
                 uri = response.getWebRequest().getUrl().toExternalForm();
                 client.printContentIfNecessary(response);
                 client.throwFailingHttpStatusCodeExceptionIfNecessary(response);
@@ -317,7 +327,9 @@ public class CSSStyleSheet extends SimpleScriptable {
                 source.setByteStream(response.getContentAsStream());
                 source.setEncoding(response.getContentCharset());
                 sheet = new CSSStyleSheet(element, source, uri);
+                // cache the style sheet
                 cache.cacheIfPossible(request, response, sheet.getWrappedSheet());
+                response.cleanUp();
             }
         }
         catch (final FailingHttpStatusCodeException e) {
@@ -894,7 +906,7 @@ public class CSSStyleSheet extends SimpleScriptable {
      * For Firefox.
      * @return the owner
      */
-    @JsxGetter(@WebBrowser(FF))
+    @JsxGetter({ @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public HTMLElement getOwnerNode() {
         return ownerNode_;
     }
@@ -921,7 +933,7 @@ public class CSSStyleSheet extends SimpleScriptable {
      * Returns the collection of rules defined in this style sheet.
      * @return the collection of rules defined in this style sheet
      */
-    @JsxGetter(@WebBrowser(FF))
+    @JsxGetter({ @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public com.gargoylesoftware.htmlunit.javascript.host.css.CSSRuleList getCssRules() {
         if (cssRules_ == null) {
             cssRules_ = new com.gargoylesoftware.htmlunit.javascript.host.css.CSSRuleList(this);
@@ -944,6 +956,9 @@ public class CSSStyleSheet extends SimpleScriptable {
                 final HtmlLink link = (HtmlLink) node;
                 final HtmlPage page = (HtmlPage) link.getPage();
                 final String href = link.getHrefAttribute();
+                if ("".equals(href) && version.hasFeature(STYLESHEET_HREF_EMPTY_IS_NULL)) {
+                    return null;
+                }
                 if (!version.hasFeature(STYLESHEET_HREF_EXPANDURL)) {
                     // Don't expand relative URLs.
                     return href;
@@ -982,7 +997,7 @@ public class CSSStyleSheet extends SimpleScriptable {
      * @see <a href="http://www.w3.org/TR/DOM-Level-2-Style/css.html#CSS-CSSStyleSheet">DOM level 2</a>
      * @return the position of the inserted rule
      */
-    @JsxFunction(@WebBrowser(FF))
+    @JsxFunction({ @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public int insertRule(final String rule, final int position) {
         try {
             return wrapped_.insertRule(rule, position);
@@ -997,7 +1012,7 @@ public class CSSStyleSheet extends SimpleScriptable {
      * @param position the position of the rule to be deleted
      * @see <a href="http://www.w3.org/TR/DOM-Level-2-Style/css.html#CSS-CSSStyleSheet">DOM level 2</a>
      */
-    @JsxFunction(@WebBrowser(FF))
+    @JsxFunction({ @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public void deleteRule(final int position) {
         try {
             wrapped_.deleteRule(position);
@@ -1118,6 +1133,12 @@ public class CSSStyleSheet extends SimpleScriptable {
                 final SiblingSelector ss = (SiblingSelector) selector;
                 return isValidSelector(ss.getSelector(), documentMode)
                         && isValidSelector(ss.getSiblingSelector(), documentMode);
+            case Selector.SAC_ANY_NODE_SELECTOR:
+                if (selector instanceof SiblingSelector) {
+                    final SiblingSelector sibling = (SiblingSelector) selector;
+                    return isValidSelector(sibling.getSelector(), documentMode)
+                            && isValidSelector(sibling.getSiblingSelector(), documentMode);
+                }
             default:
                 LOG.warn("Unhandled CSS selector type '" + selector.getSelectorType() + "'. Accepting it silently.");
                 return true; // at least in a first time to break less stuff

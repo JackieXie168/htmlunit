@@ -14,13 +14,17 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host.html;
 
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.TABLE_COLUMN_SPAN_THROWS_EXCEPTION_IF_LESS_THAN_ONE;
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.TABLE_COLUMN_WIDTH_DOES_NOT_RETURN_NEGATIVE_VALUES;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_INNER_HTML_READONLY_FOR_SOME_TAGS;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.
+                    JS_TABLE_COLUMN_SPAN_THROWS_EXCEPTION_IF_LESS_THAN_ONE;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.
+                    JS_TABLE_COLUMN_WIDTH_DOES_NOT_RETURN_NEGATIVE_VALUES;
 import net.sourceforge.htmlunit.corejs.javascript.Context;
 
 import com.gargoylesoftware.htmlunit.html.HtmlTableColumn;
 import com.gargoylesoftware.htmlunit.html.HtmlTableColumnGroup;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxClass;
+import com.gargoylesoftware.htmlunit.javascript.configuration.JsxClasses;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxGetter;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxSetter;
 
@@ -31,7 +35,10 @@ import com.gargoylesoftware.htmlunit.javascript.configuration.JsxSetter;
  * @author Ahmed Ashour
  * @author Ronald Brill
  */
-@JsxClass(domClasses = { HtmlTableColumn.class, HtmlTableColumnGroup.class  })
+@JsxClasses({
+    @JsxClass(domClass = HtmlTableColumn.class),
+    @JsxClass(domClass = HtmlTableColumnGroup.class)
+})
 public class HTMLTableColElement extends HTMLTableComponent {
 
     /**
@@ -63,7 +70,7 @@ public class HTMLTableColElement extends HTMLTableComponent {
         final double d = Context.toNumber(span);
         int i = (int) d;
         if (i < 1) {
-            if (getBrowserVersion().hasFeature(TABLE_COLUMN_SPAN_THROWS_EXCEPTION_IF_LESS_THAN_ONE)) {
+            if (getBrowserVersion().hasFeature(JS_TABLE_COLUMN_SPAN_THROWS_EXCEPTION_IF_LESS_THAN_ONE)) {
                 final Exception e = new Exception("Cannot set the span property to invalid value: " + span);
                 Context.throwAsScriptRuntimeEx(e);
             }
@@ -80,7 +87,7 @@ public class HTMLTableColElement extends HTMLTableComponent {
      */
     @JsxGetter(propertyName = "width")
     public String getWidth_js() {
-        final boolean ie = getBrowserVersion().hasFeature(TABLE_COLUMN_WIDTH_DOES_NOT_RETURN_NEGATIVE_VALUES);
+        final boolean ie = getBrowserVersion().hasFeature(JS_TABLE_COLUMN_WIDTH_DOES_NOT_RETURN_NEGATIVE_VALUES);
         final Boolean returnNegativeValues = ie ? Boolean.FALSE : null;
         return getWidthOrHeight("width", returnNegativeValues);
     }
@@ -103,15 +110,27 @@ public class HTMLTableColElement extends HTMLTableComponent {
     }
 
     /**
-     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
-     * {@inheritDoc}
-    */
+     * Overwritten to throw an exception in IE8/9.
+     * @param value the new value for replacing this node
+     */
+    @JsxSetter
     @Override
-    public String getDefaultStyleDisplay() {
-        final String tagName = getTagName();
-        if ("COLGROUP".equals(tagName)) {
-            return "table-column-group";
+    public void setOuterHTML(final String value) {
+        throw Context.reportRuntimeError("outerHTML is read-only for tag '"
+                            + getDomNodeOrDie().getNodeName() + "'");
+    }
+
+    /**
+     * Overwritten to throw an exception in IE8/9.
+     * @param value the new value for the contents of this node
+     */
+    @JsxSetter
+    @Override
+    public void setInnerHTML(final Object value) {
+        if (getBrowserVersion().hasFeature(JS_INNER_HTML_READONLY_FOR_SOME_TAGS)) {
+            throw Context.reportRuntimeError("innerHTML is read-only for tag '"
+                            + getDomNodeOrDie().getNodeName() + "'");
         }
-        return "table-column";
+        super.setInnerHTML(value);
     }
 }

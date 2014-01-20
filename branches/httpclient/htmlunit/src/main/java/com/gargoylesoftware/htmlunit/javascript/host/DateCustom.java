@@ -14,17 +14,21 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host;
 
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_DATE_LOCATE_TIME_24;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_DATE_LOCALE_DATE_SHORT;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_DATE_LOCALE_DATE_SHORT_WITH_SPECIAL_CHARS;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_DATE_LOCALE_TIME_WITH_SPECIAL_CHARS;
 
 import java.lang.reflect.Field;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import net.sourceforge.htmlunit.corejs.javascript.Context;
 import net.sourceforge.htmlunit.corejs.javascript.Function;
 import net.sourceforge.htmlunit.corejs.javascript.Scriptable;
+
+import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 
@@ -33,8 +37,12 @@ import com.gargoylesoftware.htmlunit.BrowserVersion;
  *
  * @version $Revision$
  * @author Ahmed Ashour
+ * @author Ronald Brill
+ * @author Frank Danek
  */
 public final class DateCustom {
+
+    private static final TimeZone UTC_TIME_ZONE = TimeZone.getTimeZone("UTC");
 
     private DateCustom() { }
 
@@ -50,8 +58,22 @@ public final class DateCustom {
      */
     public static String toLocaleDateString(
             final Context context, final Scriptable thisObj, final Object[] args, final Function function) {
-        final SimpleDateFormat format = new SimpleDateFormat("EEEE, MMMM dd, yyyy", getLocale(thisObj));
-        return format.format(new Date(getDateValue(thisObj)));
+        final String formatString;
+        final BrowserVersion browserVersion =
+                ((Window) thisObj.getParentScope()).getWebWindow().getWebClient().getBrowserVersion();
+
+        if (browserVersion.hasFeature(JS_DATE_LOCALE_DATE_SHORT_WITH_SPECIAL_CHARS)) {
+            // [U+200E] -> Unicode Character 'LEFT-TO-RIGHT MARK'
+            formatString = "\u200Edd\u200E.\u200EMM\u200E.\u200Eyyyy";
+        }
+        else if (browserVersion.hasFeature(JS_DATE_LOCALE_DATE_SHORT)) {
+            formatString = "d.M.yyyy";
+        }
+        else {
+            formatString = "EEEE, MMMM dd, yyyy";
+        }
+        final FastDateFormat format =  FastDateFormat.getInstance(formatString, getLocale(thisObj));
+        return format.format(getDateValue(thisObj));
     }
 
     /**
@@ -65,15 +87,32 @@ public final class DateCustom {
     public static String toLocaleTimeString(
             final Context context, final Scriptable thisObj, final Object[] args, final Function function) {
         final String formatString;
-        if (((Window) thisObj.getParentScope()).getWebWindow().getWebClient().getBrowserVersion()
-                .hasFeature(JS_DATE_LOCATE_TIME_24)) {
-            formatString = "HH:mm:ss";
+        final BrowserVersion browserVersion =
+                ((Window) thisObj.getParentScope()).getWebWindow().getWebClient().getBrowserVersion();
+
+        if (browserVersion.hasFeature(JS_DATE_LOCALE_TIME_WITH_SPECIAL_CHARS)) {
+            // [U+200E] -> Unicode Character 'LEFT-TO-RIGHT MARK'
+            formatString = "\u200EHH\u200E:\u200Emm\u200E:\u200Ess";
         }
         else {
-            formatString = "hh:mm:ss a";
+            formatString = "HH:mm:ss";
         }
-        final DateFormat format =  new SimpleDateFormat(formatString, getLocale(thisObj));
-        return format.format(new Date(getDateValue(thisObj)));
+        final FastDateFormat format =  FastDateFormat.getInstance(formatString, getLocale(thisObj));
+        return format.format(getDateValue(thisObj));
+    }
+
+    /**
+     * Converts a date to a UTC string. Special version for IE
+     * @param context the JavaScript context
+     * @param thisObj the scriptable
+     * @param args the arguments passed into the method
+     * @param function the function
+     * @return converted string
+     */
+    public static String toUTCString(
+            final Context context, final Scriptable thisObj, final Object[] args, final Function function) {
+        final Date date = new Date(getDateValue(thisObj));
+        return DateFormatUtils.format(date, "EEE, d MMM yyyy HH:mm:ss z", UTC_TIME_ZONE, Locale.ENGLISH);
     }
 
     private static long getDateValue(final Scriptable thisObj) {

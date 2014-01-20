@@ -14,12 +14,15 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host.html;
 
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_INNER_HTML_READONLY_FOR_SOME_TAGS;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_TABLE_VALIGN_SUPPORTS_IE_VALUES;
+import net.sourceforge.htmlunit.corejs.javascript.Context;
 
 import com.gargoylesoftware.htmlunit.html.HtmlTableBody;
 import com.gargoylesoftware.htmlunit.html.HtmlTableFooter;
 import com.gargoylesoftware.htmlunit.html.HtmlTableHeader;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxClass;
+import com.gargoylesoftware.htmlunit.javascript.configuration.JsxClasses;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxGetter;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxSetter;
 import com.gargoylesoftware.htmlunit.javascript.host.RowContainer;
@@ -33,7 +36,11 @@ import com.gargoylesoftware.htmlunit.javascript.host.RowContainer;
  * @author Ahmed Ashour
  * @author Ronald Brill
  */
-@JsxClass(domClasses = { HtmlTableBody.class, HtmlTableHeader.class, HtmlTableFooter.class })
+@JsxClasses({
+    @JsxClass(domClass = HtmlTableBody.class),
+    @JsxClass(domClass = HtmlTableHeader.class),
+    @JsxClass(domClass = HtmlTableFooter.class)
+})
 public class HTMLTableSectionElement extends RowContainer {
 
     /** The valid "vAlign" values for this element, when emulating IE. */
@@ -116,18 +123,37 @@ public class HTMLTableSectionElement extends RowContainer {
     }
 
     /**
-     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
-     * {@inheritDoc}
-    */
+     * Overwritten to throw an exception in IE8/9.
+     * @param value the new value for replacing this node
+     */
+    @JsxSetter
     @Override
-    public String getDefaultStyleDisplay() {
-        final String tagName = getTagName();
-        if ("TFOOT".equals(tagName)) {
-            return "table-footer-group";
+    public void setOuterHTML(final String value) {
+        throw Context.reportRuntimeError("outerHTML is read-only for tag '"
+                            + getDomNodeOrDie().getNodeName() + "'");
+    }
+
+    /**
+     * Overwritten to throw an exception in IE8/9.
+     * @param value the new value for the contents of this node
+     */
+    @JsxSetter
+    @Override
+    public void setInnerHTML(final Object value) {
+        if (getBrowserVersion().hasFeature(JS_INNER_HTML_READONLY_FOR_SOME_TAGS)) {
+            throw Context.reportRuntimeError("innerHTML is read-only for tag '"
+                            + getDomNodeOrDie().getNodeName() + "'");
         }
-        if ("THEAD".equals(tagName)) {
-            return "table-header-group";
-        }
-        return "table-row-group";
+        super.setInnerHTML(value);
+    }
+
+    /**
+     * Overwritten to throw an exception because this is readonly.
+     * @param value the new value for the contents of this node
+     */
+    @Override
+    protected void setInnerTextImpl(final String value) {
+        throw Context.reportRuntimeError("innerText is read-only for tag '"
+                            + getDomNodeOrDie().getNodeName() + "'");
     }
 }

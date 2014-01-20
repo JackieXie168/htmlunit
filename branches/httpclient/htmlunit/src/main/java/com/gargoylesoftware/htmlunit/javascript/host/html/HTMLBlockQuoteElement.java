@@ -14,20 +14,32 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host.html;
 
-import com.gargoylesoftware.htmlunit.html.HtmlInsertedText;
+import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.CHROME;
+import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.FF;
+
+import com.gargoylesoftware.htmlunit.html.HtmlBlockQuote;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxClass;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxGetter;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxSetter;
+import com.gargoylesoftware.htmlunit.javascript.configuration.WebBrowser;
 
 /**
- * The JavaScript object "HTMLInsElement".
+ * The JavaScript object "HtmlBlockQuote".
  *
  * @version $Revision$
  * @author Ahmed Ashour
  * @author Ronald Brill
  */
-@JsxClass(domClasses = HtmlInsertedText.class)
-public class HTMLInsElement extends HTMLElement {
+@JsxClass(domClass = HtmlBlockQuote.class, browsers = { @WebBrowser(FF), @WebBrowser(CHROME) })
+public class HTMLBlockQuoteElement extends HTMLElement {
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getClassName() {
+        return "HTMLQuoteElement";
+    }
 
     /**
      * Returns the value of the "cite" property.
@@ -46,33 +58,5 @@ public class HTMLInsElement extends HTMLElement {
     @JsxSetter
     public void setCite(final String cite) {
         getDomNodeOrDie().setAttribute("cite", cite);
-    }
-
-    /**
-     * Returns the value of the "dateTime" property.
-     * @return the value of the "dateTime" property
-     */
-    @JsxGetter
-    public String getDateTime() {
-        final String cite = getDomNodeOrDie().getAttribute("datetime");
-        return cite;
-    }
-
-    /**
-     * Returns the value of the "dateTime" property.
-     * @param dateTime the value
-     */
-    @JsxSetter
-    public void setDateTime(final String dateTime) {
-        getDomNodeOrDie().setAttribute("datetime", dateTime);
-    }
-
-    /**
-     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
-     * {@inheritDoc}
-    */
-    @Override
-    public String getDefaultStyleDisplay() {
-        return "inline";
     }
 }

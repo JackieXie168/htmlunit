@@ -14,10 +14,15 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host;
 
+import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.CHROME;
+import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.FF;
+import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.IE;
+
 import com.gargoylesoftware.htmlunit.javascript.SimpleScriptable;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxClass;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxGetter;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxSetter;
+import com.gargoylesoftware.htmlunit.javascript.configuration.WebBrowser;
 
 /**
  * Specifies a rectangle that contains a line of text in either an element or a TextRange object.
@@ -126,5 +131,23 @@ public class ClientRect extends SimpleScriptable {
     @JsxGetter
     public int getTop() {
         return top_;
+    }
+
+    /**
+     * Returns the "width" property.
+     * @return the "width" property
+     */
+    @JsxGetter({ @WebBrowser(CHROME), @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
+    public int getWidth() {
+        return getRight() - getLeft();
+    }
+
+    /**
+     * Returns the "height" property.
+     * @return the "height" property
+     */
+    @JsxGetter({ @WebBrowser(CHROME), @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
+    public int getHeight() {
+        return getBottom() - getTop();
     }
 }

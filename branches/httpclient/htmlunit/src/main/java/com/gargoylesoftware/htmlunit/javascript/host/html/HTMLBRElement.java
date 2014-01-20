@@ -32,7 +32,7 @@ import com.gargoylesoftware.htmlunit.javascript.configuration.JsxSetter;
  * @author Ahmed Ashour
  * @author Ronald Brill
  */
-@JsxClass(domClasses = HtmlBreak.class)
+@JsxClass(domClass = HtmlBreak.class)
 public class HTMLBRElement extends HTMLElement {
 
     /** Valid values for the {@link #getClear() clear} property. */
@@ -70,14 +70,5 @@ public class HTMLBRElement extends HTMLElement {
     @Override
     protected boolean isEndTagForbidden() {
         return true;
-    }
-
-    /**
-     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
-     * {@inheritDoc}
-    */
-    @Override
-    public String getDefaultStyleDisplay() {
-        return "inline";
     }
 }

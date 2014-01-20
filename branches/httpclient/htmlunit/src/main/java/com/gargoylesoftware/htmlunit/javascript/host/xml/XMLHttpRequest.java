@@ -14,18 +14,22 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host.xml;
 
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_XML_SUPPORT_VIA_ACTIVEXOBJECT;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.XHR_ERRORHANDLER_NOT_SUPPORTED;
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.XHR_HANDLER_THIS_IS_FUNCTION;
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.XHR_IGNORE_SAME_ORIGIN;
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.XHR_IGNORE_SAME_ORIGIN_TO_ABOUT;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.XHR_FIRE_STATE_OPENED_AGAIN_IN_ASYNC_MODE;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.XHR_IGNORE_PORT_FOR_SAME_ORIGIN;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.XHR_ONREADYSTATECANGE_SYNC_REQUESTS_COMPLETED;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.XHR_ONREADYSTATECANGE_SYNC_REQUESTS_NOT_TRIGGERED;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.XHR_ONREADYSTATECHANGE_WITH_EVENT_PARAM;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.XHR_OPEN_ALLOW_EMTPY_URL;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.XHR_ORIGIN_HEADER;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.XHR_RESPONSE_XML_IS_ACTIVEXOBJECT;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.XHR_STATUS_THROWS_EXCEPTION_WHEN_UNSET;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.XHR_TRIGGER_ONLOAD_ON_COMPLETED;
-import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.CHROME;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.XHR_WITHCREDENTIALS_ALLOW_ORIGIN_ALL;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.
+    XHR_WITHCREDENTIALS_NOT_WRITEABLE_BEFORE_OPEN_EXCEPTION;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.XHR_WITHCREDENTIALS_NOT_WRITEABLE_IN_SYNC;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.XHR_WITHCREDENTIALS_NOT_WRITEABLE_IN_SYNC_EXCEPTION;
 import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.FF;
 import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.IE;
 
@@ -56,11 +60,12 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import com.gargoylesoftware.htmlunit.AjaxController;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.HttpMethod;
-import com.gargoylesoftware.htmlunit.HttpWebConnection2;
 import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.WebConnection;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
+import com.gargoylesoftware.htmlunit.WebWindow;
+import com.gargoylesoftware.htmlunit.activex.javascript.msxml.MSXMLActiveXObjectFactory;
+import com.gargoylesoftware.htmlunit.activex.javascript.msxml.XMLDOMDocument;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.javascript.JavaScriptEngine;
 import com.gargoylesoftware.htmlunit.javascript.SimpleScriptable;
@@ -72,7 +77,6 @@ import com.gargoylesoftware.htmlunit.javascript.configuration.JsxFunction;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxGetter;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxSetter;
 import com.gargoylesoftware.htmlunit.javascript.configuration.WebBrowser;
-import com.gargoylesoftware.htmlunit.javascript.host.ActiveXObject;
 import com.gargoylesoftware.htmlunit.javascript.host.Event;
 import com.gargoylesoftware.htmlunit.util.NameValuePair;
 import com.gargoylesoftware.htmlunit.util.WebResponseWrapper;
@@ -88,11 +92,12 @@ import com.gargoylesoftware.htmlunit.xml.XmlPage;
  * @author Stuart Begg
  * @author Ronald Brill
  * @author Sebastian Cato
+ * @author Frank Danek
  *
  * @see <a href="http://www.w3.org/TR/XMLHttpRequest/">W3C XMLHttpRequest</a>
  * @see <a href="http://developer.apple.com/internet/webcontent/xmlhttpreq.html">Safari documentation</a>
  */
-@JsxClass(browsers = { @WebBrowser(value = IE, minVersion = 7), @WebBrowser(FF), @WebBrowser(CHROME) })
+@JsxClass
 public class XMLHttpRequest extends SimpleScriptable {
 
     private static final Log LOG = LogFactory.getLog(XMLHttpRequest.class);
@@ -114,7 +119,10 @@ public class XMLHttpRequest extends SimpleScriptable {
     private static final String HEADER_ACCESS_CONTROL_REQUEST_METHOD = "Access-Control-Request-Method";
     private static final String HEADER_ACCESS_CONTROL_REQUEST_HEADERS = "Access-Control-Request-Headers";
     private static final String HEADER_ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
+    private static final String HEADER_ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
     private static final String HEADER_ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
+
+    private static final String ALLOW_ORIGIN_ALL = "*";
 
     private static final String[] ALL_PROPERTIES_ = {"onreadystatechange", "readyState", "responseText", "responseXML",
         "status", "statusText", "abort", "getAllResponseHeaders", "getResponseHeader", "open", "send",
@@ -201,42 +209,23 @@ public class XMLHttpRequest extends SimpleScriptable {
             final Scriptable scope = stateChangeHandler_.getParentScope();
             final JavaScriptEngine jsEngine = containingPage_.getWebClient().getJavaScriptEngine();
 
-            final int nbExecutions;
-            if (async_ && STATE_OPENED == state) {
-                // quite strange but IE and FF seem both to fire state loading twice
-                // in async mode (at least with HTML of the unit tests)
-                nbExecutions = 2;
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Calling onreadystatechange handler for state " + state);
             }
-            else {
-                nbExecutions = 1;
+            Object[] params = ArrayUtils.EMPTY_OBJECT_ARRAY;
+            if (browser.hasFeature(XHR_ONREADYSTATECHANGE_WITH_EVENT_PARAM)) {
+                params = new Object[1];
+                final Event event = new Event(this, Event.TYPE_READY_STATE_CHANGE);
+                params[0] = event;
             }
 
-            final Scriptable thisValue;
-            if (browser.hasFeature(XHR_HANDLER_THIS_IS_FUNCTION)) {
-                thisValue = stateChangeHandler_;
-            }
-            else {
-                thisValue = this;
-            }
-            for (int i = 0; i < nbExecutions; i++) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Calling onreadystatechange handler for state " + state);
+            jsEngine.callFunction(containingPage_, stateChangeHandler_, scope, this, params);
+            if (LOG.isDebugEnabled()) {
+                if (context == null) {
+                    context = Context.getCurrentContext();
                 }
-                Object[] params = ArrayUtils.EMPTY_OBJECT_ARRAY;
-                if (browser.hasFeature(XHR_ONREADYSTATECHANGE_WITH_EVENT_PARAM)) {
-                    params = new Object[1];
-                    final Event event = new Event(this, Event.TYPE_READY_STATE_CHANGE);
-                    params[0] = event;
-                }
-
-                jsEngine.callFunction(containingPage_, stateChangeHandler_, scope, thisValue, params);
-                if (LOG.isDebugEnabled()) {
-                    if (context == null) {
-                        context = Context.getCurrentContext();
-                    }
-                    LOG.debug("onreadystatechange handler: " + context.decompileFunction(stateChangeHandler_, 4));
-                    LOG.debug("Calling onreadystatechange handler for state " + state + ". Done.");
-                }
+                LOG.debug("onreadystatechange handler: " + context.decompileFunction(stateChangeHandler_, 4));
+                LOG.debug("Calling onreadystatechange handler for state " + state + ". Done.");
             }
         }
 
@@ -253,7 +242,7 @@ public class XMLHttpRequest extends SimpleScriptable {
      * Returns the event handler that fires on load.
      * @return the event handler that fires on load
      */
-    @JsxGetter({ @WebBrowser(value = IE, maxVersion = 6), @WebBrowser(FF) })
+    @JsxGetter({ @WebBrowser(value = IE, minVersion = 11), @WebBrowser(FF) })
     public Function getOnload() {
         return loadHandler_;
     }
@@ -262,7 +251,7 @@ public class XMLHttpRequest extends SimpleScriptable {
      * Sets the event handler that fires on load.
      * @param loadHandler the event handler that fires on load
      */
-    @JsxSetter({ @WebBrowser(value = IE, maxVersion = 6), @WebBrowser(FF) })
+    @JsxSetter({ @WebBrowser(value = IE, minVersion = 11), @WebBrowser(FF) })
     public void setOnload(final Function loadHandler) {
         loadHandler_ = loadHandler;
     }
@@ -271,7 +260,7 @@ public class XMLHttpRequest extends SimpleScriptable {
      * Returns the event handler that fires on error.
      * @return the event handler that fires on error
      */
-    @JsxGetter
+    @JsxGetter({ @WebBrowser(value = IE, minVersion = 11), @WebBrowser(FF) })
     public Function getOnerror() {
         return errorHandler_;
     }
@@ -280,7 +269,7 @@ public class XMLHttpRequest extends SimpleScriptable {
      * Sets the event handler that fires on error.
      * @param errorHandler the event handler that fires on error
      */
-    @JsxSetter
+    @JsxSetter({ @WebBrowser(value = IE, minVersion = 11), @WebBrowser(FF) })
     public void setOnerror(final Function errorHandler) {
         errorHandler_ = errorHandler;
     }
@@ -357,19 +346,21 @@ public class XMLHttpRequest extends SimpleScriptable {
         }
         final String contentType = webResponse_.getContentType();
         if (contentType.isEmpty() || contentType.contains("xml")) {
+            final WebWindow webWindow = getWindow().getWebWindow();
             try {
-                final XmlPage page = new XmlPage(webResponse_, getWindow().getWebWindow());
-                final XMLDocument doc;
-                if (getBrowserVersion().hasFeature(JS_XML_SUPPORT_VIA_ACTIVEXOBJECT)) {
-                    doc = ActiveXObject.buildXMLDocument(getWindow().getWebWindow());
+                if (getBrowserVersion().hasFeature(XHR_RESPONSE_XML_IS_ACTIVEXOBJECT)) {
+                    final XmlPage page = new XmlPage(webResponse_, webWindow, true, false);
+                    final MSXMLActiveXObjectFactory factory = webWindow.getWebClient().getMSXMLActiveXObjectFactory();
+                    final XMLDOMDocument document = (XMLDOMDocument) factory.create("Microsoft.XMLDOM", webWindow);
+                    document.setDomNode(page);
+                    return document;
                 }
-                else {
-                    doc = new XMLDocument();
-                    doc.setPrototype(getPrototype(doc.getClass()));
-                }
-                doc.setParentScope(getWindow());
-                doc.setDomNode(page);
-                return doc;
+                final XmlPage page = new XmlPage(webResponse_, webWindow);
+                final XMLDocument document = new XMLDocument();
+                document.setPrototype(getPrototype(document.getClass()));
+                document.setParentScope(getWindow());
+                document.setDomNode(page);
+                return document;
             }
             catch (final IOException e) {
                 LOG.warn("Failed parsing XML document " + webResponse_.getWebRequest().getUrl() + ": "
@@ -392,6 +383,9 @@ public class XMLHttpRequest extends SimpleScriptable {
     @JsxGetter
     public int getStatus() {
         if (state_ == STATE_UNSENT || state_ == STATE_OPENED) {
+            if (getBrowserVersion().hasFeature(XHR_STATUS_THROWS_EXCEPTION_WHEN_UNSET)) {
+                throw Context.reportRuntimeError("status not set");
+            }
             return 0;
         }
         if (webResponse_ != null) {
@@ -410,6 +404,9 @@ public class XMLHttpRequest extends SimpleScriptable {
     @JsxGetter
     public String getStatusText() {
         if (state_ == STATE_UNSENT || state_ == STATE_OPENED) {
+            if (getBrowserVersion().hasFeature(XHR_STATUS_THROWS_EXCEPTION_WHEN_UNSET)) {
+                throw Context.reportRuntimeError("statusText not set");
+            }
             return "";
         }
         if (webResponse_ != null) {
@@ -485,6 +482,11 @@ public class XMLHttpRequest extends SimpleScriptable {
             throw Context.reportRuntimeError("URL for XHR.open can't be empty!");
         }
 
+        if (!async && getWithCredentials()) {
+            throw Context.reportRuntimeError(
+                    "open() in sync mode is not possible because 'withCredentials' is set to true");
+        }
+
         final String url = Context.toString(urlParam);
 
         // (URL + Method + User + Password) become a WebRequest instance.
@@ -493,11 +495,8 @@ public class XMLHttpRequest extends SimpleScriptable {
         try {
             final URL fullUrl = containingPage_.getFullyQualifiedUrl(url);
             final URL originUrl = containingPage_.getUrl();
-            if (!isAllowCrossDomainsFor(originUrl, fullUrl)) {
-                throw Context.reportRuntimeError("Access to restricted URI denied");
-            }
 
-            final WebRequest request = new WebRequest(fullUrl);
+            final WebRequest request = new WebRequest(fullUrl, getBrowserVersion().getXmlHttpRequestAcceptHeader());
             request.setCharset("UTF-8");
             request.setAdditionalHeader("Referer", containingPage_.getUrl().toExternalForm());
 
@@ -537,28 +536,15 @@ public class XMLHttpRequest extends SimpleScriptable {
         setState(STATE_OPENED, null);
     }
 
-    /**
-     * Used by IE6/7 only, to be removed when they are not supported.
-     */
-    private boolean isAllowCrossDomainsFor(final URL originUrl, final URL newUrl) {
-        final BrowserVersion browser = getBrowserVersion();
-        if (browser.hasFeature(XHR_IGNORE_SAME_ORIGIN)) {
-            return true;
-        }
-
-        if (browser.hasFeature(XHR_IGNORE_SAME_ORIGIN_TO_ABOUT)
-                && "about".equals(newUrl.getProtocol())) {
-            return true;
-        }
-
-        return originUrl.getHost().equals(newUrl.getHost());
-    }
-
     private boolean isSameOrigin(final URL originUrl, final URL newUrl) {
         if (!originUrl.getHost().equals(newUrl.getHost())) {
             return false;
         }
-        //
+
+        if (getBrowserVersion().hasFeature(XHR_IGNORE_PORT_FOR_SAME_ORIGIN)) {
+            return true;
+        }
+
         int originPort = originUrl.getPort();
         if (originPort == -1) {
             originPort = originUrl.getDefaultPort();
@@ -586,6 +572,12 @@ public class XMLHttpRequest extends SimpleScriptable {
             doSend(Context.getCurrentContext());
         }
         else {
+            if (getBrowserVersion().hasFeature(XHR_FIRE_STATE_OPENED_AGAIN_IN_ASYNC_MODE)) {
+                // quite strange but IE and FF seem both to fire state loading twice
+                // in async mode (at least with HTML of the unit tests)
+                setState(STATE_OPENED, Context.getCurrentContext());
+            }
+
             // Create and start a thread in which to execute the request.
             final Scriptable startingScope = getWindow();
             final ContextFactory cf = client.getJavaScriptEngine().getContextFactory();
@@ -645,10 +637,6 @@ public class XMLHttpRequest extends SimpleScriptable {
     private void doSend(final Context context) {
         final WebClient wc = getWindow().getWebWindow().getWebClient();
         try {
-            WebConnection connection = wc.getWebConnection();
-            if (connection instanceof HttpWebConnection2) {
-                ((HttpWebConnection2) connection).clearCredentials();
-            }
             final String originHeaderValue = webRequest_.getAdditionalHeaders().get(HEADER_ORIGIN);
             final boolean crossOriginResourceSharing = originHeaderValue != null;
             if (crossOriginResourceSharing && isPreflight()) {
@@ -695,8 +683,20 @@ public class XMLHttpRequest extends SimpleScriptable {
             }
             boolean allowOriginResponse = true;
             if (crossOriginResourceSharing) {
-                final String value = webResponse.getResponseHeaderValue(HEADER_ACCESS_CONTROL_ALLOW_ORIGIN);
-                allowOriginResponse = "*".equals(value) || originHeaderValue.equals(value);
+                String value = webResponse.getResponseHeaderValue(HEADER_ACCESS_CONTROL_ALLOW_ORIGIN);
+                allowOriginResponse = originHeaderValue.equals(value);
+                if (getWithCredentials()) {
+                    allowOriginResponse = allowOriginResponse
+                            || (getBrowserVersion().hasFeature(XHR_WITHCREDENTIALS_ALLOW_ORIGIN_ALL)
+                            && ALLOW_ORIGIN_ALL.equals(value));
+
+                    // second step: check the allow-credentials header for true
+                    value = webResponse.getResponseHeaderValue(HEADER_ACCESS_CONTROL_ALLOW_CREDENTIALS);
+                    allowOriginResponse = allowOriginResponse && Boolean.parseBoolean(value);
+                }
+                else {
+                    allowOriginResponse = allowOriginResponse || ALLOW_ORIGIN_ALL.equals(value);
+                }
             }
             if (allowOriginResponse) {
                 if (overriddenMimeType_ == null) {
@@ -711,10 +711,12 @@ public class XMLHttpRequest extends SimpleScriptable {
                     };
                 }
             }
-            setState(STATE_HEADERS_RECEIVED, context);
-            setState(STATE_LOADING, context);
-            setState(STATE_DONE, context);
-            if (!allowOriginResponse) {
+            if (allowOriginResponse) {
+                setState(STATE_HEADERS_RECEIVED, context);
+                setState(STATE_LOADING, context);
+                setState(STATE_DONE, context);
+            }
+            else {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("No permitted \"Access-Control-Allow-Origin\" header for URL " + webRequest_.getUrl());
                 }
@@ -753,7 +755,8 @@ public class XMLHttpRequest extends SimpleScriptable {
 
     private boolean isPreflightAuthorized(final WebResponse preflightResponse) {
         final String originHeader = preflightResponse.getResponseHeaderValue(HEADER_ACCESS_CONTROL_ALLOW_ORIGIN);
-        if (!"*".equals(originHeader) && !webRequest_.getAdditionalHeaders().get(HEADER_ORIGIN).equals(originHeader)) {
+        if (!ALLOW_ORIGIN_ALL.equals(originHeader)
+                && !webRequest_.getAdditionalHeaders().get(HEADER_ORIGIN).equals(originHeader)) {
             return false;
         }
         String headersHeader = preflightResponse.getResponseHeaderValue(HEADER_ACCESS_CONTROL_ALLOW_HEADERS);
@@ -841,7 +844,7 @@ public class XMLHttpRequest extends SimpleScriptable {
      * @param mimeType the type used to override that returned by the server (if any)
      * @see <a href="http://xulplanet.com/references/objref/XMLHttpRequest.html#method_overrideMimeType">XUL Planet</a>
      */
-    @JsxFunction({ @WebBrowser(value = IE, maxVersion = 6), @WebBrowser(FF) })
+    @JsxFunction(@WebBrowser(FF))
     public void overrideMimeType(final String mimeType) {
         overriddenMimeType_ = mimeType;
     }
@@ -850,7 +853,7 @@ public class XMLHttpRequest extends SimpleScriptable {
      * Returns the "withCredentials" property.
      * @return the "withCredentials" property
      */
-    @JsxGetter
+    @JsxGetter({ @WebBrowser(value = IE, minVersion = 9), @WebBrowser(FF) })
     public boolean getWithCredentials() {
         return withCredentials_;
     }
@@ -859,8 +862,20 @@ public class XMLHttpRequest extends SimpleScriptable {
      * Sets the "withCredentials" property.
      * @param withCredentials the "withCredentials" property.
      */
-    @JsxSetter
+    @JsxSetter({ @WebBrowser(value = IE, minVersion = 9), @WebBrowser(FF) })
     public void setWithCredentials(final boolean withCredentials) {
+        if (!async_ && state_ != STATE_UNSENT) {
+            if (getBrowserVersion().hasFeature(XHR_WITHCREDENTIALS_NOT_WRITEABLE_IN_SYNC_EXCEPTION)) {
+                throw Context.reportRuntimeError("Property 'withCredentials' not writable in sync mode.");
+            }
+            if (getBrowserVersion().hasFeature(XHR_WITHCREDENTIALS_NOT_WRITEABLE_IN_SYNC)) {
+                return;
+            }
+        }
+        if (state_ == STATE_UNSENT
+            && getBrowserVersion().hasFeature(XHR_WITHCREDENTIALS_NOT_WRITEABLE_BEFORE_OPEN_EXCEPTION)) {
+            throw Context.reportRuntimeError("Property 'withCredentials' not writable before calling open().");
+        }
         withCredentials_ = withCredentials;
     }
 

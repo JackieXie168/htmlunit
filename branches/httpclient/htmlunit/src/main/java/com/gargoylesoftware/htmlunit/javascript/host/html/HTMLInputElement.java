@@ -14,7 +14,7 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host.html;
 
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.CSS_DISPLAY_DEFAULT;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.EVENT_ONCLICK_USES_POINTEREVENT;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_ALIGN_FOR_INPUT_IGNORES_VALUES;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_CLICK_CHECKBOX_TRIGGERS_NO_CHANGE_EVENT;
 import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.FF;
@@ -40,6 +40,7 @@ import com.gargoylesoftware.htmlunit.javascript.configuration.WebBrowser;
 import com.gargoylesoftware.htmlunit.javascript.host.Event;
 import com.gargoylesoftware.htmlunit.javascript.host.FormField;
 import com.gargoylesoftware.htmlunit.javascript.host.MouseEvent;
+import com.gargoylesoftware.htmlunit.javascript.host.PointerEvent;
 
 /**
  * The JavaScript object for form input elements (html tag &lt;input ...&gt;).
@@ -52,8 +53,9 @@ import com.gargoylesoftware.htmlunit.javascript.host.MouseEvent;
  * @author Ahmed Ashour
  * @author Daniel Gredler
  * @author Ronald Brill
+ * @author Frank Danek
  */
-@JsxClass(domClasses = HtmlInput.class)
+@JsxClass(domClass = HtmlInput.class)
 public class HTMLInputElement extends FormField {
 
     /**
@@ -385,8 +387,15 @@ public class HTMLInputElement extends FormField {
     public void click() throws IOException {
         final HtmlInput domNode = (HtmlInput) getDomNodeOrDie();
         final boolean originalState = domNode.isChecked();
-        final Event event = new MouseEvent(domNode, MouseEvent.TYPE_CLICK, false,
-                false, false, MouseEvent.BUTTON_LEFT);
+        final Event event;
+        if (getBrowserVersion().hasFeature(EVENT_ONCLICK_USES_POINTEREVENT)) {
+            event = new PointerEvent(domNode, MouseEvent.TYPE_CLICK, false,
+                    false, false, MouseEvent.BUTTON_LEFT);
+        }
+        else {
+            event = new MouseEvent(domNode, MouseEvent.TYPE_CLICK, false,
+                    false, false, MouseEvent.BUTTON_LEFT);
+        }
         domNode.click(event);
 
         final boolean newState = domNode.isChecked();
@@ -414,17 +423,5 @@ public class HTMLInputElement extends FormField {
     @Override
     protected boolean isEndTagForbidden() {
         return true;
-    }
-
-    /**
-     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
-     * {@inheritDoc}
-    */
-    @Override
-    public String getDefaultStyleDisplay() {
-        if (getBrowserVersion().hasFeature(CSS_DISPLAY_DEFAULT)) {
-            return "inline";
-        }
-        return "inline-block";
     }
 }

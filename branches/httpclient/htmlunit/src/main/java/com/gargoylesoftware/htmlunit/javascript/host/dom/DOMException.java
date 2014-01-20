@@ -14,7 +14,9 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host.dom;
 
+import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.CHROME;
 import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.FF;
+import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.IE;
 import net.sourceforge.htmlunit.corejs.javascript.Context;
 
 import com.gargoylesoftware.htmlunit.javascript.SimpleScriptable;
@@ -30,8 +32,9 @@ import com.gargoylesoftware.htmlunit.javascript.configuration.WebBrowser;
  * DOM-Level-2-Core</a>
  * @version $Revision$
  * @author Marc Guillemot
+ * @author Frank Danek
  */
-@JsxClass(browsers = @WebBrowser(FF))
+@JsxClass(browsers = { @WebBrowser(CHROME), @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
 public class DOMException extends SimpleScriptable {
     /** If the specified range of text does not fit into a DOMString. */
     @JsxConstant
@@ -130,7 +133,7 @@ public class DOMException extends SimpleScriptable {
      * Gets the line at which the exception occurred.
      * @return the line of the exception
      */
-    @JsxGetter
+    @JsxGetter(@WebBrowser(FF))
     public Object getLineNumber() {
         if (lineNumber_ == -1) {
             return Context.getUndefinedValue();
@@ -142,7 +145,7 @@ public class DOMException extends SimpleScriptable {
      * Gets the name of the in  which the exception occurred.
      * @return the name of the source file
      */
-    @JsxGetter
+    @JsxGetter(@WebBrowser(FF))
     public Object getFilename() {
         if (fileName_ == null) {
             return Context.getUndefinedValue();

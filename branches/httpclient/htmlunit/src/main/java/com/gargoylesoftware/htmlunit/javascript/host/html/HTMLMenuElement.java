@@ -14,16 +14,21 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host.html;
 
+import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.FF;
+import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.IE;
+
 import com.gargoylesoftware.htmlunit.html.HtmlMenu;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxClass;
+import com.gargoylesoftware.htmlunit.javascript.configuration.WebBrowser;
 
 /**
  * The JavaScript object "HTMLMenuElement".
  *
  * @version $Revision$
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
-@JsxClass(domClasses = HtmlMenu.class)
+@JsxClass(domClass = HtmlMenu.class,
+    browsers = { @WebBrowser(value = FF), @WebBrowser(value = IE, minVersion = 11) })
 public class HTMLMenuElement extends HTMLListElement {
-
 }

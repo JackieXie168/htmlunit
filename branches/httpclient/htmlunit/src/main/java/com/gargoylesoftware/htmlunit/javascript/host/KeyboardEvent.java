@@ -14,8 +14,9 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host;
 
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.GENERATED_113;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_EVENT_DISTINGUISH_PRINTABLE_KEY;
 import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.FF;
+import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.IE;
 
 import com.gargoylesoftware.htmlunit.html.DomNode;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxClass;
@@ -32,6 +33,7 @@ import com.gargoylesoftware.htmlunit.javascript.configuration.WebBrowser;
  *
  * @version $Revision$
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 @JsxClass
 public class KeyboardEvent extends UIEvent {
@@ -520,23 +522,25 @@ public class KeyboardEvent extends UIEvent {
             final boolean shiftKey, final boolean ctrlKey, final boolean altKey) {
         super(domNode, type);
         int keyCode = 0;
-        if (getBrowserVersion().hasFeature(GENERATED_113)) {
-            if (getType().equals(Event.TYPE_KEY_PRESS)) {
-                keyCode = Integer.valueOf(character);
-                setKeyCode(keyCode);
-            }
-            else {
-                keyCode = Integer.valueOf(charToKeyCode(character));
-                setKeyCode(keyCode);
-            }
+
+        if (!getType().equals(Event.TYPE_KEY_PRESS)) {
+            keyCode = Integer.valueOf(charToKeyCode(character));
         }
         else {
-            if (getType().equals(Event.TYPE_KEY_PRESS) && character >= 33 && character <= 126) {
-                charCode_ = character;
+            if (getBrowserVersion().hasFeature(JS_EVENT_DISTINGUISH_PRINTABLE_KEY)) {
+                if (character < 32 || character > 126) {
+                    keyCode = Integer.valueOf(charToKeyCode(character));
+                }
             }
             else {
-                keyCode = Integer.valueOf(charToKeyCode(character));
-                setKeyCode(keyCode);
+                keyCode = Integer.valueOf(character);
+            }
+        }
+        setKeyCode(keyCode);
+        if (getType().equals(Event.TYPE_KEY_PRESS)) {
+            if ((character >= 33 && character <= 126)
+                    || !getBrowserVersion().hasFeature(JS_EVENT_DISTINGUISH_PRINTABLE_KEY)) {
+                charCode_ = character;
             }
         }
         setShiftKey(shiftKey);
@@ -619,7 +623,7 @@ public class KeyboardEvent extends UIEvent {
      * Returns the char code associated with the event.
      * @return the char code associated with the event
      */
-    @JsxGetter(@WebBrowser(FF))
+    @JsxGetter({ @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public int getCharCode() {
         return charCode_;
     }
@@ -628,7 +632,7 @@ public class KeyboardEvent extends UIEvent {
      * Returns the numeric keyCode of the key pressed, or the charCode for an alphanumeric key pressed.
      * @return the numeric keyCode of the key pressed, or the charCode for an alphanumeric key pressed
      */
-    @JsxGetter(@WebBrowser(FF))
+    @JsxGetter({ @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public Object getWhich() {
         return which_;
     }
@@ -663,7 +667,7 @@ public class KeyboardEvent extends UIEvent {
      * {@inheritDoc} Overridden to modify browser configurations.
      */
     @Override
-    @JsxGetter(@WebBrowser(FF))
+    @JsxGetter({ @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public Object getKeyCode() {
         return super.getKeyCode();
     }

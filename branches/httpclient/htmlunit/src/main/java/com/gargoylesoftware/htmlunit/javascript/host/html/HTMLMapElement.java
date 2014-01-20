@@ -30,7 +30,7 @@ import com.gargoylesoftware.htmlunit.javascript.configuration.JsxGetter;
  * @author Ahmed Ashour
  * @author Ronald Brill
  */
-@JsxClass(domClasses = HtmlMap.class)
+@JsxClass(domClass = HtmlMap.class)
 public class HTMLMapElement extends HTMLElement {
     private HTMLCollection areas_;
 
@@ -56,14 +56,5 @@ public class HTMLMapElement extends HTMLElement {
             };
         }
         return areas_;
-    }
-
-    /**
-     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
-     * {@inheritDoc}
-    */
-    @Override
-    public String getDefaultStyleDisplay() {
-        return "inline";
     }
 }

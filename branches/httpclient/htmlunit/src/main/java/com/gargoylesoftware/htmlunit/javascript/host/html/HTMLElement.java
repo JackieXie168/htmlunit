@@ -14,29 +14,28 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host.html;
 
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.GENERATED_65;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.GENERATED_72;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.HTMLELEMENT_ATTRIBUTE_FIX_IN_QUIRKS_MODE;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.HTMLELEMENT_OUTER_HTML_UPPER_CASE;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.HTMLELEMENT_OUTER_INNER_HTML_QUOTE_ATTRIBUTES;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.HTML_COLOR_EXPAND_SHORT_HEX;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.HTML_COLOR_REPLACE_NAME_BY_HEX;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.HTML_COLOR_RESTRICT;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.HTML_COLOR_RESTRICT_AND_FILL_UP;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.HTML_COLOR_TO_LOWER;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_ALIGN_ACCEPTS_ARBITRARY_VALUES;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_BOUNDING_CLIENT_RECT_OFFSET_TWO;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_CHAR_EMULATED;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_CHAR_OFF_EMULATED;
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_CHAR_OFF_INTEGER;
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_CHAR_UNDEFINED_DOT;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_CLIENT_LEFT_TOP_ZERO;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_ELEMENT_EXTENT_WITHOUT_PADDING;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_INNER_HTML_ADD_CHILD_FOR_NULL_VALUE;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_INNER_HTML_CREATES_DOC_FRAGMENT_AS_PARENT;
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_INNER_HTML_READONLY_FOR_SOME_TAGS;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_INNER_HTML_REDUCE_WHITESPACES;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_NATIVE_FUNCTION_TOSTRING_NEW_LINE;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_OFFSET_PARENT_THROWS_NOT_ATTACHED;
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_OUTER_HTML_BODY_HEAD_READONLY;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_OUTER_THROW_EXCEPTION_WHEN_CLOSES;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_PREFIX_RETURNS_EMPTY_WHEN_UNDEFINED;
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_SET_ATTRIBUTE_CONSIDERS_ATTR_FOR_CLASS_AS_REAL;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_SET_ATTRIBUTE_SUPPORTS_EVENT_HANDLERS;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_WIDTH_HEIGHT_ACCEPTS_ARBITRARY_VALUES;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.QUERYSELECTORALL_NOT_IN_QUIRKS;
@@ -50,7 +49,6 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -88,19 +86,34 @@ import com.gargoylesoftware.htmlunit.html.DomText;
 import com.gargoylesoftware.htmlunit.html.HTMLParser;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlArea;
+import com.gargoylesoftware.htmlunit.html.HtmlArticle;
+import com.gargoylesoftware.htmlunit.html.HtmlAside;
 import com.gargoylesoftware.htmlunit.html.HtmlBody;
 import com.gargoylesoftware.htmlunit.html.HtmlDivision;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
+import com.gargoylesoftware.htmlunit.html.HtmlFigure;
+import com.gargoylesoftware.htmlunit.html.HtmlFigureCaption;
+import com.gargoylesoftware.htmlunit.html.HtmlFooter;
 import com.gargoylesoftware.htmlunit.html.HtmlFrameSet;
+import com.gargoylesoftware.htmlunit.html.HtmlHeader;
+import com.gargoylesoftware.htmlunit.html.HtmlMark;
+import com.gargoylesoftware.htmlunit.html.HtmlNav;
+import com.gargoylesoftware.htmlunit.html.HtmlNoBreak;
+import com.gargoylesoftware.htmlunit.html.HtmlNoEmbed;
+import com.gargoylesoftware.htmlunit.html.HtmlNoFrames;
+import com.gargoylesoftware.htmlunit.html.HtmlNoScript;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.html.HtmlSection;
 import com.gargoylesoftware.htmlunit.html.HtmlTable;
 import com.gargoylesoftware.htmlunit.html.HtmlTableDataCell;
+import com.gargoylesoftware.htmlunit.html.HtmlWordBreak;
 import com.gargoylesoftware.htmlunit.html.SubmittableElement;
 import com.gargoylesoftware.htmlunit.javascript.NamedNodeMap;
 import com.gargoylesoftware.htmlunit.javascript.ScriptableWithFallbackGetter;
 import com.gargoylesoftware.htmlunit.javascript.background.BackgroundJavaScriptFactory;
 import com.gargoylesoftware.htmlunit.javascript.background.JavaScriptJob;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxClass;
+import com.gargoylesoftware.htmlunit.javascript.configuration.JsxClasses;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxFunction;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxGetter;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxSetter;
@@ -141,8 +154,25 @@ import com.gargoylesoftware.htmlunit.javascript.host.dom.DOMTokenList;
  * @author Ahmed Ashour
  * @author Sudhan Moghe
  * @author Ronald Brill
+ * @author Frank Danek
  */
-@JsxClass(domClasses = HtmlElement.class)
+@JsxClasses({
+    @JsxClass(domClass = HtmlArticle.class),
+    @JsxClass(domClass = HtmlAside.class),
+    @JsxClass(domClass = HtmlElement.class),
+    @JsxClass(domClass = HtmlFigure.class),
+    @JsxClass(domClass = HtmlFigureCaption.class),
+    @JsxClass(domClass = HtmlFooter.class),
+    @JsxClass(domClass = HtmlHeader.class),
+    @JsxClass(domClass = HtmlMark.class),
+    @JsxClass(domClass = HtmlNav.class),
+    @JsxClass(domClass = HtmlNoBreak.class, browsers = { @WebBrowser(FF) }),
+    @JsxClass(domClass = HtmlNoEmbed.class, browsers = { @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 9) }),
+    @JsxClass(domClass = HtmlNoFrames.class, browsers = { @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 9) }),
+    @JsxClass(domClass = HtmlNoScript.class, browsers = { @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 9) }),
+    @JsxClass(domClass = HtmlSection.class),
+    @JsxClass(domClass = HtmlWordBreak.class, browsers = { @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 9) })
+})
 public class HTMLElement extends Element implements ScriptableWithFallbackGetter {
 
     private static final Class<?>[] METHOD_PARAMS_OBJECT = new Class[] {Object.class};
@@ -348,34 +378,10 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
     private String chOff_ = "";
 
     /**
-     * The tag names of the objects for which innerHTML is read only in IE
-     */
-    private static final List<String> INNER_HTML_READONLY_IN_IE =
-        Arrays.asList(new String[] {
-            "col", "colgroup", "frameset", "head", "html", "style", "table",
-            "tbody", "tfoot", "thead", "title", "tr"});
-
-    /**
-     * The tag names of the objects for which innerText is read only
-     */
-    private static final List<String> INNER_TEXT_READONLY =
-        Arrays.asList(new String[] {"html", "table", "tbody", "tfoot", "thead", "tr"});
-
-    /**
-     * The tag names of the objects for which outerHTML is read only.
-     * Note: IE additionally handles the body and head tag as read only.
-     *       see feature JS_OUTER_HTML_BODY_READONLY
-     */
-    private static final List<String> OUTER_HTML_READONLY =
-        Arrays.asList(new String[] {
-            "caption", "col", "colgroup", "frameset",
-            "html", "tbody", "td", "tfoot", "th", "thead", "tr"});
-
-    /**
      * Returns the value of the "all" property.
      * @return the value of the "all" property
      */
-    @JsxGetter(@WebBrowser(IE))
+    @JsxGetter(@WebBrowser(value = IE, maxVersion = 9))
     public HTMLCollection getAll() {
         if (all_ == null) {
             all_ = new HTMLCollection(getDomNodeOrDie(), false, "HTMLElement.all") {
@@ -476,7 +482,7 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
      * Returns the document.
      * @return the document
      */
-    @JsxGetter(@WebBrowser(IE))
+    @JsxGetter(@WebBrowser(value = IE, maxVersion = 9))
     public DocumentProxy getDocument() {
         return getWindow().getDocument_js();
     }
@@ -500,33 +506,18 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
      * {@inheritDoc}
      */
     @Override
-    public String getNamespaceURI() {
-        final HtmlElement domNode = getDomNodeOrDie();
-        if (getBrowserVersion().hasFeature(GENERATED_65)) {
-            return domNode.getNamespaceURI();
-        }
-        if (domNode.getHtmlPageOrNull() != null) {
-            return null;
-        }
-        return domNode.getNamespaceURI();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public String getLocalName() {
         final DomNode domNode = getDomNodeOrDie();
         if (domNode.getHtmlPageOrNull() != null) {
             final String prefix = domNode.getPrefix();
             if (prefix != null) {
                 // create string builder only if needed (performance)
-                final StringBuilder localName = new StringBuilder(prefix.toUpperCase(Locale.ENGLISH));
+                final StringBuilder localName = new StringBuilder(prefix.toLowerCase(Locale.ENGLISH));
                 localName.append(':');
-                localName.append(domNode.getLocalName().toUpperCase(Locale.ENGLISH));
+                localName.append(domNode.getLocalName().toLowerCase(Locale.ENGLISH));
                 return localName.toString();
             }
-            return domNode.getLocalName().toUpperCase(Locale.ENGLISH);
+            return domNode.getLocalName().toLowerCase(Locale.ENGLISH);
         }
         return domNode.getLocalName();
     }
@@ -667,7 +658,7 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
      * @param localName the local name of the attribute to look for
      * @return the specified attribute, <code>null</code> if the attribute is not defined
      */
-    @JsxFunction({ @WebBrowser(FF), @WebBrowser(CHROME) })
+    @JsxFunction({ @WebBrowser(FF), @WebBrowser(CHROME), @WebBrowser(value = IE, minVersion = 11) })
     public Object getAttributeNodeNS(final String namespaceURI, final String localName) {
         return getDomNodeOrDie().getAttributeNodeNS(namespaceURI, localName).getScriptObject();
     }
@@ -754,39 +745,11 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
     }
 
     /**
-     * Sets the attribute node for the specified attribute.
-     * @param newAtt the attribute to set
-     * @return the replaced attribute node, if any
-     */
-    @JsxFunction
-    public Attr setAttributeNode(final Attr newAtt) {
-        final String name = newAtt.getName();
-
-        final Attr replacedAtt;
-        final boolean undefForClass = getBrowserVersion().
-                hasFeature(JS_SET_ATTRIBUTE_CONSIDERS_ATTR_FOR_CLASS_AS_REAL);
-        if (undefForClass) {
-            replacedAtt = (Attr) getAttributeNode(name);
-        }
-        else {
-            final NamedNodeMap nodes = (NamedNodeMap) getAttributes();
-            replacedAtt = (Attr) nodes.getNamedItemWithoutSytheticClassAttr(name);
-        }
-        if (replacedAtt != null) {
-            replacedAtt.detachFromParent();
-        }
-
-        final DomAttr newDomAttr = newAtt.getDomNodeOrDie();
-        getDomNodeOrDie().setAttributeNode(newDomAttr);
-        return replacedAtt;
-    }
-
-    /**
      * Returns all the descendant elements with the specified class.
      * @param className the name to search for
      * @return all the descendant elements with the specified class name
      */
-    @JsxFunction({ @WebBrowser(FF), @WebBrowser(CHROME) })
+    @JsxFunction({ @WebBrowser(FF), @WebBrowser(CHROME), @WebBrowser(value = IE, minVersion = 11) })
     public HTMLCollection getElementsByClassName(final String className) {
         final HtmlElement elt = getDomNodeOrDie();
         final String description = "HTMLElement.getElementsByClassName('" + className + "')";
@@ -895,7 +858,7 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
      * @see <a href="http://msdn.microsoft.com/en-us/library/ms534310.aspx">MSDN documentation</a>
      * @return the contents of this node as HTML
      */
-    @JsxGetter({ @WebBrowser(IE), @WebBrowser(CHROME), @WebBrowser(value = FF, minVersion = 11) })
+    @JsxGetter
     public String getOuterHTML() {
         final StringBuilder buf = new StringBuilder();
         // we can't rely on DomNode.asXml because it adds indentation and new lines
@@ -929,12 +892,17 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
             buffer.append(s);
         }
         else if (html) {
-            final HtmlElement element = (HtmlElement) node;
-            final HTMLElement scriptObject = (HTMLElement) node.getScriptObject();
+            final DomElement element = (DomElement) node;
+            final Element scriptObject = (Element) node.getScriptObject();
             final boolean isUpperCase = getBrowserVersion().hasFeature(HTMLELEMENT_OUTER_HTML_UPPER_CASE);
             String tag = element.getTagName();
-            if (isUpperCase && !scriptObject.isLowerCaseInOuterHtml()) {
-                tag = tag.toUpperCase(Locale.ENGLISH);
+
+            HTMLElement htmlElement = null;
+            if (scriptObject instanceof HTMLElement) {
+                htmlElement = (HTMLElement) scriptObject;
+                if (isUpperCase && !htmlElement.isLowerCaseInOuterHtml()) {
+                    tag = tag.toUpperCase(Locale.ENGLISH);
+                }
             }
             buffer.append("<").append(tag);
             // Add the attributes. IE does not use quotes, FF does.
@@ -958,7 +926,7 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
             buffer.append(">");
             // Add the children.
             printChildren(buffer, node, html);
-            if (!scriptObject.isEndTagForbidden()) {
+            if (null == htmlElement || !htmlElement.isEndTagForbidden()) {
                 buffer.append("</").append(tag).append(">");
             }
         }
@@ -980,11 +948,6 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
     @JsxSetter
     public void setInnerHTML(final Object value) {
         final DomNode domNode = getDomNodeOrDie();
-        final boolean readonly = getBrowserVersion().hasFeature(JS_INNER_HTML_READONLY_FOR_SOME_TAGS);
-
-        if (readonly && INNER_HTML_READONLY_IN_IE.contains(domNode.getNodeName())) {
-            throw Context.reportRuntimeError("innerHTML is read-only for tag " + domNode.getNodeName());
-        }
 
         domNode.removeAllChildren();
 
@@ -1016,12 +979,12 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
         setInnerTextImpl(Context.toString(value));
     }
 
-    private void setInnerTextImpl(final String value) {
+    /**
+     * The worker for setInnerText.
+     * @param value the new value for the contents of this node
+     */
+    protected void setInnerTextImpl(final String value) {
         final DomNode domNode = getDomNodeOrDie();
-
-        if (INNER_TEXT_READONLY.contains(domNode.getNodeName())) {
-            throw Context.reportRuntimeError("innerText is read-only for tag " + domNode.getNodeName());
-        }
 
         domNode.removeAllChildren();
 
@@ -1053,21 +1016,14 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
      * @param value the new value for replacing this node
      * @see <a href="http://msdn.microsoft.com/en-us/library/ms534310.aspx">MSDN documentation</a>
      */
-    @JsxSetter({ @WebBrowser(IE), @WebBrowser(CHROME), @WebBrowser(value = FF, minVersion = 11) })
+    @JsxSetter
     public void setOuterHTML(final String value) {
         final DomNode domNode = getDomNodeOrDie();
-        final String nodeName = domNode.getNodeName();
-
-        if (OUTER_HTML_READONLY.contains(nodeName)
-                || (getBrowserVersion().hasFeature(JS_OUTER_HTML_BODY_HEAD_READONLY)
-                        && ("body".equals(nodeName) || "head".equals(nodeName)))) {
-            throw Context.reportRuntimeError("outerHTML is read-only for tag " + nodeName);
-        }
 
         final DomDocumentFragment fragment = (DomDocumentFragment) domNode.getPage().createDocumentFragment();
         parseHtmlSnippet(fragment, false, value);
         DomNode child = fragment.getFirstChild();
-        if (child instanceof DomElement) {
+        if (getBrowserVersion().hasFeature(JS_OUTER_THROW_EXCEPTION_WHEN_CLOSES) && child instanceof DomElement) {
             final String parentName = domNode.getParentNode().getNodeName().toUpperCase(Locale.ENGLISH);
             final short[] closes = HTMLElements.getElement(child.getNodeName()).closes;
             if (closes != null) {
@@ -1125,7 +1081,7 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
          * @param append append or no
          */
         public ProxyDomNode(final SgmlPage page, final DomNode target, final boolean append) {
-            super(null, HtmlDivision.TAG_NAME, page, null);
+            super(HtmlDivision.TAG_NAME, page, null);
             target_ = target;
             append_ = append;
         }
@@ -1184,7 +1140,7 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
      *        beforeBegin, afterBegin, beforeEnd, afterEnd
      * @param text the HTML text to insert
      */
-    @JsxFunction(@WebBrowser(IE))
+    @JsxFunction({ @WebBrowser(IE), @WebBrowser(CHROME), @WebBrowser(value = FF, minVersion = 8) })
     public void insertAdjacentHTML(final String where, final String text) {
         final Object[] values = getInsertAdjacentLocation(where);
         final DomNode node = (DomNode) values[0];
@@ -1294,7 +1250,7 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
      * @param behavior the URL of the behavior to add, or a default behavior name
      * @return an identifier that can be user later to detach the behavior from the element
      */
-    @JsxFunction(@WebBrowser(IE))
+    @JsxFunction(@WebBrowser(value = IE, maxVersion = 9))
     public int addBehavior(final String behavior) {
         // if behavior already defined, then nothing to do
         if (behaviors_.contains(behavior)) {
@@ -1680,14 +1636,15 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
             // compute appropriate offset height to pretend mouse event was produced within this element
             return event.getClientY() - getPosY() + 50;
         }
-        return getCurrentStyle().getCalculatedHeight(true, true);
+        final ComputedCSSStyleDeclaration style = getWindow().getComputedStyle(this, null);
+        return style.getCalculatedHeight(true, true);
     }
 
     private boolean isDislayNone() {
         // if a parent is display:none there's nothing that a child can do to override it
         HTMLElement element = this;
         while (element != null) {
-            final CSSStyleDeclaration style = element.getCurrentStyle();
+            final CSSStyleDeclaration style = element.getWindow().getComputedStyle(element, null);
             final String display = style.getDisplay();
             if ("none".equals(display)) {
                 return true;
@@ -1716,7 +1673,8 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
             // compute appropriate offset width to pretend mouse event was produced within this element
             return event.getClientX() - getPosX() + 50;
         }
-        return getCurrentStyle().getCalculatedWidth(true, true);
+        final ComputedCSSStyleDeclaration style = getWindow().getComputedStyle(this, null);
+        return style.getCalculatedWidth(true, true);
     }
 
     /**
@@ -1756,7 +1714,8 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
             scrollTop_ = 0;
         }
         else if (scrollTop_ > 0) {
-            if (!getCurrentStyle().isScrollable(false)) {
+            final ComputedCSSStyleDeclaration style = getWindow().getComputedStyle(this, null);
+            if (!style.isScrollable(false)) {
                 scrollTop_ = 0;
             }
         }
@@ -1785,7 +1744,8 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
             scrollLeft_ = 0;
         }
         else if (scrollLeft_ > 0) {
-            if (!getCurrentStyle().isScrollable(true)) {
+            final ComputedCSSStyleDeclaration style = getWindow().getComputedStyle(this, null);
+            if (!style.isScrollable(true)) {
                 scrollLeft_ = 0;
             }
         }
@@ -1826,7 +1786,7 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
      * @return the namespace defined for the element
      * @see <a href="http://msdn.microsoft.com/en-us/library/ms534388.aspx">MSDN documentation</a>
      */
-    @JsxGetter(@WebBrowser(IE))
+    @JsxGetter(@WebBrowser(value = IE, maxVersion = 9))
     public String getScopeName() {
         final String prefix = getDomNodeOrDie().getPrefix();
         return prefix != null ? prefix : "HTML";
@@ -1837,9 +1797,12 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
      * @return the Uniform Resource Name (URN) specified in the namespace declaration
      * @see <a href="http://msdn.microsoft.com/en-us/library/ms534658.aspx">MSDN documentation</a>
      */
-    @JsxGetter(@WebBrowser(IE))
+    @JsxGetter(@WebBrowser(value = IE, maxVersion = 9))
     public String getTagUrn() {
         final String urn = getDomNodeOrDie().getNamespaceURI();
+        if (HTMLParser.XHTML_NAMESPACE.equals(urn)) {
+            return "";
+        }
         return urn != null ? urn : "";
     }
 
@@ -1932,7 +1895,7 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
      * @return <tt>false</tt> if at least one of the event handlers which handled the event
      *         called <tt>preventDefault</tt>; <tt>true</tt> otherwise
      */
-    @JsxFunction({ @WebBrowser(FF), @WebBrowser(CHROME) })
+    @JsxFunction({ @WebBrowser(FF), @WebBrowser(CHROME), @WebBrowser(value = IE, minVersion = 11) })
     public boolean dispatchEvent(final Event event) {
         event.setTarget(this);
         final HtmlElement element = getDomNodeOrDie();
@@ -2024,7 +1987,7 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
      * @param selectors the selectors
      * @return the static node list
      */
-    @JsxFunction({ @WebBrowser(value = IE, minVersion = 8), @WebBrowser(FF) })
+    @JsxFunction({ @WebBrowser(IE), @WebBrowser(FF) })
     public StaticNodeList querySelectorAll(final String selectors) {
         try {
             final List<Node> nodes = new ArrayList<Node>();
@@ -2044,7 +2007,7 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
      * @param selectors the selectors
      * @return null if no matches are found; otherwise, it returns the first matching element
      */
-    @JsxFunction({ @WebBrowser(value = IE, minVersion = 8), @WebBrowser(FF) })
+    @JsxFunction({ @WebBrowser(IE), @WebBrowser(FF) })
     public Node querySelector(final String selectors) {
         try {
             final DomNode node = getDomNodeOrDie().querySelector(selectors);
@@ -2109,7 +2072,7 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
      * @return the filters
      * @see <a href="http://msdn.microsoft.com/en-us/library/ms537452.aspx">MSDN doc</a>
      */
-    @JsxGetter(@WebBrowser(IE))
+    @JsxGetter(@WebBrowser(value = IE, maxVersion = 9))
     public Object getFilters() {
         return this; // return anything, what matters is that it is not null
     }
@@ -2118,7 +2081,7 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
      * Click this element. This simulates the action of the user clicking with the mouse.
      * @throws IOException if this click triggers a page load that encounters problems
      */
-    @JsxFunction(@WebBrowser(IE))
+    @JsxFunction({ @WebBrowser(IE), @WebBrowser(value = FF, minVersion = 10) })
     public void click() throws IOException {
         getDomNodeOrDie().click();
     }
@@ -2217,7 +2180,7 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
      * Simulates a click on a scrollbar component (IE only).
      * @param scrollAction the type of scroll action to simulate
      */
-    @JsxFunction(@WebBrowser(IE))
+    @JsxFunction(@WebBrowser(value = IE, maxVersion = 9))
     public void doScroll(final String scrollAction) {
         if (((HtmlPage) getDomNodeOrDie().getPage()).isBeingParsed()) {
             throw Context.reportRuntimeError("The data necessary to complete this operation is not yet available.");
@@ -2326,36 +2289,57 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
      */
     protected void setColorAttribute(final String name, final String value) {
         String s = value;
-        if (getBrowserVersion().hasFeature(HTML_COLOR_RESTRICT) && !s.isEmpty()) {
-            //For IE9, check HTMLElementTest#setColorAttribute
+        if (!s.isEmpty()) {
+            final boolean replaceNameByHex = getBrowserVersion().hasFeature(HTML_COLOR_REPLACE_NAME_BY_HEX);
+            final boolean restrict = getBrowserVersion().hasFeature(HTML_COLOR_RESTRICT);
+            final boolean restrictAndFillUp = getBrowserVersion().hasFeature(HTML_COLOR_RESTRICT_AND_FILL_UP);
 
-            s = null;
-            for (final String key : COLORS_MAP_IE.keySet()) {
-                if (key.equalsIgnoreCase(value)) {
-                    s = COLORS_MAP_IE.get(key).toLowerCase(Locale.ENGLISH);
-                    break;
+            boolean isName = false;
+            if (replaceNameByHex || restrict || restrictAndFillUp) {
+                for (final String key : COLORS_MAP_IE.keySet()) {
+                    if (key.equalsIgnoreCase(value)) {
+                        isName = true;
+                        if (replaceNameByHex) {
+                            s = COLORS_MAP_IE.get(key).toLowerCase(Locale.ENGLISH);
+                        }
+                        break;
+                    }
                 }
             }
-            if (s == null) {
-                s = value.toLowerCase(Locale.ENGLISH);
-                if (s.charAt(0) == '#') {
-                    s = s.substring(1);
+            if (!isName) {
+                if (s.charAt(0) == '#' && s.length() == 4
+                        && getBrowserVersion().hasFeature(HTML_COLOR_EXPAND_SHORT_HEX)) {
+                    final StringBuilder builder = new StringBuilder(7);
+                    builder.append("#0").append(s.charAt(1))
+                        .append('0').append(s.charAt(2))
+                        .append('0').append(s.charAt(3));
+                    s = builder.toString();
                 }
-                final StringBuilder builder = new StringBuilder(7);
-                for (int x = 0; x < 6 && x < s.length(); x++) {
-                    final char ch = s.charAt(x);
-                    if ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f')) {
-                        builder.append(ch);
+                if (restrict || restrictAndFillUp) {
+                    if (s.charAt(0) == '#') {
+                        s = s.substring(1);
                     }
-                    else {
-                        builder.append('0');
+                    final StringBuilder builder = new StringBuilder(7);
+                    for (int x = 0; x < 6 && x < s.length(); x++) {
+                        final char ch = s.charAt(x);
+                        if ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F')) {
+                            builder.append(ch);
+                        }
+                        else {
+                            builder.append('0');
+                        }
                     }
+                    if (restrictAndFillUp) {
+                        while (builder.length() < 6) {
+                            builder.append('0');
+                        }
+                    }
+                    builder.insert(0, '#');
+                    s = builder.toString();
                 }
-                while (builder.length() < 6) {
-                    builder.append('0');
-                }
-                builder.insert(0, '#');
-                s = builder.toString();
+            }
+            if (getBrowserVersion().hasFeature(HTML_COLOR_TO_LOWER)) {
+                s = s.toLowerCase(Locale.ENGLISH);
             }
         }
         getDomNodeOrDie().setAttribute(name, s);
@@ -2444,11 +2428,7 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
             return ch_;
         }
 
-        final String ch = getDomNodeOrDie().getAttribute("char");
-        if ((ch == DomElement.ATTRIBUTE_NOT_DEFINED) && (getBrowserVersion().hasFeature(JS_CHAR_UNDEFINED_DOT))) {
-            return ".";
-        }
-        return ch;
+        return getDomNodeOrDie().getAttribute("char");
     }
 
     /**
@@ -2490,22 +2470,12 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
 
         try {
             final float f = Float.parseFloat(chOff);
-            if (getBrowserVersion().hasFeature(JS_CHAR_OFF_INTEGER)) {
-                if (f < 0) {
-                    chOff = "0";
-                }
-                else {
-                    chOff = Integer.toString((int) f);
-                }
+            final int i = (int) f;
+            if (i == f) {
+                chOff = Integer.toString(i);
             }
             else {
-                final int i = (int) f;
-                if (i == f) {
-                    chOff = Integer.toString(i);
-                }
-                else {
-                    chOff = Float.toString(f);
-                }
+                chOff = Float.toString(f);
             }
         }
         catch (final NumberFormatException e) {
@@ -2535,10 +2505,11 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
         // Add the offset for this node.
         DomNode node = getDomNodeOrDie();
         HTMLElement element = (HTMLElement) node.getScriptObject();
-        left += element.getCurrentStyle().getLeft(true, false, false);
+        ComputedCSSStyleDeclaration style = element.getWindow().getComputedStyle(element, null);
+        left += style.getLeft(true, false, false);
 
         // If this node is absolutely positioned, we're done.
-        final String position = element.getCurrentStyle().getPositionWithInheritance();
+        final String position = style.getPositionWithInheritance();
         if ("absolute".equals(position)) {
             return left;
         }
@@ -2548,14 +2519,16 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
         while (node != null && node.getScriptObject() != offsetParent) {
             if (node.getScriptObject() instanceof HTMLElement) {
                 element = (HTMLElement) node.getScriptObject();
-                left += element.getCurrentStyle().getLeft(true, true, true);
+                style = element.getWindow().getComputedStyle(element, null);
+                left += style.getLeft(true, true, true);
             }
             node = node.getParentNode();
         }
 
         if (offsetParent != null) {
-            left += offsetParent.getCurrentStyle().getMarginLeftValue();
-            left += offsetParent.getCurrentStyle().getPaddingLeftValue();
+            style = offsetParent.getWindow().getComputedStyle(offsetParent, null);
+            left += style.getMarginLeftValue();
+            left += style.getPaddingLeftValue();
         }
 
         return left;
@@ -2571,7 +2544,8 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
         while (element != null) {
             cumulativeOffset += element.getOffsetLeft();
             if (element != this) {
-                cumulativeOffset += element.getCurrentStyle().getBorderLeftValue();
+                final ComputedCSSStyleDeclaration style = element.getWindow().getComputedStyle(element, null);
+                cumulativeOffset += style.getBorderLeftValue();
             }
             element = element.getOffsetParent();
         }
@@ -2588,7 +2562,8 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
         while (element != null) {
             cumulativeOffset += element.getOffsetTop();
             if (element != this) {
-                cumulativeOffset += element.getCurrentStyle().getBorderTopValue();
+                final ComputedCSSStyleDeclaration style = element.getWindow().getComputedStyle(element, null);
+                cumulativeOffset += style.getBorderTopValue();
             }
             element = element.getOffsetParent();
         }
@@ -2616,7 +2591,8 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
         if (getBrowserVersion().hasFeature(JS_CLIENT_LEFT_TOP_ZERO)) {
             return 0;
         }
-        return getCurrentStyle().getBorderLeftValue();
+        final ComputedCSSStyleDeclaration style = getWindow().getComputedStyle(this, null);
+        return style.getBorderLeftValue();
     }
 
     /**
@@ -2628,7 +2604,8 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
         if (getBrowserVersion().hasFeature(JS_CLIENT_LEFT_TOP_ZERO)) {
             return 0;
         }
-        return getCurrentStyle().getBorderTopValue();
+        final ComputedCSSStyleDeclaration style = getWindow().getComputedStyle(this, null);
+        return style.getBorderTopValue();
     }
 
     /**
@@ -2652,10 +2629,11 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
         // Add the offset for this node.
         DomNode node = getDomNodeOrDie();
         HTMLElement element = (HTMLElement) node.getScriptObject();
-        top += element.getCurrentStyle().getTop(true, false, false);
+        ComputedCSSStyleDeclaration style = element.getWindow().getComputedStyle(element, null);
+        top += style.getTop(true, false, false);
 
         // If this node is absolutely positioned, we're done.
-        final String position = element.getCurrentStyle().getPositionWithInheritance();
+        final String position = style.getPositionWithInheritance();
         if ("absolute".equals(position)) {
             return top;
         }
@@ -2665,18 +2643,22 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
         while (node != null && node.getScriptObject() != offsetParent) {
             if (node.getScriptObject() instanceof HTMLElement) {
                 element = (HTMLElement) node.getScriptObject();
-                top += element.getCurrentStyle().getTop(false, true, true);
+                style = element.getWindow().getComputedStyle(element, null);
+                top += style.getTop(false, true, true);
             }
             node = node.getParentNode();
         }
 
         if (offsetParent != null) {
             final HTMLElement thiz = (HTMLElement) getDomNodeOrDie().getScriptObject();
-            final boolean thisElementHasTopMargin = (thiz.getCurrentStyle().getMarginTopValue() != 0);
+            style = thiz.getWindow().getComputedStyle(thiz, null);
+            final boolean thisElementHasTopMargin = style.getMarginTopValue() != 0;
+
+            style = offsetParent.getWindow().getComputedStyle(offsetParent, null);
             if (!thisElementHasTopMargin) {
-                top += offsetParent.getCurrentStyle().getMarginTopValue();
+                top += style.getMarginTopValue();
             }
-            top += offsetParent.getCurrentStyle().getPaddingTopValue();
+            top += style.getPaddingTopValue();
         }
 
         return top;
@@ -2707,7 +2689,7 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
 
         Object offsetParent = null;
         final HTMLElement htmlElement = (HTMLElement) currentElement.getScriptObject();
-        final ComputedCSSStyleDeclaration style = htmlElement.getCurrentStyle();
+        final ComputedCSSStyleDeclaration style = htmlElement.getWindow().getComputedStyle(htmlElement, null);
         final String position = style.getPositionWithInheritance();
         final boolean ie = getBrowserVersion().hasFeature(GENERATED_72);
         final boolean staticPos = "static".equals(position);
@@ -2726,7 +2708,8 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
 
             if (parentNode != null && parentNode.getScriptObject() instanceof HTMLElement) {
                 final HTMLElement parentElement = (HTMLElement) parentNode.getScriptObject();
-                final ComputedCSSStyleDeclaration parentStyle = parentElement.getCurrentStyle();
+                final ComputedCSSStyleDeclaration parentStyle =
+                            parentElement.getWindow().getComputedStyle(parentElement, null);
                 final String parentPosition = parentStyle.getPositionWithInheritance();
                 final boolean parentIsStatic = "static".equals(parentPosition);
                 final boolean parentIsFixed = "fixed".equals(parentPosition);
@@ -2769,7 +2752,7 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
             top += 2;
         }
 
-        final ClientRect textRectangle = new ClientRect(0, left, 0, top);
+        final ClientRect textRectangle = new ClientRect(top + getOffsetHeight(), left, left + getOffsetWidth(), top);
         textRectangle.setParentScope(getWindow());
         textRectangle.setPrototype(getPrototype(textRectangle.getClass()));
         return textRectangle;
@@ -2779,7 +2762,7 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
      * Gets the token list of class attribute.
      * @return the token list of class attribute
      */
-    @Override
+    @JsxGetter({ @WebBrowser(CHROME), @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public DOMTokenList getClassList() {
         return new DOMTokenList(this, "class");
     }
@@ -2788,7 +2771,7 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
      * {@inheritDoc} Overridden to modify browser configurations.
      */
     @Override
-    @JsxFunction({ @WebBrowser(FF), @WebBrowser(CHROME) })
+    @JsxFunction({ @WebBrowser(FF), @WebBrowser(CHROME), @WebBrowser(value = IE, minVersion = 11) })
     public boolean hasAttribute(final String name) {
         return super.hasAttribute(name);
     }
@@ -2815,7 +2798,7 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
      * {@inheritDoc} Overridden to modify browser configurations.
      */
     @Override
-    @JsxGetter(@WebBrowser(IE))
+    @JsxGetter({ @WebBrowser(CHROME), @WebBrowser(IE) })
     public HTMLCollection getChildren() {
         return super.getChildren();
     }
@@ -2833,7 +2816,8 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
      * Returns the "dataset" attribute.
      * @return the "dataset" attribute
      */
-    @JsxGetter({ @WebBrowser(value = FF, minVersion = 10), @WebBrowser(CHROME) })
+    @JsxGetter({ @WebBrowser(value = FF, minVersion = 10), @WebBrowser(CHROME),
+        @WebBrowser(value = IE, minVersion = 11) })
     public DOMStringMap getDataset() {
         return new DOMStringMap(this);
     }
@@ -2860,7 +2844,7 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
      * Sets the <tt>onchange</tt> event handler for this element.
      * @param onchange the <tt>onchange</tt> event handler for this element
      */
-    @JsxSetter({ @WebBrowser(value = FF), @WebBrowser(CHROME) })
+    @JsxSetter({ @WebBrowser(value = FF), @WebBrowser(CHROME), @WebBrowser(value = IE, minVersion = 11) })
     public void setOnchange(final Object onchange) {
         setEventHandlerProp("onchange", onchange);
     }
@@ -2869,7 +2853,7 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
      * Returns the <tt>onchange</tt> event handler for this element.
      * @return the <tt>onchange</tt> event handler for this element
      */
-    @JsxGetter({ @WebBrowser(value = FF), @WebBrowser(CHROME) })
+    @JsxGetter({ @WebBrowser(value = FF), @WebBrowser(CHROME), @WebBrowser(value = IE, minVersion = 11) })
     public Function getOnchange() {
         return getEventHandler("onchange");
     }
@@ -2878,7 +2862,7 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
      * Returns the <tt>onsubmit</tt> event handler for this element.
      * @return the <tt>onsubmit</tt> event handler for this element
      */
-    @JsxGetter({ @WebBrowser(value = FF), @WebBrowser(CHROME) })
+    @JsxGetter({ @WebBrowser(value = FF), @WebBrowser(CHROME), @WebBrowser(value = IE, minVersion = 11) })
     public Object getOnsubmit() {
         return getEventHandlerProp("onsubmit");
     }
@@ -2887,8 +2871,17 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
      * Sets the <tt>onsubmit</tt> event handler for this element.
      * @param onsubmit the <tt>onsubmit</tt> event handler for this element
      */
-    @JsxSetter({ @WebBrowser(value = FF), @WebBrowser(CHROME) })
+    @JsxSetter({ @WebBrowser(value = FF), @WebBrowser(CHROME), @WebBrowser(value = IE, minVersion = 11) })
     public void setOnsubmit(final Object onsubmit) {
         setEventHandlerProp("onsubmit", onsubmit);
+    }
+
+    /**
+     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
+     * {@inheritDoc}
+    */
+    public String getDefaultStyleDisplay() {
+        final HtmlElement htmlElt = getDomNodeOrDie();
+        return htmlElt.getDefaultStyleDisplay().value();
     }
 }

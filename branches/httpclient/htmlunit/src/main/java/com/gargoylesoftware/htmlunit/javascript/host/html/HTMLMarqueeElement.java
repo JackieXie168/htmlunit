@@ -14,22 +14,18 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host.html;
 
-import com.gargoylesoftware.htmlunit.html.HtmlSpacer;
+import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.IE;
+
+import com.gargoylesoftware.htmlunit.html.HtmlMarquee;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxClass;
+import com.gargoylesoftware.htmlunit.javascript.configuration.WebBrowser;
 
 /**
- * The JavaScript object "HTMLSpacerElement".
+ * The JavaScript object "HTMLMarqueeElement".
  *
  * @version $Revision$
- * @author Ahmed Ashour
+ * @author Ronald Brill
  */
-@JsxClass(domClasses = HtmlSpacer.class)
-public class HTMLSpacerElement extends HTMLElement {
-
-    /**
-     * {@inheritDoc}
-     */
-    protected boolean isLowerCaseInOuterHtml() {
-        return true;
-    }
+@JsxClass(domClass = HtmlMarquee.class, browsers = @WebBrowser(IE))
+public class HTMLMarqueeElement extends HTMLElement {
 }

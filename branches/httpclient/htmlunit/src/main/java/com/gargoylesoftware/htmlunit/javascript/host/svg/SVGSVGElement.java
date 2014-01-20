@@ -29,7 +29,7 @@ import com.gargoylesoftware.htmlunit.svg.SvgSvg;
  * @version $Revision$
  * @author Ahmed Ashour
  */
-@JsxClass(domClasses = SvgSvg.class,
+@JsxClass(domClass = SvgSvg.class,
     browsers = { @WebBrowser(value = IE, minVersion = 9), @WebBrowser(FF), @WebBrowser(CHROME) })
 public class SVGSVGElement extends SVGElement {
 
@@ -56,5 +56,17 @@ public class SVGSVGElement extends SVGElement {
     @JsxFunction
     public SVGMatrix getScreenCTM() {
         return new SVGMatrix(getWindow());
+    }
+
+    /**
+     * Creates a new {@link SVGRect}.
+     * @return the new rect
+     */
+    @JsxFunction
+    public SVGRect createSVGRect() {
+        final SVGRect rect = new SVGRect();
+        rect.setPrototype(getPrototype(rect.getClass()));
+        rect.setParentScope(getParentScope());
+        return rect;
     }
 }

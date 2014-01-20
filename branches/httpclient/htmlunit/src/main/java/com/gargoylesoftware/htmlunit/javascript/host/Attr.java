@@ -41,8 +41,9 @@ import com.gargoylesoftware.htmlunit.javascript.configuration.WebBrowser;
  * @author Ahmed Ashour
  * @author Sudhan Moghe
  * @author Ronald Brill
+ * @author Frank Danek
  */
-@JsxClass(domClasses = DomAttr.class)
+@JsxClass(domClass = DomAttr.class)
 public class Attr extends Node {
 
     /**
@@ -66,7 +67,7 @@ public class Attr extends Node {
      * Returns <tt>true</tt> if this attribute is an ID.
      * @return <tt>true</tt> if this attribute is an ID
      */
-    @JsxGetter(@WebBrowser(FF))
+    @JsxGetter(@WebBrowser(value = FF, maxVersion = 23))
     public boolean getIsId() {
         return getDomNodeOrDie().isId();
     }
@@ -106,7 +107,7 @@ public class Attr extends Node {
      * Returns the owner element.
      * @return the owner element
      */
-    @JsxGetter(@WebBrowser(FF))
+    @JsxGetter({ @WebBrowser(CHROME), @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public Object getOwnerElement() {
         final DomElement parent = getDomNodeOrDie().getOwnerElement();
         if (parent != null) {

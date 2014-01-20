@@ -16,14 +16,15 @@ package com.gargoylesoftware.htmlunit.javascript;
 
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_ALLOW_CONST_ASSIGNMENT;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_CONSTRUCTOR;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_DATE_USE_UTC;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_DEFINE_GETTER;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_DONT_ENUM_FUNCTIONS;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_ECMA5_FUNCTIONS;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_FUNCTION_BIND;
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_FUNCTION_ISXMLNAME;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_FUNCTION_TOSOURCE;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_HAS_OBJECT_WITH_PROTOTYPE_PROPERTY_IN_WINDOW_SCOPE;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_XML;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.STRING_CONTAINS;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.STRING_TRIM;
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.STRING_TRIM_LEFT_RIGHT;
 
@@ -85,6 +86,7 @@ import com.gargoylesoftware.htmlunit.javascript.host.Window;
  * @author Ahmed Ashour
  * @author Amit Manjhi
  * @author Ronald Brill
+ * @author Frank Danek
  * @see <a href="http://groups-beta.google.com/group/netscape.public.mozilla.jseng/browse_thread/thread/b4edac57329cf49f/069e9307ec89111f">
  * Rhino and Java Browser</a>
  */
@@ -231,7 +233,7 @@ public class JavaScriptEngine {
                         if (obj.getClass() == Element.class) {
                             final Page page = webWindow.getEnclosedPage();
                             if (page != null && page.isHtmlPage()) {
-                                final DomNode domNode = new HtmlDivision(null, "", (HtmlPage) page, null);
+                                final DomNode domNode = new HtmlDivision("", (HtmlPage) page, null);
                                 obj.setDomNode(domNode);
                             }
                         }
@@ -295,6 +297,12 @@ public class JavaScriptEngine {
             stringPrototype.defineFunctionProperties(new String[] {"trimLeft", "trimRight"},
                 StringCustom.class, ScriptableObject.EMPTY);
         }
+        if (browserVersion.hasFeature(STRING_CONTAINS)) {
+            final ScriptableObject stringPrototype =
+                (ScriptableObject) ScriptableObject.getClassPrototype(window, "String");
+            stringPrototype.defineFunctionProperties(new String[] {"contains"},
+                StringCustom.class, ScriptableObject.EMPTY);
+        }
 
         if (!browserVersion.hasFeature(JS_FUNCTION_BIND)) {
             removePrototypeProperties(window, "Function", "bind");
@@ -318,9 +326,7 @@ public class JavaScriptEngine {
             removePrototypeProperties(window, "Number", "toSource");
             removePrototypeProperties(window, "String", "toSource");
         }
-        if (!browserVersion.hasFeature(JS_FUNCTION_ISXMLNAME)) {
-            deleteProperties(window, "isXMLName");
-        }
+        deleteProperties(window, "isXMLName");
 
         NativeFunctionToStringFunction.installFix(window, webClient.getBrowserVersion());
 
@@ -331,6 +337,12 @@ public class JavaScriptEngine {
         final ScriptableObject datePrototype = (ScriptableObject) ScriptableObject.getClassPrototype(window, "Date");
         datePrototype.defineFunctionProperties(new String[] {"toLocaleDateString", "toLocaleTimeString"},
                 DateCustom.class, ScriptableObject.DONTENUM);
+
+        if (browserVersion.hasFeature(JS_DATE_USE_UTC)) {
+            datePrototype.defineFunctionProperties(new String[] {"toUTCString"},
+                    DateCustom.class, ScriptableObject.DONTENUM);
+        }
+
         window.setPrototypes(prototypes);
         window.initialize(webWindow);
     }

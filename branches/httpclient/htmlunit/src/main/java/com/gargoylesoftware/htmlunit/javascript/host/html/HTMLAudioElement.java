@@ -16,6 +16,7 @@ package com.gargoylesoftware.htmlunit.javascript.host.html;
 
 import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.CHROME;
 import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.FF;
+import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.IE;
 
 import com.gargoylesoftware.htmlunit.html.HtmlAudio;
 import com.gargoylesoftware.htmlunit.javascript.configuration.JsxClass;
@@ -27,16 +28,10 @@ import com.gargoylesoftware.htmlunit.javascript.configuration.WebBrowser;
  * @version $Revision$
  * @author Ronald Brill
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
-@JsxClass(domClasses = HtmlAudio.class, browsers = { @WebBrowser(FF), @WebBrowser(CHROME) })
+@JsxClass(domClass = HtmlAudio.class, browsers = { @WebBrowser(FF),
+        @WebBrowser(value = IE, minVersion = 11), @WebBrowser(CHROME) })
 public class HTMLAudioElement extends HTMLMediaElement {
-
-    /**
-     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
-     * {@inheritDoc}
-    */
-    @Override
-    public String getDefaultStyleDisplay() {
-        return "none";
-    }
+    // empty at the moment
 }

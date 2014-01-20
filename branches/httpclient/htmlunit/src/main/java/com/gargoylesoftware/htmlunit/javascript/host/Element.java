@@ -50,8 +50,9 @@ import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLCollection;
  * @author Marc Guillemot
  * @author Sudhan Moghe
  * @author Ronald Brill
+ * @author Frank Danek
  */
-@JsxClass(domClasses = DomElement.class)
+@JsxClass(domClass = DomElement.class)
 public class Element extends EventNode {
 
     private NamedNodeMap attributes_;
@@ -70,7 +71,7 @@ public class Element extends EventNode {
      * @param expression a string specifying an XPath expression
      * @return list of the found elements
      */
-    @JsxFunction(@WebBrowser(IE))
+    @JsxFunction(@WebBrowser(value = IE, maxVersion = 9))
     public HTMLCollection selectNodes(final String expression) {
         final DomElement domNode = getDomNodeOrDie();
         final boolean attributeChangeSensitive = expression.contains("@");
@@ -90,7 +91,7 @@ public class Element extends EventNode {
      * @return the first node that matches the given pattern-matching operation
      *         If no nodes match the expression, returns a null value.
      */
-    @JsxFunction(@WebBrowser(IE))
+    @JsxFunction(@WebBrowser(value = IE, maxVersion = 9))
     public Object selectSingleNode(final String expression) {
         final HTMLCollection collection = selectNodes(expression);
         if (collection.getLength() > 0) {
@@ -126,7 +127,7 @@ public class Element extends EventNode {
      * Returns the Base URI as a string.
      * @return the Base URI as a string
      */
-    @JsxGetter
+    @JsxGetter({ @WebBrowser(CHROME), @WebBrowser(FF) })
     public String getBaseURI() {
         return getDomNodeOrDie().getPage().getUrl().toExternalForm();
     }
@@ -260,7 +261,7 @@ public class Element extends EventNode {
      * Represents the text content of the node or the concatenated text representing the node and its descendants.
      * @return the text content of the node or the concatenated text representing the node and its descendants
      */
-    @JsxGetter(@WebBrowser(IE))
+    @JsxGetter(@WebBrowser(value = IE, maxVersion = 9))
     public String getText() {
         final StringBuilder buffer = new StringBuilder();
         toText(getDomNodeOrDie(), buffer);
@@ -302,7 +303,7 @@ public class Element extends EventNode {
      *                  which matches all elements.
      * @return a live NodeList of found elements in the order they appear in the tree
      */
-    @JsxFunction(@WebBrowser(FF))
+    @JsxFunction({ @WebBrowser(CHROME), @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public Object getElementsByTagNameNS(final Object namespaceURI, final String localName) {
         final String description = "Element.getElementsByTagNameNS('" + namespaceURI + "', '" + localName + "')";
 
@@ -323,7 +324,7 @@ public class Element extends EventNode {
      * @param name the name of the attribute to look for
      * @return true if an attribute with the given name is specified on this element or has a default value
      */
-    @JsxFunction(@WebBrowser(FF))
+    @JsxFunction({ @WebBrowser(CHROME), @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public boolean hasAttribute(final String name) {
         return getDomNodeOrDie().hasAttribute(name);
     }
@@ -363,7 +364,7 @@ public class Element extends EventNode {
      * Returns the current number of child elements.
      * @return the child element count
      */
-    @JsxGetter(@WebBrowser(FF))
+    @JsxGetter({ @WebBrowser(CHROME), @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public int getChildElementCount() {
         return getDomNodeOrDie().getChildElementCount();
     }
@@ -372,7 +373,7 @@ public class Element extends EventNode {
      * Returns the first element child.
      * @return the first element child
      */
-    @JsxGetter(@WebBrowser(FF))
+    @JsxGetter({ @WebBrowser(CHROME), @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public Element getFirstElementChild() {
         final DomElement child = getDomNodeOrDie().getFirstElementChild();
         if (child != null) {
@@ -385,7 +386,7 @@ public class Element extends EventNode {
      * Returns the last element child.
      * @return the last element child
      */
-    @JsxGetter(@WebBrowser(FF))
+    @JsxGetter({ @WebBrowser(CHROME), @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public Element getLastElementChild() {
         final DomElement child = getDomNodeOrDie().getLastElementChild();
         if (child != null) {
@@ -398,7 +399,7 @@ public class Element extends EventNode {
      * Returns the next element sibling.
      * @return the next element sibling
      */
-    @JsxGetter(@WebBrowser(FF))
+    @JsxGetter({ @WebBrowser(CHROME), @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public Element getNextElementSibling() {
         final DomElement child = getDomNodeOrDie().getNextElementSibling();
         if (child != null) {
@@ -411,7 +412,7 @@ public class Element extends EventNode {
      * Returns the previous element sibling.
      * @return the previous element sibling
      */
-    @JsxGetter(@WebBrowser(FF))
+    @JsxGetter({ @WebBrowser(CHROME), @WebBrowser(FF), @WebBrowser(value = IE, minVersion = 11) })
     public Element getPreviousElementSibling() {
         final DomElement child = getDomNodeOrDie().getPreviousElementSibling();
         if (child != null) {
@@ -451,7 +452,7 @@ public class Element extends EventNode {
      * @see <a href="http://msdn.microsoft.com/en-us/library/ms537446.aspx">MSDN documentation</a>
      * @return the child at the given position
      */
-    @JsxGetter(@WebBrowser(FF))
+    @JsxGetter({ @WebBrowser(CHROME), @WebBrowser(FF) })
     public HTMLCollection getChildren() {
         final DomElement node = getDomNodeOrDie();
         final HTMLCollection collection = new HTMLCollection(node, false, "Element.children") {
@@ -467,7 +468,7 @@ public class Element extends EventNode {
      * Gets the token list of class attribute.
      * @return the token list of class attribute
      */
-    @JsxGetter(@WebBrowser(FF))
+    @JsxGetter({ @WebBrowser(CHROME), @WebBrowser(FF) })
     public DOMTokenList getClassList() {
         return null;
     }
@@ -478,7 +479,7 @@ public class Element extends EventNode {
      * @param localName the local name of the attribute to look for
      * @return the value of the specified attribute, <code>null</code> if the attribute is not defined
      */
-    @JsxFunction({ @WebBrowser(FF), @WebBrowser(CHROME) })
+    @JsxFunction({ @WebBrowser(FF), @WebBrowser(CHROME), @WebBrowser(value = IE, minVersion = 11) })
     public String getAttributeNS(final String namespaceURI, final String localName) {
         return getDomNodeOrDie().getAttributeNS(namespaceURI, localName);
     }
@@ -492,7 +493,7 @@ public class Element extends EventNode {
      * @param localName the local name of the attribute to look for
      * @return <code>true</code> if the node has this attribute
      */
-    @JsxFunction({ @WebBrowser(FF), @WebBrowser(CHROME) })
+    @JsxFunction({ @WebBrowser(FF), @WebBrowser(CHROME), @WebBrowser(value = IE, minVersion = 11) })
     public boolean hasAttributeNS(final String namespaceURI, final String localName) {
         return getDomNodeOrDie().hasAttributeNS(namespaceURI, localName);
     }
@@ -503,7 +504,7 @@ public class Element extends EventNode {
      * @param qualifiedName the qualified name of the attribute to look for
      * @param value the new attribute value
      */
-    @JsxFunction({ @WebBrowser(FF), @WebBrowser(CHROME) })
+    @JsxFunction({ @WebBrowser(FF), @WebBrowser(CHROME), @WebBrowser(value = IE, minVersion = 11) })
     public void setAttributeNS(final String namespaceURI, final String qualifiedName, final String value) {
         getDomNodeOrDie().setAttributeNS(namespaceURI, qualifiedName, value);
     }
@@ -513,7 +514,7 @@ public class Element extends EventNode {
      * @param namespaceURI the namespace URI of the attribute to remove
      * @param localName the local name of the attribute to remove
      */
-    @JsxFunction({ @WebBrowser(FF), @WebBrowser(CHROME) })
+    @JsxFunction({ @WebBrowser(FF), @WebBrowser(CHROME), @WebBrowser(value = IE, minVersion = 11) })
     public void removeAttributeNS(final String namespaceURI, final String localName) {
         getDomNodeOrDie().removeAttributeNS(namespaceURI, localName);
     }
@@ -542,17 +543,30 @@ public class Element extends EventNode {
      */
     @JsxGetter(@WebBrowser(IE))
     public ComputedCSSStyleDeclaration getCurrentStyle() {
+        if (!getDomNodeOrDie().isDirectlyAttachedToPage()) {
+            return null;
+        }
         return getWindow().getComputedStyle(this, null);
     }
 
     /**
-     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
-     *
-     * Returns the default display style.
-     *
-     * @return the default display style.
+     * Sets the attribute node for the specified attribute.
+     * @param newAtt the attribute to set
+     * @return the replaced attribute node, if any
      */
-    public String getDefaultStyleDisplay() {
-        return "block";
+    @JsxFunction
+    public Attr setAttributeNode(final Attr newAtt) {
+        final String name = newAtt.getName();
+
+        final NamedNodeMap nodes = (NamedNodeMap) getAttributes();
+        final Attr replacedAtt = (Attr) nodes.getNamedItemWithoutSytheticClassAttr(name);
+        if (replacedAtt != null) {
+            replacedAtt.detachFromParent();
+        }
+
+        final DomAttr newDomAttr = newAtt.getDomNodeOrDie();
+        getDomNodeOrDie().setAttributeNode(newDomAttr);
+        return replacedAtt;
     }
+
 }

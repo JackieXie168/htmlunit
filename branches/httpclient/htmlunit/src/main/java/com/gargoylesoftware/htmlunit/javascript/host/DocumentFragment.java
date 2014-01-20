@@ -36,11 +36,12 @@ import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLDocument;
  *
  * @version $Revision$
  * @author Ahmed Ashour
+ * @author Frank Danek
  *
  * @see <a href="http://www.w3.org/TR/2000/WD-DOM-Level-1-20000929/level-one-core.html#ID-B63ED1A3">
  * W3C Dom Level 1</a>
  */
-@JsxClass(domClasses = DomDocumentFragment.class)
+@JsxClass(domClass = DomDocumentFragment.class)
 public class DocumentFragment extends Node {
 
     //TODO: seems that in IE, DocumentFragment extends HTMLDocument
@@ -74,7 +75,7 @@ public class DocumentFragment extends Node {
      * @param tagName the tag name
      * @return the new HTML element, or NOT_FOUND if the tag is not supported
      */
-    @JsxFunction(@WebBrowser(IE))
+    @JsxFunction(@WebBrowser(value = IE, maxVersion = 9))
     public Object createElement(final String tagName) {
         return getDocument().createElement(tagName);
     }
@@ -124,7 +125,7 @@ public class DocumentFragment extends Node {
      * @param selectors the selectors
      * @return the static node list
      */
-    @JsxFunction({ @WebBrowser(value = IE, minVersion = 8), @WebBrowser(FF) })
+    @JsxFunction({ @WebBrowser(IE), @WebBrowser(FF) })
     public StaticNodeList querySelectorAll(final String selectors) {
         try {
             final List<Node> nodes = new ArrayList<Node>();
@@ -144,7 +145,7 @@ public class DocumentFragment extends Node {
      * @param selectors the selectors
      * @return null if no matches are found; otherwise, it returns the first matching element
      */
-    @JsxFunction({ @WebBrowser(value = IE, minVersion = 8), @WebBrowser(FF) })
+    @JsxFunction({ @WebBrowser(IE), @WebBrowser(FF) })
     public Node querySelector(final String selectors) {
         try {
             final DomNode node = getDomNodeOrDie().querySelector(selectors);

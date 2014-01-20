@@ -15,7 +15,7 @@
 package com.gargoylesoftware.htmlunit.javascript.host.html;
 
 import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_BUTTON_SET_TYPE_THROWS_EXCEPTION;
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_BUTTON_USE_CONTENT_AS_VALUE;
+import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.CHROME;
 import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.FF;
 
 import java.io.IOException;
@@ -38,8 +38,9 @@ import com.gargoylesoftware.htmlunit.javascript.host.FormField;
  * @author Marc Guillemot
  * @author Ahmed Ashour
  * @author Ronald Brill
+ * @author Frank Danek
  */
-@JsxClass(domClasses = HtmlButton.class)
+@JsxClass(domClass = HtmlButton.class)
 public class HTMLButtonElement extends FormField {
 
     /**
@@ -66,30 +67,6 @@ public class HTMLButtonElement extends FormField {
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    @JsxGetter
-    public String getValue() {
-        if (getBrowserVersion().hasFeature(JS_BUTTON_USE_CONTENT_AS_VALUE)) {
-            return getText();
-        }
-        return super.getValue();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @JsxSetter
-    public void setValue(final String newValue) {
-        if (getBrowserVersion().hasFeature(JS_BUTTON_USE_CONTENT_AS_VALUE)) {
-            setInnerText(newValue);
-        }
-        super.setValue(newValue);
-    }
-
-    /**
      * {@inheritDoc} Overridden to modify browser configurations.
      */
     @Override
@@ -111,17 +88,8 @@ public class HTMLButtonElement extends FormField {
      * {@inheritDoc} Overridden to modify browser configurations.
      */
     @Override
-    @JsxFunction(@WebBrowser(FF))
+    @JsxFunction({ @WebBrowser(CHROME), @WebBrowser(FF) })
     public void click() throws IOException {
         super.click();
-    }
-
-    /**
-     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
-     * {@inheritDoc}
-    */
-    @Override
-    public String getDefaultStyleDisplay() {
-        return "inline-block";
     }
 }

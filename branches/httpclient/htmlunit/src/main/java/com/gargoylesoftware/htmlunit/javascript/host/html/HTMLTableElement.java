@@ -14,9 +14,11 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host.html;
 
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.GENERATED_105;
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.GENERATED_106;
-import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.GENERATED_107;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_INNER_HTML_READONLY_FOR_SOME_TAGS;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.
+                            JS_TABLE_SET_CAPTION_ALTHOUGH_ALREADY_SET_THROWS_ERROR;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_TABLE_SET_TFOOT_ALTHOUGH_ALREADY_SET_THROWS_ERROR;
+import static com.gargoylesoftware.htmlunit.BrowserVersionFeatures.JS_TABLE_SET_THEAD_ALTHOUGH_ALREADY_SET_THROWS_ERROR;
 import static com.gargoylesoftware.htmlunit.javascript.configuration.BrowserName.IE;
 
 import java.util.ArrayList;
@@ -46,8 +48,9 @@ import com.gargoylesoftware.htmlunit.javascript.host.RowContainer;
  * @author Marc Guillemot
  * @author Ahmed Ashour
  * @author Ronald Brill
+ * @author Frank Danek
  */
-@JsxClass(domClasses = HtmlTable.class)
+@JsxClass(domClass = HtmlTable.class)
 public class HTMLTableElement extends RowContainer {
 
     private HTMLCollection tBodies_; // has to be a member to have equality (==) working
@@ -72,7 +75,7 @@ public class HTMLTableElement extends RowContainer {
      */
     @JsxSetter
     public void setCaption(final Object o) {
-        if (getBrowserVersion().hasFeature(GENERATED_105)) {
+        if (getBrowserVersion().hasFeature(JS_TABLE_SET_CAPTION_ALTHOUGH_ALREADY_SET_THROWS_ERROR)) {
             throw Context.reportRuntimeError("Can't set caption");
         }
         else if (!(o instanceof HTMLTableCaptionElement)) {
@@ -106,7 +109,7 @@ public class HTMLTableElement extends RowContainer {
      */
     @JsxSetter
     public void setTFoot(final Object o) {
-        if (getBrowserVersion().hasFeature(GENERATED_106)) {
+        if (getBrowserVersion().hasFeature(JS_TABLE_SET_TFOOT_ALTHOUGH_ALREADY_SET_THROWS_ERROR)) {
             throw Context.reportRuntimeError("Can't set tFoot");
         }
         else if (!(o instanceof HTMLTableSectionElement
@@ -141,7 +144,7 @@ public class HTMLTableElement extends RowContainer {
      */
     @JsxSetter
     public void setTHead(final Object o) {
-        if (getBrowserVersion().hasFeature(GENERATED_107)) {
+        if (getBrowserVersion().hasFeature(JS_TABLE_SET_THEAD_ALTHOUGH_ALREADY_SET_THROWS_ERROR)) {
             throw Context.reportRuntimeError("Can't set tHead");
         }
         else if (!(o instanceof HTMLTableSectionElement
@@ -248,7 +251,7 @@ public class HTMLTableElement extends RowContainer {
      * @see <a href="http://msdn2.microsoft.com/en-us/library/ms536687.aspx">
      * MSDN Documentation</a>
      */
-    @JsxFunction(@WebBrowser(IE))
+    @JsxFunction(@WebBrowser(value = IE, maxVersion = 9))
     public void refresh() {
         // Empty: this method only affects rendering, which we don't care about.
     }
@@ -374,11 +377,24 @@ public class HTMLTableElement extends RowContainer {
     }
 
     /**
-     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
-     * {@inheritDoc}
-    */
+     * Overwritten to throw an exception in IE8/9.
+     * @param value the new value for the contents of this node
+     */
+    @JsxSetter
     @Override
-    public String getDefaultStyleDisplay() {
-        return "table";
+    public void setInnerHTML(final Object value) {
+        if (getBrowserVersion().hasFeature(JS_INNER_HTML_READONLY_FOR_SOME_TAGS)) {
+            throw Context.reportRuntimeError("innerHTML is read-only for tag 'table'");
+        }
+        super.setInnerHTML(value);
+    }
+
+    /**
+     * Overwritten to throw an exception because this is readonly.
+     * @param value the new value for the contents of this node
+     */
+    @Override
+    protected void setInnerTextImpl(final String value) {
+        throw Context.reportRuntimeError("innerText is read-only for tag 'table'");
     }
 }
