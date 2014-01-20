@@ -27,6 +27,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @version $Revision$
  * @author Mirko Friedenhagen
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class CDATASectionTest extends WebDriverTestCase {
@@ -35,7 +36,8 @@ public class CDATASectionTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = "null", FF = "[object Comment]")
+    @Alerts(DEFAULT = "[object Comment]",
+            IE8 = "null")
     public void simpleScriptable() throws Exception {
         final String html
             = "<html><head><title>foo</title><script>\n"

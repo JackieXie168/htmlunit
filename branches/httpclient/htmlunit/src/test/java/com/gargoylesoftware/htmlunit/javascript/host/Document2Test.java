@@ -16,6 +16,10 @@ package com.gargoylesoftware.htmlunit.javascript.host;
 
 import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF;
 import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF17;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF24;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE11;
+
+import java.net.URL;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,6 +39,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @version $Revision$
  * @author Ronald Brill
  * @author Marc Guillemot
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class Document2Test extends WebDriverTestCase {
@@ -43,7 +48,8 @@ public class Document2Test extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "exception", FF3_6 = "false", IE = "false")
+    @Alerts(DEFAULT = "exception",
+            IE8 = "false")
     public void createElementWithAngleBrackets() throws Exception {
         final String html = "<html><head><title>foo</title><script>\n"
             + "  function test() {\n"
@@ -62,9 +68,8 @@ public class Document2Test extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF3_6 = { "DIV", "exception" },
-            DEFAULT = "exception",
-            IE = { "DIV", "false", "mySelect", "0", "OPTION", "myOption", "0" })
+    @Alerts(DEFAULT = "exception",
+            IE8 = { "DIV", "false", "mySelect", "0", "OPTION", "myOption", "0" })
     public void createElementWithHtml() throws Exception {
         final String html = "<html><head><title>foo</title><script>\n"
             + "  function test() {\n"
@@ -93,7 +98,8 @@ public class Document2Test extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = "false", IE = "true")
+    @Alerts(DEFAULT = "false",
+            IE8 = "true")
     public void createElementPrototype() throws Exception {
         final String html = "<html><head><title>foo</title><script>\n"
             + "  var HAS_EXTENDED_CREATE_ELEMENT_SYNTAX = (function() {\n"
@@ -115,8 +121,29 @@ public class Document2Test extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
+    @Alerts("true")
+    public void appendChild() throws Exception {
+        final String html
+            = "<html><head><title>foo</title><script>\n"
+            + "function test(){\n"
+            + "    var span = document.createElement('SPAN');\n"
+            + "    var div = document.getElementById('d');\n"
+            + "    div.appendChild(span);\n"
+            + "    alert(span === div.childNodes[0])\n"
+            + "}\n"
+            + "</script></head><body onload='test()'>\n"
+            + "<div id='d'></div>\n"
+            + "</body></html>";
+
+        loadPageWithAlerts2(html);
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Browsers({ FF, IE11 })
     @Alerts("1")
-    @Browsers(FF)
     public void getElementByTagNameNS_includesHtml() throws Exception {
         final String html
             = "<html><head><title>foo</title>"
@@ -137,8 +164,8 @@ public class Document2Test extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
+    @Browsers({ FF, IE11 })
     @Alerts({ "div1", "null", "2", "1" })
-    @Browsers(FF)
     public void importNode_deep() throws Exception {
         importNode(true);
     }
@@ -147,8 +174,8 @@ public class Document2Test extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
+    @Browsers({ FF, IE11 })
     @Alerts({ "div1", "null", "0" })
-    @Browsers(FF)
     public void importNode_notDeep() throws Exception {
         importNode(false);
     }
@@ -277,6 +304,61 @@ public class Document2Test extends WebDriverTestCase {
     }
 
     /**
+     * Regression test for issue 1568.
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = { "[object HTMLBodyElement]", "http://localhost:12345/#", "http://localhost:12345/#" },
+            IE11 = { "null", "http://localhost:12345/#", "http://localhost:12345/#" },
+            IE8 = { "[object]", "http://localhost:12345/#", "http://localhost:12345/#" })
+    public void activeElement_iframe() throws Exception {
+        final String html =
+                "<html>\n"
+                + "<head></head>\n"
+                + "<body>\n"
+
+                + "  <a id='insert' "
+                        + "onclick=\"insertText("
+                        + "'<html><head></head><body>first frame text</body></html>');\" href=\"#\">"
+                        + "insert text to frame</a>\n"
+                + "  <a id= 'update' "
+                        + "onclick=\"insertText("
+                        + "'<html><head></head><body>another frame text</body></html>');\" href=\"#\">"
+                        + "change frame text again</a><br>\n"
+                + "  <iframe id='innerFrame' name='innerFrame' src='frame1.html'></iframe>\n"
+
+                + "  <script>\n"
+                + "    alert(document.activeElement);\n"
+
+                + "    function insertText(text) {\n"
+                + "      with (innerFrame.document) {\n"
+                + "        open();\n"
+                + "        writeln(text);\n"
+                + "        close();\n"
+                + "      }\n"
+                + "      alert(document.activeElement);\n"
+                + "    }\n"
+                + "  </script>\n"
+                + "</body>\n"
+                + "</html>";
+
+        getMockWebConnection().setResponse(new URL("http://example.com/frame1.html"), "");
+
+        final WebDriver driver = loadPage2(html);
+
+        driver.findElement(By.id("insert")).click();
+        driver.switchTo().frame(driver.findElement(By.id("innerFrame")));
+        assertEquals("first frame text", driver.findElement(By.tagName("body")).getText());
+
+        driver.switchTo().defaultContent();
+        driver.findElement(By.id("update")).click();
+        driver.switchTo().frame(driver.findElement(By.id("innerFrame")));
+        assertEquals("another frame text", driver.findElement(By.tagName("body")).getText());
+
+        assertEquals(getExpectedAlerts(), getCollectedAlerts(driver));
+    }
+
+    /**
      * Verifies that when we create a text node and append it to an existing DOM node,
      * its <tt>outerHTML</tt>, <tt>innerHTML</tt> and <tt>innerText</tt> properties are
      * properly escaped.
@@ -284,11 +366,6 @@ public class Document2Test extends WebDriverTestCase {
      */
     @Test
     @Alerts(FF = { "<p>a & b</p> &amp; \u0162 \" '",
-                "<p>a & b</p> &amp; \u0162 \" '",
-                "undefined",
-                "&lt;p&gt;a &amp; b&lt;/p&gt; &amp;amp; \u0162 \" '",
-                "undefined" },
-            FF17 = { "<p>a & b</p> &amp; \u0162 \" '",
                     "<p>a & b</p> &amp; \u0162 \" '",
                     "<div id=\"div\">&lt;p&gt;a &amp; b&lt;/p&gt; &amp;amp; \u0162 \" '</div>",
                     "&lt;p&gt;a &amp; b&lt;/p&gt; &amp;amp; \u0162 \" '",
@@ -296,6 +373,11 @@ public class Document2Test extends WebDriverTestCase {
             IE = { "<p>a & b</p> &amp; \u0162 \" '",
                 "<p>a & b</p> &amp; \u0162 \" '",
                 "<DIV id=div>&lt;p&gt;a &amp; b&lt;/p&gt; &amp;amp; \u0162 \" '</DIV>",
+                "&lt;p&gt;a &amp; b&lt;/p&gt; &amp;amp; \u0162 \" '",
+                "<p>a & b</p> &amp; \u0162 \" '" },
+            IE11 = { "<p>a & b</p> &amp; \u0162 \" '",
+                "<p>a & b</p> &amp; \u0162 \" '",
+                "<div id=\"div\">&lt;p&gt;a &amp; b&lt;/p&gt; &amp;amp; \u0162 \" '</div>",
                 "&lt;p&gt;a &amp; b&lt;/p&gt; &amp;amp; \u0162 \" '",
                 "<p>a & b</p> &amp; \u0162 \" '" })
     public void createTextNodeWithHtml_FF() throws Exception {
@@ -321,10 +403,9 @@ public class Document2Test extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(FF = { "error", "error", "true", "true", "true" },
-            FF17 = { "error", "error", "false", "false", "false" },
+    @Alerts(FF = { "error", "error", "false", "false", "false" },
             IE = { "true", "true", "true", "true", "true" })
-    @NotYetImplemented(FF17)
+    @NotYetImplemented({ FF17, FF24 })
     public void queryCommandEnabled() throws Exception {
         final String html = "<html><body onload='x()'><iframe name='f' id='f'></iframe><script>\n"
             + "function x() {\n"
@@ -469,8 +550,8 @@ public class Document2Test extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "style.css", "LINK" },
-            DEFAULT = { })
+    @Alerts(DEFAULT = { },
+            IE8 = { "style.css", "LINK" })
     public void createStyleSheet() throws Exception {
         final String html
             = "<html><head><title>First</title>\n"
@@ -497,8 +578,8 @@ public class Document2Test extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "null", "" },
-            DEFAULT = { })
+    @Alerts(DEFAULT = { },
+            IE8 = { "null", "" })
     public void createStyleSheet_emptyUrl() throws Exception {
         final String html
             = "<html><head><title>First</title>\n"
@@ -525,8 +606,8 @@ public class Document2Test extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "dotseven.css", "zero.css", "minus1.css", "seven.css", "none.css" },
-            DEFAULT = { })
+    @Alerts(DEFAULT = { },
+            IE8 = { "dotseven.css", "zero.css", "minus1.css", "seven.css", "none.css" })
     public void createStyleSheet_insertAt() throws Exception {
         final String html
             = "<html><head><title>First</title>\n"

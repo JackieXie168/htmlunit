@@ -27,6 +27,7 @@ import java.util.Map;
 
 import javax.servlet.Servlet;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -37,7 +38,6 @@ import com.gargoylesoftware.htmlunit.BrowserRunner.NotYetImplemented;
 import com.gargoylesoftware.htmlunit.CollectingAlertHandler;
 import com.gargoylesoftware.htmlunit.HttpMethod;
 import com.gargoylesoftware.htmlunit.MockWebConnection;
-import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
@@ -64,17 +64,13 @@ public class XMLHttpRequest3Test extends WebServerTestCase {
     private static final String MSG_NO_CONTENT = "no Content";
     private static final String MSG_PROCESSING_ERROR = "error processing";
 
-    private static final String UNSENT = String.valueOf(XMLHttpRequest.STATE_UNSENT);
-    private static final String OPENED = String.valueOf(XMLHttpRequest.STATE_OPENED);
-    private static final String HEADERS_RECEIVED = String.valueOf(XMLHttpRequest.STATE_HEADERS_RECEIVED);
-    private static final String LOADING = String.valueOf(XMLHttpRequest.STATE_LOADING);
-    private static final String DONE = String.valueOf(XMLHttpRequest.STATE_DONE);
-
     /**
      * Tests asynchronous use of XMLHttpRequest, using Mozilla style object creation.
      * @throws Exception if the test fails
      */
     @Test
+    @Alerts(DEFAULT = { "0", "1", "1", "2", "3", "4" },
+                FF24 = { "0", "1", "2", "3", "4" })
     public void asyncUse() throws Exception {
         final String html =
               "<html>\n"
@@ -119,8 +115,7 @@ public class XMLHttpRequest3Test extends WebServerTestCase {
         client.getPage(URL_FIRST);
 
         assertEquals(0, client.waitForBackgroundJavaScriptStartingBefore(1000));
-        final String[] alerts = {UNSENT, OPENED, OPENED, HEADERS_RECEIVED, LOADING, DONE, xml};
-        assertEquals(alerts, collectedAlerts);
+        assertEquals(ArrayUtils.add(getExpectedAlerts(), xml), collectedAlerts);
     }
 
     /**
@@ -129,7 +124,8 @@ public class XMLHttpRequest3Test extends WebServerTestCase {
      */
     @Test
     @Alerts(IE = { "0", "1", "1", "2", "4", MSG_NO_CONTENT },
-            FF = { "0", "1", "1", "2", "4", MSG_NO_CONTENT, MSG_PROCESSING_ERROR })
+            FF = { "0", "1", "2", "4", MSG_NO_CONTENT, MSG_PROCESSING_ERROR },
+            FF17 = { "0", "1", "1", "2", "4", MSG_NO_CONTENT, MSG_PROCESSING_ERROR })
     public void testAsyncUseWithNetworkConnectionFailure() throws Exception {
         final String html =
               "<html>\n"
@@ -194,7 +190,7 @@ public class XMLHttpRequest3Test extends WebServerTestCase {
 
     /**
      * Asynchronous callback should be called in "main" js thread and not parallel to other js execution.
-     * See https://sourceforge.net/tracker/index.php?func=detail&aid=1508377&group_id=47038&atid=448266.
+     * See http://sourceforge.net/p/htmlunit/bugs/360/.
      * @throws Exception if the test fails
      */
     @Test
@@ -448,46 +444,6 @@ public class XMLHttpRequest3Test extends WebServerTestCase {
         client.getPage(URL_FIRST);
 
         assertEquals(0, client.waitForBackgroundJavaScriptStartingBefore(1000));
-        assertEquals(getExpectedAlerts(), collectedAlerts);
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Browsers(FF)
-    @Alerts({ "orsc1", "orsc1", "orsc2", "orsc3", "orsc4", "4", "<a>b</a>", "[object XMLHttpRequest]" })
-    public void onload() throws Exception {
-        final String html =
-              "<html>\n"
-            + "  <head>\n"
-            + "    <script>\n"
-            + "      function test() {\n"
-            + "        var xhr;\n"
-            + "        if (window.XMLHttpRequest) xhr = new XMLHttpRequest();\n"
-            + "        else xhr = new ActiveXObject('Microsoft.XMLHTTP');\n"
-            + "        xhr.onreadystatechange = function() { alert('orsc' + xhr.readyState); };\n"
-            + "        xhr.onload = function() { alert(xhr.readyState); alert(xhr.responseText); alert(this); }\n"
-            + "        xhr.open('GET', '" + URL_SECOND + "', true);\n"
-            + "        xhr.send('');\n"
-            + "      }\n"
-            + "    </script>\n"
-            + "  </head>\n"
-            + "  <body onload='test()'></body>\n"
-            + "</html>";
-
-        final String xml = "<a>b</a>";
-
-        final WebClient client = getWebClient();
-        client.setAjaxController(new NicelyResynchronizingAjaxController());
-        final List<String> collectedAlerts = new ArrayList<String>();
-        client.setAlertHandler(new CollectingAlertHandler(collectedAlerts));
-        final MockWebConnection conn = new MockWebConnection();
-        conn.setResponse(URL_FIRST, html);
-        conn.setResponse(URL_SECOND, xml, "text/xml");
-        client.setWebConnection(conn);
-        client.getPage(URL_FIRST);
-
         assertEquals(getExpectedAlerts(), collectedAlerts);
     }
 }

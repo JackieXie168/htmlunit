@@ -42,6 +42,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlSpan;
  * @version $Revision$
  * @author Ahmed Ashour
  * @author Marc Guillemot
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HTMLDocumentWriteTest extends SimpleWebTestCase {
@@ -138,8 +139,8 @@ public class HTMLDocumentWriteTest extends SimpleWebTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(IE = { "null", "[object]", "s1 s2 s3 s4 s5" },
-            FF = { "null", "[object HTMLBodyElement]", "s1 s2 s3 s4 s5" })
+    @Alerts(DEFAULT = { "null", "[object HTMLBodyElement]", "s1 s2 s3 s4 s5" },
+            IE8 = { "null", "[object]", "s1 s2 s3 s4 s5" })
     public void write_Destination() throws Exception {
         final String html =
               "<html>\n"
@@ -177,8 +178,8 @@ public class HTMLDocumentWriteTest extends SimpleWebTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(IE = { "null", "[object]", "", "foo" },
-            FF = { "null", "[object HTMLBodyElement]", "", "foo" })
+    @Alerts(DEFAULT = { "null", "[object HTMLBodyElement]", "", "foo" },
+            IE8 = { "null", "[object]", "", "foo" })
     public void write_BodyAttributesKept() throws Exception {
         final String html =
               "<html>\n"
@@ -561,8 +562,8 @@ public class HTMLDocumentWriteTest extends SimpleWebTestCase {
     }
 
    /**
-    * Test for bug 1678826.
-    * https://sourceforge.net/tracker/index.php?func=detail&aid=1678826&group_id=47038&atid=448266
+    * Test for bug 436.
+    * http://sourceforge.net/p/htmlunit/bugs/436/
     * @throws Exception if the test fails
     */
     @Test

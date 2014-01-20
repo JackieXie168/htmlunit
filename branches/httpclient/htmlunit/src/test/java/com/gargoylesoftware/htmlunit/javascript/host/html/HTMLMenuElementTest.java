@@ -27,6 +27,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @version $Revision$
  * @author Daniel Gredler
  * @author Ronald Brill
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HTMLMenuElementTest extends WebDriverTestCase {
@@ -35,9 +36,9 @@ public class HTMLMenuElementTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(FF = { "false", "true", "true", "true", "null", "", "blah", "2",
+    @Alerts(DEFAULT = { "false", "true", "true", "true", "null", "", "blah", "2",
                    "true", "false", "true", "false", "", "null", "", "null" },
-            IE = { "false", "true", "true", "true", "false", "true", "true", "true",
+            IE8 = { "false", "true", "true", "true", "false", "true", "true", "true",
                    "true", "false", "true", "false", "true", "false", "true", "false" })
     public void compact() throws Exception {
         final String html =

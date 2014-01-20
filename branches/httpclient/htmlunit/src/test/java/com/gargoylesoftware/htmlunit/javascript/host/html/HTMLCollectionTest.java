@@ -16,7 +16,9 @@ package com.gargoylesoftware.htmlunit.javascript.host.html;
 
 import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF;
 import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF17;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF24;
 import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE8;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,6 +36,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlPageTest;
  * @version $Revision$
  * @author Marc Guillemot
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HTMLCollectionTest extends WebDriverTestCase {
@@ -60,8 +63,9 @@ public class HTMLCollectionTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @NotYetImplemented(IE)
-    @Alerts(IE = "object", FF = "function")
+    @Alerts(DEFAULT = "function",
+            IE8 = "object")
+    @NotYetImplemented(IE8)
     public void testToStringFunction() throws Exception {
         final String html = "<html><head><title>foo</title><script>\n"
             + "function test() {\n"
@@ -78,15 +82,18 @@ public class HTMLCollectionTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts({ "5", "6" })
     @Browsers(IE)
+    @Alerts(DEFAULT = { "5", "6" },
+            IE11 = { "5", "exception" })
     public void getElements() throws Exception {
         final String html
             = "<html><head><title>foo</title><script>\n"
             + "function doTest() {\n"
             + "    alert(document.all.length);\n"
-            + "    document.appendChild(document.createElement('div'));\n"
-            + "    alert(document.all.length);\n"
+            + "    try {"
+            + "      document.appendChild(document.createElement('div'));\n"
+            + "      alert(document.all.length);\n"
+            + "    } catch (e) { alert('exception') }\n"
             + "}\n"
             + "</script></head><body onload='doTest()'>\n"
             + "</body></html>";
@@ -98,10 +105,12 @@ public class HTMLCollectionTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = {"string 0", "string item", "string length", "string namedItem" },
-            FF17 = {"string 0", "string item", "string iterator", "string length", "string namedItem" },
-            IE = {"string length", "string myForm" })
-    @NotYetImplemented(FF17)
+    @Alerts(FF = { "string 0", "string item", "string iterator", "string length", "string namedItem" },
+            FF24 = { "string 0", "string item", "string iterator", "string length",
+                        "string myForm", "string namedItem" },
+            IE = { "string length", "string myForm" },
+            IE11 = { "string item", "string length", "string myForm", "string namedItem" })
+    @NotYetImplemented({ FF17, FF24 })
     public void testFor_in() throws Exception {
         final String html = "<html><head><title>foo</title><script>\n"
             + "  function test() {\n"
@@ -126,13 +135,18 @@ public class HTMLCollectionTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = {"string 0", "string 1", "string 2", "string 3", "string 4", "string 5",
-            "string item", "string length", "string namedItem" },
-            FF17 = {"string 0", "string 1", "string 2", "string 3", "string 4", "string 5",
-                    "string item", "string iterator", "string length", "string namedItem" },
-            IE = {"string 1", "string action", "string first_submit", "string length",
-            "string second_submit", "string val1", "string val2" })
-    @NotYetImplemented(FF17)
+    @Alerts(FF = { "string 0", "string 1", "string 2", "string 3", "string 4", "string 5",
+                "string item", "string iterator", "string length", "string namedItem" },
+            FF24 = { "string 0", "string 1", "string 2", "string 3", "string 4", "string 5",
+                "string action", "string first_submit", "string id1", "string input_disabled",
+                "string item", "string iterator", "string length", "string namedItem", "string second_submit",
+                "string val1", "string val2" },
+            IE = { "string 1", "string action", "string first_submit", "string length",
+                "string second_submit", "string val1", "string val2" },
+            IE11 = { "string 1", "string action", "string first_submit", "string item",
+                "string length", "string namedItem", "string second_submit", "string val1",
+                "string val2" })
+    @NotYetImplemented({ FF17, FF24 })
     public void testFor_in2() throws Exception {
         final String html = "<html><head><title>foo</title><script>\n"
             + "  function test() {\n"
@@ -187,8 +201,9 @@ public class HTMLCollectionTest extends WebDriverTestCase {
      */
     @Test
     @NotYetImplemented(FF)
-    @Alerts(IE = { "null", "null", "undefined", "null" },
-            FF = { "null", "null", "undefined", "exception" })
+    @Alerts(FF = { "null", "null", "undefined", "exception" },
+            IE = { "null", "null", "undefined", "null" },
+            IE11 = { "null", "null", "undefined", "undefined" })
     public void testOutOfBoundAccess() throws Exception {
         final String html = "<html><head><title>foo</title><script>\n"
             + "  function test() {\n"
@@ -228,7 +243,8 @@ public class HTMLCollectionTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "1", "DIV", "2" }, FF = { "3", "#text", "5" })
+    @Alerts(DEFAULT = { "3", "#text", "5" },
+            IE8 = { "1", "DIV", "2" })
     public void childNodes() throws Exception {
         final String html = "<html><head>\n"
             + "<script>\n"
@@ -269,7 +285,8 @@ public class HTMLCollectionTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "[object]", "undefined" }, FF = { "[object HTMLHeadingElement]", "undefined" })
+    @Alerts(DEFAULT = { "[object HTMLHeadingElement]", "undefined" },
+            IE8 = { "[object]", "undefined" })
     public void getElementWithDollarSign() throws Exception {
         final String html
             = "<h3 id='$h'>h</h3><script>\n"
@@ -284,8 +301,8 @@ public class HTMLCollectionTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "undefined", "undefined", "undefined", "undefined" },
-        DEFAULT =  { "function", "function", "function", "function" })
+    @Alerts(DEFAULT =  { "function", "function", "function", "function" },
+            IE8 = { "undefined", "undefined", "undefined", "undefined" })
     public void array_prototype() throws Exception {
         final String html = "<html><head>\n"
             + "<script>\n"
@@ -306,8 +323,8 @@ public class HTMLCollectionTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "undefined", "undefined", "function", "function" },
-        DEFAULT =  { "function", "function", "function", "function" })
+    @Alerts(DEFAULT =  { "function", "function", "function", "function" },
+            IE8 = { "undefined", "undefined", "function", "function" })
     public void array_prototype_standards() throws Exception {
         final String html = HtmlPageTest.STANDARDS_MODE_PREFIX_ + "<html><head>\n"
             + "<script>\n"

@@ -14,7 +14,7 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host.html;
 
-import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE8;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,6 +30,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @version $Revision$
  * @author Daniel Gredler
  * @author Ronald Brill
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HTMLLegendElementTest extends WebDriverTestCase {
@@ -65,7 +66,8 @@ public class HTMLLegendElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "[object HTMLFormElement]", IE = "[object]")
+    @Alerts(DEFAULT = "[object HTMLFormElement]",
+            IE8 = "[object]")
     public void form() throws Exception {
         final String html
             = "<html><body><form><fieldset><legend id='a'>a</legend></fieldset></form><script>\n"
@@ -108,7 +110,7 @@ public class HTMLLegendElementTest extends WebDriverTestCase {
     @Test
     @Alerts(DEFAULT = { "CenTer", "8", "foo", "left", "right", "bottom", "top" },
             IE = { "center", "error", "center", "error", "center", "left", "right", "bottom", "top" })
-    @NotYetImplemented(IE)
+    @NotYetImplemented(IE8)
     public void setAlign() throws Exception {
         final String html
             = "<html><body>\n"

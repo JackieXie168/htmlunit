@@ -16,6 +16,8 @@ package com.gargoylesoftware.htmlunit.javascript.host.xml;
 
 import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF;
 import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE11;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE8;
 import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.NONE;
 
 import java.io.IOException;
@@ -50,6 +52,7 @@ import com.gargoylesoftware.htmlunit.util.NameValuePair;
  * @author Sudhan Moghe
  * @author Sebastian Cato
  * @author Ronald Brill
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class XMLHttpRequestTest extends WebDriverTestCase {
@@ -64,6 +67,7 @@ public class XMLHttpRequestTest extends WebDriverTestCase {
      */
     @Test
     @Tries(3)
+    // TODO [IE11]SINGLE-VS-BULK test runs when executed as single but breaks as bulk
     public void syncUse() throws Exception {
         final String html =
               "<html>\n"
@@ -106,7 +110,8 @@ public class XMLHttpRequestTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = "[object]", IE6 = "activeX created", DEFAULT = "[object XMLHttpRequest]")
+    @Alerts(DEFAULT = "[object XMLHttpRequest]",
+            IE8 = "[object]")
     public void creation() throws Exception {
         final String html =
             "<html>\n"
@@ -131,26 +136,142 @@ public class XMLHttpRequestTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts({"0-", "0-" })
-    public void statusBeforeSend() throws Exception {
+    @Alerts(DEFAULT = { "1: 0-", "2: ", "3: 200-OK" },
+            IE8 = {"1: ex: status-ex: statusText, 2: , 3: 200-OK" })
+    public void statusSync() throws Exception {
         final String html =
             "<html>\n"
             + "  <head>\n"
             + "    <title>XMLHttpRequest Test</title>\n"
-            + "    <script>\n"
-            + "        var request;\n"
-            + "        if (window.XMLHttpRequest)\n"
-            + "          request = new XMLHttpRequest();\n"
-            + "        else if (window.ActiveXObject)\n"
-            + "          request = new ActiveXObject('Microsoft.XMLHTTP');\n"
+            + "<script>\n"
+            + "  var xhr;\n"
+            + "  if (window.XMLHttpRequest)\n"
+            + "    xhr = new XMLHttpRequest();\n"
+            + "  else if (window.ActiveXObject)\n"
+            + "    xhr = new ActiveXObject('Microsoft.XMLHTTP');\n"
 
-            + "        alert(request.status + '-' + request.statusText);\n"
-            + "        request.open('GET', '/foo.xml', false);\n"
-            + "        alert(request.status + '-' + request.statusText);\n"
-            + "    </script>\n"
+            + "  alertStatus('1: ');\n"
+            + "  xhr.open('GET', '/foo.xml', false);\n"
+            + "  alert('2: ');\n"
+
+            + "  xhr.send();\n"
+            + "  alertStatus('3: ');\n"
+
+            + "  function alertStatus(prefix) {\n"
+            + "    var msg = prefix;"
+            + "    try {\n"
+            + "      msg = msg + xhr.status + '-';\n"
+            + "    } catch(e) { msg = msg + 'ex: status' + '-' }\n"
+            + "    try {\n"
+            + "      msg = msg + xhr.statusText;;\n"
+            + "    } catch(e) { msg = msg + 'ex: statusText' }\n"
+            + "    alert(msg);\n"
+            + "  }\n"
+            + "</script>\n"
             + "  </head>\n"
             + "  <body></body>\n"
             + "</html>";
+
+        getMockWebConnection().setDefaultResponse("<res></res>", "text/xml");
+        loadPageWithAlerts2(html);
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = { "1: 0-", "2: 0-", "#1: 0-", "3: 0-", "#1: 0-", "4: 0-",
+                            "#2: 200-OK", "#3: 200-OK", "#4: 200-OK" },
+            FF24 = { "1: 0-", "2: 0-", "#1: 0-", "3: 0-", "4: 0-", "#2: 200-OK", "#3: 200-OK", "#4: 200-OK" },
+            IE8 = { "1: ex: status-ex: statusText", "2: ex: status-ex: statusText", "#1: ex: status-ex: statusText",
+                    "3: ex: status-ex: statusText", "#1: ex: status-ex: statusText", "4: ex: status-ex: statusText",
+                    "#2: 200-OK", "#3: 200-OK", "#4: 200-OK" })
+    public void statusAsync() throws Exception {
+        final String html =
+            "<html>\n"
+            + "  <head>\n"
+            + "    <title>XMLHttpRequest Test</title>\n"
+            + "<script>\n"
+            + "  var xhr;\n"
+            + "  if (window.XMLHttpRequest)\n"
+            + "    xhr = new XMLHttpRequest();\n"
+            + "  else if (window.ActiveXObject)\n"
+            + "    xhr = new ActiveXObject('Microsoft.XMLHTTP');\n"
+
+            + "  function test() {\n"
+            + "    try {\n"
+            + "      alertStatus('1: ');\n"
+
+            + "      xhr.onreadystatechange = onReadyStateChange;\n"
+            + "      alertStatus('2: ');\n"
+
+            + "      xhr.open('GET',  '/foo.xml', true);\n"
+            + "      alertStatus('3: ');\n"
+
+            + "      xhr.send();\n"
+            + "      alertStatus('4: ');\n"
+            + "    } catch(e) { alert(e) }\n"
+            + "  }\n"
+
+            + "  function onReadyStateChange() {\n"
+            + "    alertStatus('#' + xhr.readyState + ': ');"
+            + "  }\n"
+
+            + "  function alertStatus(prefix) {\n"
+            + "    var msg = prefix;"
+            + "    try {\n"
+            + "      msg = msg + xhr.status + '-';\n"
+            + "    } catch(e) { msg = msg + 'ex: status' + '-' }\n"
+            + "    try {\n"
+            + "      msg = msg + xhr.statusText;;\n"
+            + "    } catch(e) { msg = msg + 'ex: statusText' }\n"
+            + "    alert(msg);\n"
+            + "  }\n"
+            + "</script>\n"
+            + "  </head>\n"
+            + "  <body onload='test()'></body>\n"
+            + "</html>";
+
+        getMockWebConnection().setDefaultResponse("<res></res>", "text/xml");
+        loadPageWithAlerts2(html);
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = { "orsc1", "open-done", "orsc1", "send-done",
+                "orsc2", "orsc3", "orsc4", "4", "<a>b</a>", "[object XMLHttpRequest]" },
+            FF24 = { "orsc1", "open-done", "send-done",
+                "orsc2", "orsc3", "orsc4", "4", "<a>b</a>", "[object XMLHttpRequest]" },
+            IE8 = { "orsc1", "open-done", "orsc1", "send-done", "orsc2", "orsc3", "orsc4" })
+    public void onload() throws Exception {
+        final String html =
+              "<html>\n"
+            + "  <head>\n"
+            + "    <script>\n"
+            + "      function test() {\n"
+            + "        var xhr;\n"
+            + "        if (window.XMLHttpRequest) xhr = new XMLHttpRequest();\n"
+            + "        else xhr = new ActiveXObject('Microsoft.XMLHTTP');\n"
+
+            + "        xhr.onreadystatechange = function() { alert('orsc' + xhr.readyState); };\n"
+            + "        xhr.onload = function() { alert(xhr.readyState); alert(xhr.responseText); alert(this); }\n"
+
+            + "        xhr.open('GET', '/foo.xml', true);\n"
+            + "        alert('open-done');\n"
+
+            + "        xhr.send('');\n"
+            + "        alert('send-done');\n"
+            + "      }\n"
+            + "    </script>\n"
+            + "  </head>\n"
+            + "  <body onload='test()'></body>\n"
+            + "</html>";
+
+        final String xml = "<a>b</a>";
+
+        getMockWebConnection().setDefaultResponse(xml, "text/xml");
         loadPageWithAlerts2(html);
     }
 
@@ -182,7 +303,7 @@ public class XMLHttpRequestTest extends WebDriverTestCase {
     }
 
     /**
-     * Regression test for http://sourceforge.net/tracker/index.php?func=detail&aid=1209692&group_id=47038&atid=448266.
+     * Regression test for http://sourceforge.net/p/htmlunit/bugs/269/.
      * @throws Exception if the test fails
      */
     @Test
@@ -225,6 +346,7 @@ public class XMLHttpRequestTest extends WebDriverTestCase {
      */
     @Test
     @Alerts("bla bla")
+    // TODO [IE11]SINGLE-VS-BULK test runs when executed as single but breaks as bulk
     public void responseText_NotXml() throws Exception {
         final String html = "<html><head>\n"
             + "<script>\n"
@@ -251,8 +373,10 @@ public class XMLHttpRequestTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts({ "1", "someAttr", "someValue", "someAttr=\"someValue\"" })
+    @Alerts(DEFAULT = { "1", "someAttr", "someValue", "someAttr=\"someValue\"" },
+            IE11 = { "1", "someAttr", "undefined", "undefined" })
     @Browsers(IE)
+    // TODO [IE11]SINGLE-VS-BULK test runs when executed as single but breaks as bulk
     public void responseXML2() throws Exception {
         final String html = "<html><head>\n"
             + "<script>\n"
@@ -408,7 +532,8 @@ public class XMLHttpRequestTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = { "true", "false" }, IE = { "true", "exception" }, IE6 = "exception")
+    @Alerts(DEFAULT = { "true", "false" },
+            IE = { "true", "exception" })
     public void overrideMimeType() throws Exception {
         final String html = "<html><head>\n"
             + "<script>\n"
@@ -436,14 +561,15 @@ public class XMLHttpRequestTest extends WebDriverTestCase {
     }
 
     /**
-     * Regression test for bug 1611097.
-     * https://sourceforge.net/tracker/index.php?func=detail&aid=1611097&group_id=47038&atid=448266
-     * Caution: the problem appeared with jdk 1.4 but not with jdk 1.5 as String contains a
+     * Regression test for bug 410.
+     * http://sourceforge.net/p/htmlunit/bugs/410/
+     * Caution: the problem appeared with JDK 1.4 but not with JDK 1.5 as String contains a
      * replace(CharSequence, CharSequence) method in this version
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = { "ibcdefg", "xxxxxfg" }, FF3_6 = { })
+    @Alerts({ "ibcdefg", "xxxxxfg" })
+    // TODO [IE11]SINGLE-VS-BULK test runs when executed as single but breaks as bulk
     public void replaceOnTextData() throws Exception {
         final String html =
               "<html>\n"
@@ -543,7 +669,7 @@ public class XMLHttpRequestTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Browsers(IE)
+    @Browsers(IE8)
     @Alerts("2")
     public void responseXML_selectNodesIE() throws Exception {
         final String html =
@@ -581,7 +707,7 @@ public class XMLHttpRequestTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Browsers(FF)
+    @Browsers({ FF, IE11 })
     @Alerts({ "null", "myID", "blah", "span", "[object XMLDocument]" })
     public void responseXML_getElementById_FF() throws Exception {
         final String html =
@@ -627,12 +753,11 @@ public class XMLHttpRequestTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = { "[object Element]", "[object Element]", "[object HTMLBodyElement]",
-            "[object HTMLSpanElement]", "[object XMLDocument]", "undefined" },
-            CHROME = { "[object Element]", "[object Element]", "[object HTMLBodyElement]",
-                    "[object HTMLSpanElement]", "[object Document]", "undefined" },
-            IE = { "[object]", "[object]", "[object]",
-            "<body xmlns=\"http://www.w3.org/1999/xhtml\"><span id=\"out\">Hello Bob Dole!</span></body>" })
+    @Alerts(DEFAULT = { "[object Element]", "[object Element]", "[object HTMLBodyElement]",
+                "[object HTMLSpanElement]", "[object XMLDocument]", "undefined" },
+            IE8 = { "[object]", "[object]", "[object]",
+                "<body xmlns=\"http://www.w3.org/1999/xhtml\"><span id=\"out\">Hello Bob Dole!</span></body>" })
+    // TODO [IE11]SINGLE-VS-BULK test runs when executed as single but breaks as bulk
     public void responseXML_getElementById() throws Exception {
         final String html =
               "<html>\n"
@@ -779,7 +904,8 @@ public class XMLHttpRequestTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "myID", IE = "exception")
+    @Alerts(DEFAULT = "myID",
+            IE8 = "exception")
     public void responseXML_html_select() throws Exception {
         final String html =
               "<html>\n"
@@ -821,7 +947,8 @@ public class XMLHttpRequestTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "myInput", IE = "exception")
+    @Alerts(DEFAULT = "myInput",
+            IE8 = "exception")
     public void responseXML_html_form() throws Exception {
         final String html =
               "<html>\n"
@@ -880,7 +1007,7 @@ public class XMLHttpRequestTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(IE6 = "exception", DEFAULT = "undefined")
+    @Alerts("undefined")
     public void caseSensitivity_XMLHttpRequest() throws Exception {
         final String html = "<html><head><script>\n"
             + "function test() {\n"

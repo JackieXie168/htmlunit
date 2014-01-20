@@ -14,11 +14,14 @@
  */
 package com.gargoylesoftware.htmlunit.javascript;
 
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE8;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.gargoylesoftware.htmlunit.BrowserRunner;
 import com.gargoylesoftware.htmlunit.BrowserRunner.Alerts;
+import com.gargoylesoftware.htmlunit.BrowserRunner.BuggyWebDriver;
 import com.gargoylesoftware.htmlunit.WebDriverTestCase;
 
 /**
@@ -28,6 +31,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @author Ahmed Ashour
  * @author Marc Guillemot
  * @author Adam Doupe
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class IEConditionalCompilationTest extends WebDriverTestCase {
@@ -36,7 +40,7 @@ public class IEConditionalCompilationTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = "testing @cc_on")
+    @Alerts(IE8 = "testing @cc_on")
     public void simple() throws Exception {
         final String script = "/*@cc_on alert('testing @cc_on'); @*/";
         testScript(script);
@@ -58,7 +62,7 @@ public class IEConditionalCompilationTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = "testing @cc_on")
+    @Alerts(IE8 = "testing @cc_on")
     public void simple3() throws Exception {
         final String script = "/*@cc_on @*/\n"
             + "/*@if (@_win32)\n"
@@ -71,8 +75,9 @@ public class IEConditionalCompilationTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "1", "testing @cc_on" })
+    @Alerts(IE8 = { "1", "testing @cc_on" })
     //TODO: fails with IE8 with WebDriver, but succeeds manually
+    @BuggyWebDriver(IE8)
     public void simple4() throws Exception {
         final String script = "/*@cc_on alert(1) @*/\n"
             + "/*@if (@_win32)\n"
@@ -85,7 +90,7 @@ public class IEConditionalCompilationTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE6 = "5.6", IE7 = "5.7", IE8 = "5.8")
+    @Alerts(IE8 = "5.8")
     public void ifTest() throws Exception {
         final String script = "/*@cc_on@if(@_jscript_version>=5){alert(@_jscript_version)}@end@*/";
         testScript(script);
@@ -95,7 +100,7 @@ public class IEConditionalCompilationTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE6 = "5.6", IE7 = "5.7", IE8 = "5.8")
+    @Alerts(IE8 = "5.8")
     public void variables_jscript_version() throws Exception {
         final String script = "/*@cc_on alert(@_jscript_version) @*/";
         testScript(script);
@@ -105,7 +110,7 @@ public class IEConditionalCompilationTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE6 = "6626", IE7 = "5730", IE8 = "18702")
+    @Alerts(IE8 = "18702")
     public void variables_jscript_build() throws Exception {
         final String script = "/*@cc_on alert(@_jscript_build) @*/";
         testScript(script);
@@ -115,7 +120,7 @@ public class IEConditionalCompilationTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = "testing /*@cc_on")
+    @Alerts(IE8 = "testing /*@cc_on")
     public void reservedString() throws Exception {
         final String script = "/*@cc_on alert('testing /*@cc_on'); @*/";
         testScript(script);
@@ -125,7 +130,7 @@ public class IEConditionalCompilationTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = "12")
+    @Alerts(IE8 = "12")
     public void set() throws Exception {
         final String script = "/*@cc_on @set @mine = 12 alert(@mine); @*/";
         testScript(script);
@@ -135,7 +140,7 @@ public class IEConditionalCompilationTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = "win")
+    @Alerts(IE8 = "win")
     public void elif() throws Exception {
         final String script = "/*@cc_on @if(@_win32)type='win';@elif(@_mac)type='mac';@end alert(type); @*/";
         testScript(script);
@@ -145,7 +150,7 @@ public class IEConditionalCompilationTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = "$2")
+    @Alerts(IE8 = "$2")
     public void dollar_single_quote_in_string() throws Exception {
         final String script = "/*@cc_on var test='$2'; alert(test);@*/";
         testScript(script);
@@ -155,7 +160,7 @@ public class IEConditionalCompilationTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = "$2")
+    @Alerts(IE8 = "$2")
     public void dollar_double_quote_in_string() throws Exception {
         final String script = "/*@cc_on var test=\"$2\"; alert(test);@*/";
         testScript(script);
@@ -165,7 +170,7 @@ public class IEConditionalCompilationTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = "\\")
+    @Alerts(IE8 = "\\")
     public void slashes_in_single_quotes() throws Exception {
         final String script = "/*@cc_on var test='\\\\\'; alert(test);@*/";
         testScript(script);
@@ -175,7 +180,7 @@ public class IEConditionalCompilationTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = "$")
+    @Alerts(IE8 = "$")
     public void slash_dollar_in_single_quotes() throws Exception {
         final String script = "/*@cc_on var test='\\$\'; alert(test);@*/";
         testScript(script);
@@ -197,7 +202,8 @@ public class IEConditionalCompilationTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = "true", FF = "false")
+    @Alerts(DEFAULT = "false",
+            IE8 = "true")
     public void escaping() throws Exception {
         final String script = "var isMSIE=eval('false;/*@cc_on@if(@\\x5fwin32)isMSIE=true@end@*/');\n"
             + "alert(isMSIE);";
@@ -208,7 +214,8 @@ public class IEConditionalCompilationTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = "true", FF = "false")
+    @Alerts(DEFAULT = "false",
+            IE8 = "true")
     public void eval() throws Exception {
         final String script =
             "var isMSIE;\n"
@@ -223,7 +230,7 @@ public class IEConditionalCompilationTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = "Alert")
+    @Alerts(IE8 = "Alert")
     public void bug3076667() throws Exception {
         final String script =
             "/*@cc_on @*/\n"
@@ -237,7 +244,7 @@ public class IEConditionalCompilationTest extends WebDriverTestCase {
     * @throws Exception if the test fails
     */
     @Test
-    @Alerts(IE = "1")
+    @Alerts(IE8 = "1")
     public void escapedDoubleQuote() throws Exception {
         final String script =
             "/*@cc_on\n"

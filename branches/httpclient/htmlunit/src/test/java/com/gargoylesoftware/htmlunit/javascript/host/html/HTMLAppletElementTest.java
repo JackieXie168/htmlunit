@@ -14,7 +14,7 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host.html;
 
-import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE8;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +28,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * Tests for {@link HTMLAppletElement}.
  * @version $Revision$
  * @author Ronald Brill
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HTMLAppletElementTest extends WebDriverTestCase {
@@ -38,7 +39,7 @@ public class HTMLAppletElementTest extends WebDriverTestCase {
     @Test
     @Alerts(DEFAULT = { "left", "right", "bottom", "middle", "top", "wrong", "" },
             IE = { "left", "right", "bottom", "middle", "top", "", "" })
-    @NotYetImplemented(IE)
+    @NotYetImplemented(IE8)
     public void getAlign() throws Exception {
         final String html
             = "<html><body>\n"
@@ -65,7 +66,7 @@ public class HTMLAppletElementTest extends WebDriverTestCase {
     @Test
     @Alerts(DEFAULT = { "CenTer", "8", "foo", "left", "right", "bottom", "middle", "top" },
             IE = { "center", "error", "center", "error", "center", "left", "right", "bottom", "middle", "top" })
-    @NotYetImplemented(IE)
+    @NotYetImplemented(IE8)
     public void setAlign() throws Exception {
         final String html
             = "<html><body>\n"

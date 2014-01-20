@@ -26,6 +26,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  *
  * @version $Revision$
  * @author Ronald Brill
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class CSSMediaRuleTest extends WebDriverTestCase {
@@ -34,10 +35,9 @@ public class CSSMediaRuleTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(FF = { "2", "screen", "print", "screen, print" },
-            IE = { "Your browser does not support this example!" })
+    @Alerts(DEFAULT = { "2", "screen", "print", "screen, print" },
+            IE8 = { "Your browser does not support this example!" })
     // TODO: check which IE versions support what
-    // For IE 6 this is correct (rbri)
     public void simple() throws Exception {
         final String html
             = "<html><body>\n"

@@ -14,6 +14,8 @@
  */
 package com.gargoylesoftware.htmlunit.javascript;
 
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF24;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.By;
@@ -22,6 +24,7 @@ import org.openqa.selenium.WebElement;
 
 import com.gargoylesoftware.htmlunit.BrowserRunner;
 import com.gargoylesoftware.htmlunit.BrowserRunner.Alerts;
+import com.gargoylesoftware.htmlunit.BrowserRunner.NotYetImplemented;
 import com.gargoylesoftware.htmlunit.WebDriverTestCase;
 
 /**
@@ -30,6 +33,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @version $Revision$
  * @author Marc Guillemot
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class JavaScriptEngine2Test extends WebDriverTestCase {
@@ -117,8 +121,8 @@ public class JavaScriptEngine2Test extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = {"in goo", "in hoo", "in foo" },
-            FF = {"in goo", "in hoo", "foo error" })
+    @Alerts(FF = {"in goo", "in hoo", "foo error" },
+            IE = {"in goo", "in hoo", "in foo" })
     public void functionDeclaredForwardInBlock() throws Exception {
         final String html = "<html><head></head><body>\n"
             + "<script>\n"
@@ -145,8 +149,8 @@ public class JavaScriptEngine2Test extends WebDriverTestCase {
      */
     @Test
     @Alerts(FF = { "undefined", "foo error" },
-            IE = {"function foo() {\n}", "function foo() {\n}" })
-    // Real IE doesn't have the extra 'new line'
+            IE = { "function foo() {\n}", "function foo() {\n}" })
+    // TODO Real IE doesn't have the extra 'new line'
     public void variableNotDefined() throws Exception {
         final String html = "<html><head></head><body>\n"
             + "<script>\n"
@@ -169,9 +173,13 @@ public class JavaScriptEngine2Test extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = { "[object Window]", "[object Window]", "true",
+    @Alerts(DEFAULT = { "[object Window]", "[object Window]", "true",
                 "[object HTMLDocument]", "[object HTMLDocument]", "true", "function" },
-            IE = { "undefined", "exception", "undefined", "exception", "function" })
+            FF24 = { "[object Window]", "[object Window]", "true",
+                "function HTMLDocument() {\n    [native code]\n}",
+                "function HTMLDocument() {\n    [native code]\n}", "true", "function" },
+            IE8 = { "undefined", "exception", "undefined", "exception", "function" })
+    @NotYetImplemented(FF24)
     public void constructor() throws Exception {
         final String html = "<html><head></head><body>\n"
             + "<script>\n"
@@ -241,7 +249,8 @@ public class JavaScriptEngine2Test extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "undefined", "undefined" }, DEFAULT = { "function", "function" })
+    @Alerts(DEFAULT = { "function", "function" },
+            IE8 = { "undefined", "undefined" })
     public void inline() throws Exception {
         final String html = "<html><head><script>\n"
                 + "alert(typeof Array.prototype.filter);\n"

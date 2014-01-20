@@ -46,6 +46,7 @@ import com.gargoylesoftware.htmlunit.javascript.JavaScriptEngine;
  * @author Chris Erskine
  * @author Ahmed Ashour
  * @author Ronald Brill
+ * @author Frank Danek
  */
 public class JavaScriptConfigurationTest extends SimpleWebTestCase {
 
@@ -59,7 +60,7 @@ public class JavaScriptConfigurationTest extends SimpleWebTestCase {
     @Test
     public void configurationMapExpands() throws Exception {
         // get a reference to the leaky map
-        final Field field = JavaScriptConfiguration.class.getDeclaredField("ConfigurationMap_");
+        final Field field = JavaScriptConfiguration.class.getDeclaredField("CONFIGURATION_MAP_");
         field.setAccessible(true);
         final Map<?, ?> leakyMap = (Map<? , ?>) field.get(null);
 
@@ -106,7 +107,7 @@ public class JavaScriptConfigurationTest extends SimpleWebTestCase {
     }
 
     /**
-     * Tests that all classes in *.javascript.* which have {@link JsxClass} annotation,
+     * Tests that all classes in *.javascript.* which have {@link JsxClasses}/{@link JsxClass} annotation,
      * are included in {@link JavaScriptConfiguration#CLASSES_}.
      */
     @Test
@@ -123,7 +124,10 @@ public class JavaScriptConfigurationTest extends SimpleWebTestCase {
                 catch (final Throwable t) {
                     continue;
                 }
-                if (klass.getAnnotation(JsxClass.class) != null) {
+                if (klass.getAnnotation(JsxClasses.class) != null) {
+                    foundJsxClasses.add(className);
+                }
+                else if (klass.getAnnotation(JsxClass.class) != null) {
                     foundJsxClasses.add(className);
                 }
             }

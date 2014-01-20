@@ -14,10 +14,15 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host;
 
+import static org.junit.Assert.assertNotNull;
+
+import java.net.URL;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
 import com.gargoylesoftware.htmlunit.BrowserRunner;
 import com.gargoylesoftware.htmlunit.BrowserRunner.Alerts;
@@ -29,16 +34,38 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @version $Revision$
  * @author Marc Guillemot
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class MouseEventTest extends WebDriverTestCase {
 
     /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = { "DOM2: [object MouseEvent]", "DOM3: [object MouseEvent]" },
+            IE8 = { "DOM2: exception", "DOM3: exception" })
+    public void createEvent() throws Exception {
+        final String html = "<html><head><title>foo</title><script>\n"
+            + "  function test() {\n"
+            + "    try {\n"
+            + "      alert('DOM2: ' + document.createEvent('MouseEvents'));\n"
+            + "    } catch(e) {alert('DOM2: exception')}\n"
+            + "    try {\n"
+            + "      alert('DOM3: ' + document.createEvent('MouseEvent'));\n"
+            + "    } catch(e) {alert('DOM3: exception')}\n"
+            + "  }\n"
+            + "</script></head><body onload='test()'>\n"
+            + "</body></html>";
+        loadPageWithAlerts2(html);
+    }
+
+    /**
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(FF = { "click", "true", "true", "true", "1", "2", "3", "4", "true", "true", "true", "true" },
-            IE = "exception")
+    @Alerts(DEFAULT = { "click", "true", "true", "true", "1", "2", "3", "4", "true", "true", "true", "true" },
+            IE8 = "exception")
     public void initMouseEvent() throws Exception {
         final String html = "<html><body><script>\n"
             + "try {\n"
@@ -141,7 +168,8 @@ public class MouseEventTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(IE = "1", FF = "0")
+    @Alerts(DEFAULT = "0",
+            IE8 = "1")
     public void button_onmousedown() throws Exception {
         final String html = "<html><body>\n"
             + "<p id='clicker'>Click me!</p>\n"
@@ -160,5 +188,35 @@ public class MouseEventTest extends WebDriverTestCase {
         final WebDriver driver = loadPage2(html);
         driver.findElement(By.id("clicker")).click();
         assertEquals(getExpectedAlerts(), getCollectedAlerts(driver));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    public void eventCoordinates() throws Exception {
+        final URL url = getClass().getClassLoader().getResource("event_coordinates.html");
+        assertNotNull(url);
+
+        final WebDriver driver = loadPageWithAlerts2(url);
+        assertEquals("Mouse Event coordinates", driver.getTitle());
+
+        final WebElement textarea = driver.findElement(By.id("myTextarea"));
+        assertEquals("", textarea.getText());
+
+        driver.findElement(By.id("div1")).click();
+        assertEquals("Click on DIV(id=div1): true, true, false, false", textarea.getText());
+        textarea.clear();
+
+        driver.findElement(By.id("span1")).click();
+        assertEquals("Click on SPAN(id=span1): true, true, true, false", textarea.getText());
+        textarea.clear();
+
+        driver.findElement(By.id("span2")).click();
+        assertEquals("Click on SPAN(id=span2): true, false, false, true", textarea.getText());
+        textarea.clear();
+
+        textarea.click();
+        assertEquals("Click on TEXTAREA(id=myTextarea): true, false, false, false", textarea.getText());
     }
 }

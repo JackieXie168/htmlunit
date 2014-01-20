@@ -14,12 +14,15 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host.html;
 
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF17;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF24;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE8;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.gargoylesoftware.htmlunit.BrowserRunner;
 import com.gargoylesoftware.htmlunit.BrowserRunner.Alerts;
-import com.gargoylesoftware.htmlunit.BrowserRunner.Browser;
 import com.gargoylesoftware.htmlunit.BrowserRunner.NotYetImplemented;
 import com.gargoylesoftware.htmlunit.WebDriverTestCase;
 
@@ -27,6 +30,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * Tests for {@link HTMLBaseFontElement}.
  * @version $Revision$
  * @author Ronald Brill
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HTMLBaseFontElementTest extends WebDriverTestCase {
@@ -35,10 +39,9 @@ public class HTMLBaseFontElementTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @NotYetImplemented(Browser.FF3_6)
     @Alerts(DEFAULT = { "[object HTMLSpanElement]", "undefined", "undefined", "undefined" },
-            FF3_6 = { "[object HTMLBaseFontElement]", "", "-1", "" },
-            IE = { "[object]", "", "3", "" })
+            IE = { "[object]", "", "3", "" },
+            IE11 = { "[object HTMLBaseFontElement]", "", "3", "" })
     public void defaults() throws Exception {
         final String html =
             "<html>\n"
@@ -63,10 +66,9 @@ public class HTMLBaseFontElementTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @NotYetImplemented({ Browser.FF10, Browser.FF17 })
     @Alerts(DEFAULT = { "undefined", "42" },
-            FF3_6 = { "4", "42" },
             IE = { "4", "42" })
+    @NotYetImplemented({ FF17, FF24 })
     public void size() throws Exception {
         final String html =
             "<html>\n"
@@ -94,10 +96,9 @@ public class HTMLBaseFontElementTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @NotYetImplemented({ Browser.FF10, Browser.FF17 })
     @Alerts(DEFAULT = { "undefined", "helvetica" },
-            FF3_6 = { "swiss", "helvetica" },
             IE = { "swiss", "helvetica" })
+    @NotYetImplemented({ FF17, FF24 })
     public void face() throws Exception {
         final String html =
             "<html>\n"
@@ -125,10 +126,10 @@ public class HTMLBaseFontElementTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @NotYetImplemented({ Browser.FF10, Browser.FF17, Browser.IE })
     @Alerts(DEFAULT = { "undefined", "blue" },
-            FF3_6 = { "red", "blue" },
-            IE = { "#ff0000", "#0000ff" })
+            IE = { "#ff0000", "#0000ff" },
+            IE11 = { "red", "blue" })
+    @NotYetImplemented({ FF17, FF24, IE8 })
     public void color() throws Exception {
         final String html =
             "<html>\n"

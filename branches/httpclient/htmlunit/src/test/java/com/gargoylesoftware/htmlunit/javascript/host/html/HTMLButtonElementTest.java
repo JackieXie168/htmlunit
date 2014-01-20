@@ -14,7 +14,7 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host.html;
 
-import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF17;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,6 +31,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @author Daniel Gredler
  * @author Ahmed Ashour
  * @author Ronald Brill
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HTMLButtonElementTest extends WebDriverTestCase {
@@ -67,8 +68,9 @@ public class HTMLButtonElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "button", "exception", "button", "button" }, FF = { "submit", "button", "submit" },
-            CHROME = { "submit", "submit", "submit" })
+    @Alerts(DEFAULT = { "submit", "button", "submit" },
+            CHROME = { "submit", "submit", "submit" },
+            IE8 = { "button", "exception", "button", "button" })
     public void type() throws Exception {
         final String html = "<html><head><title>foo</title><script>\n"
             + "  function test() {\n"
@@ -91,7 +93,7 @@ public class HTMLButtonElementTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "test", "4", "42", "2", "[object HTMLButtonElement]", "26" },
-            IE = { "test", "4", "42", "2", "[object]", "8" })
+            IE8 = { "test", "4", "42", "2", "[object]", "8" })
     public void getAttributeAndSetValue() throws Exception {
         final String html =
             "<html>\n"
@@ -128,9 +130,9 @@ public class HTMLButtonElementTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = { "null", "4", "", "0" },
-            IE = { "null", "4", "null", "4" })
-    @NotYetImplemented(FF)
+    @Alerts(DEFAULT = { "null", "4", "null", "4" },
+            FF17 = { "null", "4", "", "0" })
+    @NotYetImplemented(FF17)
     public void getAttributeAndSetValueNull() throws Exception {
         final String html =
             "<html>\n"

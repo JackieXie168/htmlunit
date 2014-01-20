@@ -26,6 +26,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  *
  * @version $Revision$
  * @author Marc Guillemot
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class CSSFontFaceRuleTest extends WebDriverTestCase {
@@ -36,7 +37,9 @@ public class CSSFontFaceRuleTest extends WebDriverTestCase {
     @Test
     @Alerts(FF = { "[object CSSFontFaceRule]", "5",
             "@font-face {\n  font-family: \"Delicious\";\n  src: url(\"Delicious-Bold.otf\");\n}" },
-            IE = { "exception" })
+            IE = { "exception" },
+            IE11 = { "[object CSSFontFaceRule]", "5",
+            "@font-face {\r\n\tfont-family: Delicious;\r\n\tsrc: url(Delicious-Bold.otf);\r\n}\r\n" })
     public void simple() throws Exception {
         final String html
             = "<html><body>\n"

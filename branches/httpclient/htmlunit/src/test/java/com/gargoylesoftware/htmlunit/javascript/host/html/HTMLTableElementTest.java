@@ -31,6 +31,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @author Marc Guillemot
  * @author Ahmed Ashour
  * @author Ronald Brill
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HTMLTableElementTest extends WebDriverTestCase {
@@ -39,8 +40,8 @@ public class HTMLTableElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = { "caption1", "caption2", "null", "caption3", "exception", "caption3", "caption4" },
-            IE = { "caption1", "caption2", "null", "caption3", "exception", "caption3", "exception", "caption3" })
+    @Alerts(DEFAULT = { "caption1", "caption2", "null", "caption3", "exception", "caption3", "caption4" },
+            IE8 = { "caption1", "caption2", "null", "caption3", "exception", "caption3", "exception", "caption3" })
     public void tableCaptions() throws Exception {
         final String html
             = "<html><head><title>foo</title></head><body>\n"
@@ -74,8 +75,8 @@ public class HTMLTableElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = { "thead1", "thead2", "null", "thead3", "exception", "thead3", "thead4" },
-            IE = { "thead1", "thead2", "null", "thead3", "exception", "thead3", "exception", "thead3" })
+    @Alerts(DEFAULT = { "thead1", "thead2", "null", "thead3", "exception", "thead3", "thead4" },
+            IE8 = { "thead1", "thead2", "null", "thead3", "exception", "thead3", "exception", "thead3" })
     public void tableHeaders() throws Exception {
         final String html
             = "<html><head><title>foo</title></head><body>\n"
@@ -262,8 +263,8 @@ public class HTMLTableElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = { "tfoot1", "tfoot2", "null", "tfoot3", "exception", "tfoot3", "tfoot4" },
-            IE = { "tfoot1", "tfoot2", "null", "tfoot3", "exception", "tfoot3", "exception", "tfoot3" })
+    @Alerts(DEFAULT = { "tfoot1", "tfoot2", "null", "tfoot3", "exception", "tfoot3", "tfoot4" },
+            IE8 = { "tfoot1", "tfoot2", "null", "tfoot3", "exception", "tfoot3", "exception", "tfoot3" })
     public void tableFooters() throws Exception {
         final String html
             = "<html><head><title>foo</title></head><body>\n"
@@ -471,9 +472,15 @@ public class HTMLTableElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "table: [object]", "row: [object]", "cell: [object]" },
-            DEFAULT = { "table: [object HTMLTableElement]",
-                    "row: [object HTMLTableRowElement]", "cell: [object HTMLTableCellElement]" })
+    @Alerts(DEFAULT = { "table: [object HTMLTableElement]",
+                "row: [object HTMLTableRowElement]",
+                "headcell: [object HTMLTableCellElement]",
+                "datacell: [object HTMLTableCellElement]" },
+            IE = { "table: [object HTMLTableElement]",
+                "row: [object HTMLTableRowElement]",
+                "headcell: [object HTMLTableHeaderCellElement]",
+                "datacell: [object HTMLTableDataCellElement]" },
+            IE8 = { "table: [object]", "row: [object]", "headcell: [object]", "datacell: [object]" })
     public void stringValues() throws Exception {
         final String html =
             "<html><head>\n"
@@ -482,14 +489,18 @@ public class HTMLTableElementTest extends WebDriverTestCase {
             + "    {\n"
             + "      alert('table: ' + document.getElementById('myTable'));\n"
             + "      alert('row: ' + document.getElementById('myRow'));\n"
-            + "      alert('cell: ' + document.getElementById('myCell'));\n"
+            + "      alert('headcell: ' + document.getElementById('myHeadCell'));\n"
+            + "      alert('datacell: ' + document.getElementById('myDataCell'));\n"
             + "    }\n"
             + "  </script>\n"
             + "  </head>\n"
             + "  <body onload='test()'>\n"
             + "    <table id='myTable'>\n"
             + "      <tr id='myRow'>\n"
-            + "        <th id='myCell'>Foo</th>\n"
+            + "        <th id='myHeadCell'>Foo</th>\n"
+            + "      </tr>\n"
+            + "      <tr>\n"
+            + "        <td id='myDataCell'>Foo</th>\n"
             + "      </tr>\n"
             + "    </table>\n"
             + "  </body>\n"
@@ -538,7 +549,8 @@ public class HTMLTableElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "no refresh function", IE = "refreshed")
+    @Alerts(DEFAULT = "no refresh function",
+            IE8 = "refreshed")
     public void refresh() throws Exception {
         final String html
             = "<html><head><script>\n"
@@ -607,9 +619,9 @@ public class HTMLTableElementTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(IE = {"", "#0000aa", "#000000" },
-            DEFAULT = {"", "#0000aa", "x" },
-            FF3_6 = { "", "#0000aa", "#000000" })
+    @Alerts(DEFAULT = {"", "#0000aa", "x" },
+            IE = {"", "#0000aa", "#000000" },
+            IE11 = {"", "#0000aa", "#0" })
     public void bgColor() throws Exception {
         final String html =
             "<html>\n"

@@ -27,6 +27,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @version $Revision$
  * @author Marc Guillemot
  * @author Ronald Brill
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class GlobalFunctionsTest extends WebDriverTestCase {
@@ -54,6 +55,45 @@ public class GlobalFunctionsTest extends WebDriverTestCase {
     }
 
     /**
+     * Test for bug <a href="http://sourceforge.net/p/htmlunit/bugs/1563/">1563</a>.
+     *
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = { "0", "1", "-2345", "1", "12", "NaN", "0", "1", "0", "0", "64", "0", "1", "8", "9", "100" },
+            CHROME = { "0", "1", "-2345", "1", "12", "NaN", "0", "1", "8", "9", "100", "0", "1", "8", "9", "100" },
+            FF24 = { "0", "1", "-2345", "1", "12", "NaN", "0", "1", "8", "9", "100", "0", "1", "8", "9", "100" },
+            IE11 = { "0", "1", "-2345", "1", "12", "NaN", "0", "1", "8", "9", "100", "0", "1", "8", "9", "100" })
+    public void parseInt() throws Exception {
+        final String html
+            = "<html><head><title>foo</title><script>\n"
+            + "function doTest() {\n"
+            + "    alert(parseInt('0'));\n"
+            + "    alert(parseInt(' 1 '));\n"
+            + "    alert(parseInt('-2345'));\n"
+            + "    alert(parseInt('1.23'));\n"
+            + "    alert(parseInt('12,3'));\n"
+            + "    alert(parseInt('abc'));\n"
+
+            + "    alert(parseInt('0'));\n"
+            + "    alert(parseInt(' 01 '));\n"
+            + "    alert(parseInt('08'));\n"
+            + "    alert(parseInt('09'));\n"
+            + "    alert(parseInt('0100'));\n"
+
+            + "    alert(parseInt('0', 10));\n"
+            + "    alert(parseInt(' 01 ', 10));\n"
+            + "    alert(parseInt('08', 10));\n"
+            + "    alert(parseInt('09', 10));\n"
+            + "    alert(parseInt('0100', 10));\n"
+            + "}\n"
+            + "</script></head><body onload='doTest()'>\n"
+            + "</body></html>";
+
+        loadPageWithAlerts2(html);
+    }
+
+    /**
      * Test for the methods with the same expectations for all browsers.
      * @throws Exception if the test fails
      */
@@ -73,9 +113,8 @@ public class GlobalFunctionsTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = { "isXMLName: function", "uneval: function" },
-            FF17 = { "isXMLName: undefined", "uneval: function" },
-            DEFAULT = { "isXMLName: undefined", "uneval: undefined" })
+    @Alerts(DEFAULT = { "isXMLName: undefined", "uneval: undefined" },
+            FF = { "isXMLName: undefined", "uneval: function" })
     public void methods_different() throws Exception {
         final String[] methods = {"isXMLName", "uneval"};
         final String html = NativeDateTest.createHTMLTestMethods("this", methods);

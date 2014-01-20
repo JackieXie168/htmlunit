@@ -14,12 +14,15 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host.css;
 
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF17;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF24;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE8;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.gargoylesoftware.htmlunit.BrowserRunner;
 import com.gargoylesoftware.htmlunit.BrowserRunner.Alerts;
-import com.gargoylesoftware.htmlunit.BrowserRunner.Browser;
 import com.gargoylesoftware.htmlunit.BrowserRunner.BuggyWebDriver;
 import com.gargoylesoftware.htmlunit.BrowserRunner.NotYetImplemented;
 import com.gargoylesoftware.htmlunit.WebDriverTestCase;
@@ -33,6 +36,7 @@ import com.gargoylesoftware.htmlunit.util.UrlUtils;
  * @author Ronald Brill
  * @author Marc Guillemot
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class CSSSelectorTest extends WebDriverTestCase {
@@ -41,13 +45,10 @@ public class CSSSelectorTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = { "0", "0" },
-            FF3_6 = "exception",
-            IE8 = "exception")
-    @NotYetImplemented({ Browser.FF3_6, Browser.IE })
+    @Alerts({ "0", "0" })
     public void querySelectorAll_nullUndefined() throws Exception {
         final String html = "<html><head><title>First</title>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=9'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "<script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
@@ -76,7 +77,7 @@ public class CSSSelectorTest extends WebDriverTestCase {
     @Alerts({ "exception", "exception" })
     public void querySelectorAll_emptyString() throws Exception {
         final String html = "<html><head><title>First</title>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=9'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "<script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
@@ -106,10 +107,11 @@ public class CSSSelectorTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = { "li2", "li1", "li2", "li1", "li3", "li1", "2", "li1", "li2" }, IE8 = "exception")
+    @Alerts(DEFAULT = { "li2", "li1", "li2", "li1", "li3", "li1", "2", "li1", "li2" },
+            IE8 = "exception")
     public void nth_child() throws Exception {
         final String html = "<html><head><title>First</title>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=9'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "<script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
@@ -143,10 +145,11 @@ public class CSSSelectorTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = { "1", "li2", "2", "li1", "li3" }, IE8 = "exception")
+    @Alerts(DEFAULT = { "1", "li2", "2", "li1", "li3" },
+            IE8 = "exception")
     public void nth_child_even_odd() throws Exception {
         final String html = "<html><head><title>First</title>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=9'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "<script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
@@ -175,10 +178,10 @@ public class CSSSelectorTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = { "1", "[object HTMLBodyElement]", "1", "0" })
+    @Alerts({ "1", "[object HTMLBodyElement]", "1", "0" })
     public void childSelector_html_body() throws Exception {
         final String html = "<html><head><title>First</title>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=9'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "<script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
@@ -230,16 +233,19 @@ public class CSSSelectorTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = { "li1", "li4", "li7", "li10" }, IE8 = { })
+    @Alerts(DEFAULT = { "li1", "li4", "li7", "li10" },
+            IE8 = { "exception" })
     public void nth_child_equation() throws Exception {
         final String html
             = HtmlPageTest.STANDARDS_MODE_PREFIX_ + "<html><head><title>First</title><script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
-            + "    var list = document.querySelectorAll('li:nth-child(3n+1)');\n"
-            + "    for (var i = 0 ; i < list.length; i++) {\n"
-            + "      alert(list[i].id);\n"
-            + "    }\n"
+            + "    try {\n"
+            + "      var list = document.querySelectorAll('li:nth-child(3n+1)');\n"
+            + "      for (var i = 0 ; i < list.length; i++) {\n"
+            + "        alert(list[i].id);\n"
+            + "      }\n"
+            + "    } catch (e) {alert('exception')}\n"
             + "  }\n"
             + "}\n"
             + "</script></head>\n"
@@ -290,7 +296,7 @@ public class CSSSelectorTest extends WebDriverTestCase {
     @Alerts({ "1", "ul2" })
     public void directAdjacentSelector() throws Exception {
         final String html = "<html><head><title>First</title>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=8'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "<script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
@@ -317,7 +323,7 @@ public class CSSSelectorTest extends WebDriverTestCase {
     @Alerts({ "1", "thing1" })
     public void prefixAttribute() throws Exception {
         final String html = "<html><head><title>First</title>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=8'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "<script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
@@ -341,10 +347,10 @@ public class CSSSelectorTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts("0")
+    @Alerts(DEFAULT = "0")
     public void prefixAttributeEmpty() throws Exception {
         final String html = "<html><head><title>First</title>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=8'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "<script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
@@ -370,7 +376,7 @@ public class CSSSelectorTest extends WebDriverTestCase {
     @Alerts({ "1", "something" })
     public void suffixAttribute() throws Exception {
         final String html = "<html><head><title>First</title>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=8'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "<script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
@@ -394,10 +400,10 @@ public class CSSSelectorTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts("0")
+    @Alerts(DEFAULT = "0")
     public void suffixAttributeEmpty() throws Exception {
         final String html = "<html><head><title>First</title>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=8'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "<script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
@@ -423,7 +429,7 @@ public class CSSSelectorTest extends WebDriverTestCase {
     @Alerts({ "2", "something", "thing2" })
     public void substringAttribute() throws Exception {
         final String html = "<html><head><title>First</title>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=8'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "<script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
@@ -448,10 +454,10 @@ public class CSSSelectorTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts("0")
+    @Alerts(DEFAULT = "0")
     public void substringAttributeEmpty() throws Exception {
         final String html = "<html><head><title>First</title>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=8'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "<script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
@@ -477,7 +483,7 @@ public class CSSSelectorTest extends WebDriverTestCase {
     @Alerts({ "2", "id1", "id2" })
     public void oneOfAttribute() throws Exception {
         final String html = "<html><head><title>First</title>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=8'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "<script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
@@ -505,7 +511,7 @@ public class CSSSelectorTest extends WebDriverTestCase {
     @Alerts("0")
     public void oneOfAttributeEmpty() throws Exception {
         final String html = "<html><head><title>First</title>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=8'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "<script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
@@ -528,16 +534,18 @@ public class CSSSelectorTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts({ "1", "ul2" })
+    @Alerts({ "2", "ul2", "ul3" })
     public void generalAdjacentSelector() throws Exception {
         final String html = "<html><head><title>First</title>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=8'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "<script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
             + "    var list = document.querySelectorAll('div~ul');\n"
             + "    alert(list.length);\n"
-            + "    alert(list[0].id);\n"
+            + "    for (var i = 0 ; i < list.length; i++) {\n"
+            + "      alert(list[i].id);\n"
+            + "    }\n"
             + "  }\n"
             + "}\n"
             + "</script></head>\n"
@@ -545,6 +553,7 @@ public class CSSSelectorTest extends WebDriverTestCase {
             + "  <div></div>\n"
             + "  <p></p>\n"
             + "  <ul id='ul2'></ul>\n"
+            + "  <ul id='ul3'></ul>\n"
             + "</body></html>";
 
         loadPageWithAlerts2(html);
@@ -554,10 +563,11 @@ public class CSSSelectorTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = { "li3", "2", "li1", "li3" }, IE8 = "exception")
+    @Alerts(DEFAULT = { "li3", "2", "li1", "li3" },
+            IE8 = "exception")
     public void nth_last_child() throws Exception {
         final String html = "<html><head><title>First</title>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=9'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "<script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
@@ -590,7 +600,7 @@ public class CSSSelectorTest extends WebDriverTestCase {
             IE8 = "exception")
     public void nth_last_child2() throws Exception {
         final String html = "<html><head><title>First</title>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=9'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "<script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
@@ -632,10 +642,11 @@ public class CSSSelectorTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = "id3", IE8 = "exception")
+    @Alerts(DEFAULT = "id3",
+            IE8 = "exception")
     public void nth_of_type() throws Exception {
         final String html = "<html><head><title>First</title>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=9'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "<script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
@@ -660,10 +671,11 @@ public class CSSSelectorTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = "id3", IE8 = "exception")
+    @Alerts(DEFAULT = "id3",
+            IE8 = "exception")
     public void nth_last_of_type() throws Exception {
         final String html = "<html><head><title>First</title>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=9'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "<script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
@@ -688,10 +700,41 @@ public class CSSSelectorTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
+    @Alerts(DEFAULT = { },
+            IE8 = { "li1" })
+    @NotYetImplemented(IE8)
+    public void pseudoAfter() throws Exception {
+        final String html
+            = HtmlPageTest.STANDARDS_MODE_PREFIX_ + "<html><head><title>Pseudo-After</title><script>\n"
+            + "function test() {\n"
+            + "  if (document.querySelectorAll) {\n"
+            + "    try {\n"
+            + "      var list = document.querySelectorAll('#li1:after');\n"
+            + "      for (var i = 0 ; i < list.length; i++) {\n"
+            + "        alert(list[i].id);\n"
+            + "      }\n"
+            + "    } catch (e) {alert('exception')}\n"
+            + "  }\n"
+            + "}\n"
+            + "</script></head>\n"
+            + "<body onload='test()'>\n"
+            + "<ul>\n"
+            + "  <li id='li1'></li>\n"
+            + "  <li id='li2'></li>\n"
+            + "</ul>\n"
+            + "</body></html>";
+
+        loadPageWithAlerts2(html);
+    }
+
+    /**
+     * @throws Exception if an error occurs
+     */
+    @Test
     @Alerts("li1")
     public void first_child() throws Exception {
         final String html = "<html><head><title>First</title>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=8'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "<script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
@@ -714,10 +757,11 @@ public class CSSSelectorTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = "li3", IE8 = "exception")
+    @Alerts(DEFAULT = "li3",
+            IE8 = "exception")
     public void last_child() throws Exception {
         final String html = "<html><head><title>First</title>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=9'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "<script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
@@ -742,10 +786,11 @@ public class CSSSelectorTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = "id2", IE8 = "exception")
+    @Alerts(DEFAULT = "id2",
+            IE8 = "exception")
     public void first_of_type() throws Exception {
         final String html = "<html><head><title>First</title>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=9'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "<script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
@@ -769,13 +814,46 @@ public class CSSSelectorTest extends WebDriverTestCase {
     }
 
     /**
+     * See http://dev.w3.org/csswg/selectors3/#negation and
+     * http://dev.w3.org/csswg/selectors3/#simple-selectors-dfn.
+     *
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = "id4", IE8 = "exception")
+    @Alerts("exception")
+    public void invalid_not() throws Exception {
+        final String html = "<html><head><title>First</title>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
+            + "<script>\n"
+            + "function test() {\n"
+            + "  if (document.querySelectorAll) {\n"
+            + "    try {\n"
+            + "      alert(document.querySelectorAll('p a:not(a:first-of-type)')[0].id);\n"
+            + "    } catch(e) {alert('exception')}\n"
+            + "  }\n"
+            + "}\n"
+            + "</script></head>\n"
+            + "<body onload='test()'>\n"
+            + "<p>\n"
+            + "  <strong id='strong'>This</strong> is a short blurb\n"
+            + "  <a id='link_1' href='#'>with a link</a> or\n"
+            + "  <a id='link_2' href='#'>two</a>.\n"
+            + "  Or <cite id='with_title' title='hello world!'>a citation</cite>.\n"
+            + "</p>\n"
+            + "</body></html>";
+
+        loadPageWithAlerts2(html);
+    }
+
+    /**
+     * @throws Exception if an error occurs
+     */
+    @Test
+    @Alerts(DEFAULT = "id4",
+            IE8 = "exception")
     public void last_of_type() throws Exception {
         final String html = "<html><head><title>First</title>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=9'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "<script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
@@ -802,10 +880,11 @@ public class CSSSelectorTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = "id3", IE8 = "exception")
+    @Alerts(DEFAULT = "id3",
+            IE8 = "exception")
     public void only_child() throws Exception {
         final String html = "<html><head><title>First</title>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=9'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "<script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
@@ -832,10 +911,11 @@ public class CSSSelectorTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = "id3", IE8 = "exception")
+    @Alerts(DEFAULT = "id3",
+            IE8 = "exception")
     public void only_of_type() throws Exception {
         final String html = "<html><head><title>First</title>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=9'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "<script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
@@ -862,10 +942,11 @@ public class CSSSelectorTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = { "id2", "span1" }, IE8 = "exception")
+    @Alerts(DEFAULT = { "id2", "span1" },
+            IE8 = "exception")
     public void empty() throws Exception {
         final String html = "<html><head><title>First</title>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=9'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "<script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
@@ -890,10 +971,11 @@ public class CSSSelectorTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = "id2", IE8 = "exception")
+    @Alerts(DEFAULT = "id2",
+            IE8 = "exception")
     public void not() throws Exception {
         final String html = "<html><head><title>First</title>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=9'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "<script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
@@ -915,12 +997,76 @@ public class CSSSelectorTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(FF = { "0", "undefined", "1", "[object HTMLInputElement]", "id2" },
-            DEFAULT = { "1", "[object HTMLHtmlElement]", "1", "[object HTMLInputElement]", "id2" })
-    @BuggyWebDriver({ Browser.FF10, Browser.FF17 })
-    public void focus() throws Exception {
+    @Alerts(DEFAULT = { "2", "item_2", "item_3" },
+            IE8 = "exception")
+    public void childNot() throws Exception {
         final String html = "<html><head><title>First</title>\n"
             + "<meta http-equiv='X-UA-Compatible' content='IE=9'>\n"
+            + "<script>\n"
+            + "function test() {\n"
+            + "  if (document.querySelectorAll) {\n"
+            + "    try {\n"
+            + "      var res = document.querySelectorAll('#list li:not(#item_1)');\n"
+            + "      alert(res.length);\n"
+            + "      alert(res[0].id);\n"
+            + "      alert(res[1].id);\n"
+            + "    } catch(e) {alert('exception')}\n"
+            + "  }\n"
+            + "}\n"
+            + "</script></head>\n"
+            + "<body onload='test()'>\n"
+            + "  <ul id='list'>\n"
+            + "    <li id='item_1'>1</li>\n"
+            + "    <li id='item_2'>2</li>\n"
+            + "    <li id='item_3'>3</li>\n"
+            + "  </ul>\n"
+            + "</body></html>";
+
+        loadPageWithAlerts2(html);
+    }
+
+    /**
+     * @throws Exception if an error occurs
+     */
+    @Test
+    @Alerts(DEFAULT = { "1", "item_2" },
+            IE8 = "exception")
+    public void childNotNot() throws Exception {
+        final String html = "<html><head><title>First</title>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=9'>\n"
+            + "<script>\n"
+            + "function test() {\n"
+            + "  if (document.querySelectorAll) {\n"
+            + "    try {\n"
+            + "      var res = document.querySelectorAll('#list li:not(#item_1):not(#item_3)');\n"
+            + "      alert(res.length);\n"
+            + "      alert(res[0].id);\n"
+            + "    } catch(e) {alert('exception')}\n"
+            + "  }\n"
+            + "}\n"
+            + "</script></head>\n"
+            + "<body onload='test()'>\n"
+            + "  <ul id='list'>\n"
+            + "    <li id='item_1'>1</li>\n"
+            + "    <li id='item_2'>2</li>\n"
+            + "    <li id='item_3'>3</li>\n"
+            + "  </ul>\n"
+            + "</body></html>";
+
+        loadPageWithAlerts2(html);
+    }
+
+    /**
+     * @throws Exception if an error occurs
+     */
+    @Test
+    @Alerts(DEFAULT = { "1", "[object HTMLHtmlElement]", "1", "[object HTMLInputElement]", "id2" },
+            FF = { "0", "undefined", "1", "[object HTMLInputElement]", "id2" },
+            IE11 = { "1", "[object HTMLBodyElement]", "1", "[object HTMLInputElement]", "id2" })
+    @BuggyWebDriver({ FF17,  FF24 })
+    public void focus() throws Exception {
+        final String html = "<html><head><title>First</title>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "<script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
@@ -955,10 +1101,11 @@ public class CSSSelectorTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = { "1", "id1", }, IE = "exception")
+    @Alerts(DEFAULT = { "1", "id1", },
+            IE8 = "exception")
     public void enabled() throws Exception {
         final String html = "<html><head><title>First</title>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=9'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "<script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
@@ -982,10 +1129,11 @@ public class CSSSelectorTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = { "1", "id2" }, IE = "exception")
+    @Alerts(DEFAULT = { "1", "id2" },
+            IE8 = "exception")
     public void disabled() throws Exception {
         final String html = "<html><head><title>First</title>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=9'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "<script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
@@ -1009,10 +1157,11 @@ public class CSSSelectorTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = { "1", "id2" }, IE = "exception")
+    @Alerts(DEFAULT = { "1", "id2" },
+            IE8 = "exception")
     public void target() throws Exception {
         final String html = "<html><head><title>First</title>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=9'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "<script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
@@ -1037,10 +1186,11 @@ public class CSSSelectorTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = { "0" }, IE = "exception")
+    @Alerts(DEFAULT = { "0" },
+            IE8 = "exception")
     public void targetNoHash() throws Exception {
         final String html = "<html><head><title>First</title>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=9'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "<script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
@@ -1064,10 +1214,11 @@ public class CSSSelectorTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = { "0" }, IE = "exception")
+    @Alerts(DEFAULT = { "0" },
+            IE8 = "exception")
     public void targetUnknown() throws Exception {
         final String html = "<html><head><title>First</title>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=9'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "<script>\n"
             + "function test() {\n"
             + "  if (document.querySelectorAll) {\n"
@@ -1091,10 +1242,11 @@ public class CSSSelectorTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = { "first", "second" }, IE8 = { "exception", "exception" })
+    @Alerts(DEFAULT = { "first", "second" },
+            IE8 = { "exception", "exception" })
     public void escapedAttributeValue() throws Exception {
         final String html = "<html><head>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=9'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "</head><body>\n"
             + "  <input id='first' name='foo[bar]'>\n"
             + "  <input id='second' name='foo.bar'>\n"
@@ -1117,7 +1269,7 @@ public class CSSSelectorTest extends WebDriverTestCase {
     @Alerts({ "first", "second", "third" })
     public void escapedClassName() throws Exception {
         final String html = "<html><head>\n"
-            + "<meta http-equiv='X-UA-Compatible' content='IE=9'>\n"
+            + "<meta http-equiv='X-UA-Compatible' content='IE=edge'>\n"
             + "</head><body>\n"
             + "  <input id='first' class='foo[bar]'>\n"
             + "  <input id='second' class='foo.bar'>\n"
@@ -1129,6 +1281,33 @@ public class CSSSelectorTest extends WebDriverTestCase {
             + "  alert(document.querySelectorAll('.foo\\\\:bar')[0].id);\n"
             + "} catch(e) {alert('exception')}\n"
             + "</script></body></html>";
+
+        loadPageWithAlerts2(html);
+    }
+
+    /**
+     * @throws Exception if an error occurs
+     */
+    @Test
+    @Alerts("exception")
+    public void invalidSelectors() throws Exception {
+        final String html
+            = HtmlPageTest.STANDARDS_MODE_PREFIX_ + "<html><head><title>Invalid Selectors</title><script>\n"
+            + "function test() {\n"
+            + "  if (document.querySelectorAll) {\n"
+            + "    try {\n"
+            + "      var list = document.querySelectorAll('li:foo() ~ li');\n"
+            + "      alert(list.length);\n"
+            + "    } catch (e) {alert('exception')}\n"
+            + "  }\n"
+            + "}\n"
+            + "</script></head>\n"
+            + "<body onload='test()'>\n"
+            + "<ul id='ul'>\n"
+            + "  <li id='li1'></li>\n"
+            + "  <li id='li2'></li>\n"
+            + "</ul>\n"
+            + "</body></html>";
 
         loadPageWithAlerts2(html);
     }

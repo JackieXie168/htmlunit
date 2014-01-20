@@ -14,6 +14,9 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host.html;
 
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -25,7 +28,6 @@ import org.openqa.selenium.WebElement;
 
 import com.gargoylesoftware.htmlunit.BrowserRunner;
 import com.gargoylesoftware.htmlunit.BrowserRunner.Alerts;
-import com.gargoylesoftware.htmlunit.BrowserRunner.Browser;
 import com.gargoylesoftware.htmlunit.BrowserRunner.BuggyWebDriver;
 import com.gargoylesoftware.htmlunit.BrowserRunner.NotYetImplemented;
 import com.gargoylesoftware.htmlunit.WebDriverTestCase;
@@ -36,6 +38,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @version $Revision$
  * @author Ahmed Ashour
  * @author Ronald Brill
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HTMLOptionElement2Test extends WebDriverTestCase {
@@ -45,7 +48,7 @@ public class HTMLOptionElement2Test extends WebDriverTestCase {
      */
     @Test
     @Alerts("SELECT;")
-    @BuggyWebDriver(Browser.IE)
+    @BuggyWebDriver(IE)
     //TODO: WebDriver tests passes even with HtmlUnit direct usage fails!
     public void clickSelect() throws Exception {
         final String html
@@ -98,8 +101,8 @@ public class HTMLOptionElement2Test extends WebDriverTestCase {
     @Test
     @Alerts(DEFAULT = "opt-a; opt-b",
             CHROME = "opt-b")
-    @NotYetImplemented
     @BuggyWebDriver
+    @NotYetImplemented
     //TODO: Needs further investigation of clicking an option without clicking the select
     //See the first comment in http://code.google.com/p/selenium/issues/detail?id=2131#c1
     // Additionally, FF and Chrome drivers look buggy as they don't allow to capture
@@ -152,10 +155,10 @@ public class HTMLOptionElement2Test extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @NotYetImplemented
-    @BuggyWebDriver(Browser.FF)
     @Alerts(DEFAULT = "onchange-select; onclick-option; onclick-select;",
             IE = "onchange-select; onclick-select;")
+    @BuggyWebDriver(FF)
+    @NotYetImplemented
     public void clickOptionEventSequence1() throws Exception {
         final String html = "<html><head>\n"
                 + "<script>\n"
@@ -192,10 +195,9 @@ public class HTMLOptionElement2Test extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @NotYetImplemented
-    @BuggyWebDriver(Browser.FF)
     @Alerts(DEFAULT = "change-SELECT; click-OPTION; click-OPTION;",
             IE = "change-SELECT; click-SELECT;")
+    @BuggyWebDriver(FF)
     public void clickOptionEventSequence2() throws Exception {
         final String html = "<html><head>\n"
                 + "<script>\n"
@@ -254,10 +256,9 @@ public class HTMLOptionElement2Test extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @NotYetImplemented
-    @BuggyWebDriver(Browser.FF)
     @Alerts(DEFAULT = "onchange-select; change-SELECT; onclick-option; click-OPTION; onclick-select; click-OPTION;",
             IE = "onchange-select; change-SELECT; onclick-select; click-SELECT;")
+    @BuggyWebDriver(FF)
     public void clickOptionEventSequence3() throws Exception {
         final String html = "<html><head>\n"
                 + "<script>\n"
@@ -318,7 +319,8 @@ public class HTMLOptionElement2Test extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = { "1", "option1", "0" }, IE = { "1", "option2", "1" })
+    @Alerts(DEFAULT = { "1", "option1", "0" },
+            IE8 = { "1", "option2", "1" })
     public void unselectResetToFirstOption() throws Exception {
         final String html
             = "<html><head><title>foo</title><script>\n"
@@ -352,7 +354,8 @@ public class HTMLOptionElement2Test extends WebDriverTestCase {
             + "  var sel = document.form1.select1;\n"
             + "  sel.options[1].selected = true;\n"
             + "  alert(sel.selectedIndex);\n"
-            + "}</script></head><body onload='doTest()'>\n"
+            + "}\n"
+            + "</script></head><body onload='doTest()'>\n"
             + "<form name='form1'>\n"
             + "    <select name='select1' onfocus='alert(\"focus\")'>\n"
             + "        <option value='option1' name='option1'>One</option>\n"

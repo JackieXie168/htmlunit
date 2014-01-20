@@ -14,7 +14,7 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.regexp.mozilla.js1_2;
 
-import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE8;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,6 +29,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  *
  * @version $Revision$
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class StringSplitTest extends WebDriverTestCase {
@@ -88,8 +89,9 @@ public class StringSplitTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = ",,,", IE = "")
-    @NotYetImplemented(IE)
+    @Alerts(DEFAULT = ",,,",
+            IE8 = "")
+    @NotYetImplemented(IE8)
     public void test6() throws Exception {
         test("'abc'.split(/[a-z]/)");
     }
@@ -99,8 +101,9 @@ public class StringSplitTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = ",,,", IE = "")
-    @NotYetImplemented(IE)
+    @Alerts(DEFAULT = ",,,",
+            IE8 = "")
+    @NotYetImplemented(IE8)
     public void test7() throws Exception {
         test("'abc'.split(/[a-z]/)");
     }
@@ -110,8 +113,9 @@ public class StringSplitTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = ",,,", IE = "")
-    @NotYetImplemented(IE)
+    @Alerts(DEFAULT = ",,,",
+            IE8 = "")
+    @NotYetImplemented(IE8)
     public void test8() throws Exception {
         test("'abc'.split(new RegExp('[a-z]'))");
     }
@@ -121,8 +125,9 @@ public class StringSplitTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = ",,,", IE = "")
-    @NotYetImplemented(IE)
+    @Alerts(DEFAULT = ",,,",
+            IE8 = "")
+    @NotYetImplemented(IE8)
     public void test9() throws Exception {
         test("'abc'.split(new RegExp('[a-z]'))");
     }

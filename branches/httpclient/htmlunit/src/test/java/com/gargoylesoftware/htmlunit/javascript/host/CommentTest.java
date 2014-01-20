@@ -27,6 +27,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @version $Revision$
  * @author Mirko Friedenhagen
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class CommentTest extends WebDriverTestCase {
@@ -35,7 +36,8 @@ public class CommentTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = "[object]", DEFAULT = "[object Comment]")
+    @Alerts(DEFAULT = "[object Comment]",
+            IE8 = "[object]")
     public void simpleScriptable() throws Exception {
         final String html
             = "<html><head><title>foo</title><script>\n"
@@ -51,7 +53,7 @@ public class CommentTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "after", "comment" },
-            IE = { "undefined", "undefined" })
+            IE8 = { "undefined", "undefined" })
     public void textContent() throws Exception {
         final String html
             = "<html><body>\n"
@@ -68,9 +70,10 @@ public class CommentTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = { "undefined", "undefined" },
-            CHROME = { "after", "undefined" },
-            IE = { "after", "" })
+    @Alerts(CHROME = { "after", "undefined" },
+            FF = { "undefined", "undefined" },
+            IE = { "after", "" },
+            IE11 = { "after", "undefined" })
     public void innerText() throws Exception {
         final String html
             = "<html><body>\n"
@@ -98,7 +101,8 @@ public class CommentTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "undefined", IE = "")
+    @Alerts(DEFAULT = "undefined",
+            IE8 = "")
     public void id() throws Exception {
         property("id");
     }
@@ -107,7 +111,8 @@ public class CommentTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "undefined", IE = "")
+    @Alerts(DEFAULT = "undefined",
+            IE8 = "")
     public void className() throws Exception {
         property("className");
     }
@@ -116,7 +121,8 @@ public class CommentTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "undefined", IE = "!")
+    @Alerts(DEFAULT = "undefined",
+            IE8 = "!")
     public void tagName() throws Exception {
         property("tagName");
     }
@@ -125,7 +131,8 @@ public class CommentTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "undefined", IE = "<!--abcdefg-->")
+    @Alerts(DEFAULT = "undefined",
+            IE = "<!--abcdefg-->")
     public void text() throws Exception {
         property("text");
     }
@@ -134,7 +141,8 @@ public class CommentTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "undefined", IE = "[object]")
+    @Alerts(DEFAULT = "undefined",
+            IE8 = "[object]")
     public void document() throws Exception {
         property("document");
     }

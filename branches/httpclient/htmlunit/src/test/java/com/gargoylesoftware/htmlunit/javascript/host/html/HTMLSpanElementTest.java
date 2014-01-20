@@ -14,14 +14,11 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host.html;
 
-import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF17;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.gargoylesoftware.htmlunit.BrowserRunner;
 import com.gargoylesoftware.htmlunit.BrowserRunner.Alerts;
-import com.gargoylesoftware.htmlunit.BrowserRunner.NotYetImplemented;
 import com.gargoylesoftware.htmlunit.WebDriverTestCase;
 
 /**
@@ -31,6 +28,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @author Daniel Gredler
  * @author Marc Guillemot
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HTMLSpanElementTest extends WebDriverTestCase {
@@ -39,7 +37,8 @@ public class HTMLSpanElementTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(IE = "yes", FF = "no")
+    @Alerts(DEFAULT = "no",
+            IE8 = "yes")
     public void doScroll() throws Exception {
         final String html =
             "<html>\n"
@@ -67,18 +66,14 @@ public class HTMLSpanElementTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(IE6 = {"[object] undefined", "[object] undefined" },
-            IE = {"[object] ", "[object] undefined" },
-            FF3_6 = {"[object HTMLSpanElement] undefined", "[object HTMLSpanElement] undefined" },
-            FF = {"[object HTMLElement] undefined", "[object HTMLSpanElement] undefined" })
-    @NotYetImplemented(FF17)
+    @Alerts(DEFAULT = "[object HTMLSpanElement] undefined" ,
+            IE8 = "[object] undefined")
     public void cite() throws Exception {
         final String html =
             "<html>\n"
             + "  <head>\n"
             + "    <script>\n"
             + "      function test() {\n"
-            + "        debug(document.createElement('abbr'));\n"
             + "        debug(document.createElement('span'));\n"
             + "      }\n"
             + "      function debug(e) {\n"

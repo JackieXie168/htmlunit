@@ -14,7 +14,7 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host.html;
 
-import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE8;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,7 +45,8 @@ public class HTMLScriptElementTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(FF = "1 2 3 4 onload ", IE = "1 2 3 b=loading 4 b=loaded ")
+    @Alerts(DEFAULT = "1 2 3 4 onload ",
+            IE8 = "1 2 3 b=loading 4 b=loaded ")
     public void onReadyStateChangeHandler() throws Exception {
         final String html = "<html>\n"
             + "  <head>\n"
@@ -89,7 +90,7 @@ public class HTMLScriptElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "", IE6 = "1")
+    @Alerts("")
     public void srcWithJavaScriptProtocol_Static() throws Exception {
         final String html = "<html><head><script src='javascript:\"alert(1)\"'></script></head><body></body></html>";
         loadPageWithAlerts2(html);
@@ -100,7 +101,7 @@ public class HTMLScriptElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "", IE6 = "1")
+    @Alerts("")
     public void srcWithJavaScriptProtocol_Dynamic() throws Exception {
         final String html =
               "<html><head><title>foo</title><script>\n"
@@ -120,7 +121,8 @@ public class HTMLScriptElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = { "start", "end" }, IE = { "start", "executed", "end" })
+    @Alerts(DEFAULT = { "start", "end" },
+            IE8 = { "start", "executed", "end" })
     public void reexecuteModifiedScript() throws Exception {
         final String html =
               "<html><head><title>foo</title></head><body>\n"
@@ -141,7 +143,7 @@ public class HTMLScriptElementTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "start", "end" },
-            IE = { "start", "exception", "end" })
+            IE8 = { "start", "exception", "end" })
     public void createElementWithCreateTextNode() throws Exception {
         // IE (at least IE6 and IE8) does not support script.appendChild(source)
         final String html =
@@ -167,7 +169,7 @@ public class HTMLScriptElementTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "start", "middle", "executed", "end" },
-            IE = { "start", "exception", "middle", "end" })
+            IE8 = { "start", "exception", "middle", "end" })
     public void createElementWithCreateTextNodeAndAppend() throws Exception {
         // IE (at least IE6 and IE8) does not support script.appendChild(source)
         final String html =
@@ -286,7 +288,7 @@ public class HTMLScriptElementTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "start", "end" },
-            IE = { "start", "exception", "end" })
+            IE8 = { "start", "exception", "end" })
     public void replaceSelfWithCreateTextNode() throws Exception {
         // IE (at least IE6 and IE8) does not support script.appendChild(source)
         final String html =
@@ -311,7 +313,7 @@ public class HTMLScriptElementTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "start", "end" },
-            IE = { "start", "executed", "end" })
+            IE8 = { "start", "executed", "end" })
     public void replaceSelfWithSetText() throws Exception {
         // TODO this test is the same as #reexecuteModifiedScriptWhenReappending()
         final String html =
@@ -334,7 +336,7 @@ public class HTMLScriptElementTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "start", "end" },
-            IE = { "start", "end", "executed" })
+            IE8 = { "start", "end", "executed" })
     public void replaceSelfWithSetSrc() throws Exception {
         final String html =
                 "<html><head><title>foo</title></head><body>\n"
@@ -359,7 +361,7 @@ public class HTMLScriptElementTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "start", "executed", "end" },
-            IE = { "start", "exception", "end" })
+            IE8 = { "start", "exception", "end" })
     public void replaceWithCreateTextNodeEmpty() throws Exception {
         // IE (at least IE6 and IE8) does not support script.appendChild(source)
         final String html =
@@ -385,7 +387,7 @@ public class HTMLScriptElementTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "start", "end" },
-            IE = { "start", "exception", "end" })
+            IE8 = { "start", "exception", "end" })
     public void replaceWithCreateTextNodeBlank() throws Exception {
         // IE (at least IE6 and IE8) does not support script.appendChild(source)
         final String html =
@@ -411,7 +413,7 @@ public class HTMLScriptElementTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "script", "start", "end" },
-            IE = { "script", "start", "exception", "end" })
+            IE8 = { "script", "start", "exception", "end" })
     public void replaceWithCreateTextNodeScript() throws Exception {
         // IE (at least IE6 and IE8) does not support script.appendChild(source)
         final String html =
@@ -460,7 +462,7 @@ public class HTMLScriptElementTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "start", "end" },
-            IE = { "start", "executed", "end" })
+            IE8 = { "start", "executed", "end" })
     public void replaceWithSetTextBlank() throws Exception {
         final String html =
                 "<html><head><title>foo</title></head><body>\n"
@@ -482,7 +484,7 @@ public class HTMLScriptElementTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "script", "start", "end" },
-            IE = { "script", "start", "executed", "end" })
+            IE8 = { "script", "start", "executed", "end" })
     public void replaceWithSetTextScript() throws Exception {
         final String html =
                 "<html><head><title>foo</title></head><body>\n"
@@ -530,7 +532,7 @@ public class HTMLScriptElementTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "start", "end" },
-            IE = { "start", "end", "executed" })
+            IE8 = { "start", "end", "executed" })
     public void replaceWithSetSrcBlank() throws Exception {
         final String html =
                 "<html><head><title>foo</title></head><body>\n"
@@ -555,7 +557,7 @@ public class HTMLScriptElementTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "script", "start", "end" },
-            IE = { "script", "start", "end", "executed" })
+            IE8 = { "script", "start", "end", "executed" })
     public void replaceWithSetSrcScript() throws Exception {
         final String html =
                 "<html><head><title>foo</title></head><body>\n"
@@ -628,7 +630,8 @@ public class HTMLScriptElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = "exception", IE = "hello")
+    @Alerts(FF = "exception",
+            IE = "hello")
     public void scriptForEvent() throws Exception {
         // IE accepts it with () or without
         scriptForEvent("onload");
@@ -656,8 +659,9 @@ public class HTMLScriptElementTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @NotYetImplemented(IE)
-    @Alerts(FF = { "3", "4", "2", "5" }, IE = { "1", "2", "3", "4", "5", "6", "7" })
+    @Alerts(DEFAULT = { "3", "4", "2", "5" },
+            IE8 = { "1", "2", "3", "4", "5", "6", "7" })
+    @NotYetImplemented(IE8)
     public void onReadyStateChange_Order() throws Exception {
         final String html =
               "<html>\n"
@@ -678,7 +682,7 @@ public class HTMLScriptElementTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(IE = "[object]")
+    @Alerts(IE8 = "[object]")
     public void onReadyStateChange_EventAvailable() throws Exception {
         final String html =
               "<html><body><script>\n"
@@ -698,7 +702,8 @@ public class HTMLScriptElementTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(FF = { "3", "4", "2" }, IE = { "1", "2", "3", "4", "5", "6" })
+    @Alerts(DEFAULT = { "3", "4", "2" },
+            IE8 = { "1", "2", "3", "4", "5", "6" })
     public void onReadyStateChange_Order_NoBody() throws Exception {
         final String html =
               "<html>\n"
@@ -746,7 +751,8 @@ public class HTMLScriptElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = "onload", IE = { "defer", "onload" })
+    @Alerts(DEFAULT = "onload",
+            IE8 = { "defer", "onload" })
     public void onload_after_deferReadStateComplete() throws Exception {
         final String html =
               "<html>\n"
@@ -768,7 +774,8 @@ public class HTMLScriptElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = { "1", "2", "3" }, IE = "1")
+    @Alerts(FF = { "1", "2", "3" },
+            IE = "1")
     public void scriptType() throws Exception {
         final String html
             = "<html>\n"
@@ -789,7 +796,8 @@ public class HTMLScriptElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = "Unexpected call to method or property access")
+    @Alerts(IE = "Unexpected call to method or property access",
+            IE11 = "")
     public void appendChild_UnexpectedCall() throws Exception {
         // IE (at least IE6 and IE8) does not support script.appendChild(source)
         final String html =
@@ -813,7 +821,8 @@ public class HTMLScriptElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = "Unexpected call to method or property access")
+    @Alerts(IE = "Unexpected call to method or property access",
+            IE11 = "")
     public void insertBeforeUnexpectedCall() throws Exception {
         // IE (at least IE6 and IE8) does not support script.insertBefore(source, null)
         final String html =
@@ -838,7 +847,8 @@ public class HTMLScriptElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = "onload for window,onclick for div1,", DEFAULT = "onload for window,")
+    @Alerts(DEFAULT = "onload for window,",
+            IE8 = "onload for window,onclick for div1,")
     public void scriptEventFor() throws Exception {
         final String html = "<html>\n"
             + "<head>\n"
@@ -874,7 +884,7 @@ public class HTMLScriptElementTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "function foo() { return a > b}", "function mce() { return a &gt; b}" },
-            IE = { "\r\nfunction foo() { return a > b}", "function mce() { return a &gt; b}" })
+            IE8 = { "\r\nfunction foo() { return a > b}", "function mce() { return a &gt; b}" })
     public void innerHtml() throws Exception {
         final String html
             = "<html><head><title>foo</title>\n"

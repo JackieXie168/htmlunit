@@ -15,6 +15,7 @@
 package com.gargoylesoftware.htmlunit.javascript.host;
 
 import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE8;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,6 +26,7 @@ import org.openqa.selenium.WebElement;
 import com.gargoylesoftware.htmlunit.BrowserRunner;
 import com.gargoylesoftware.htmlunit.BrowserRunner.Alerts;
 import com.gargoylesoftware.htmlunit.BrowserRunner.Browsers;
+import com.gargoylesoftware.htmlunit.BrowserRunner.BuggyWebDriver;
 import com.gargoylesoftware.htmlunit.WebDriverTestCase;
 
 /**
@@ -32,6 +34,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  *
  * @version $Revision$
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class EventNodeTest extends WebDriverTestCase {
@@ -40,7 +43,7 @@ public class EventNodeTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Browsers(IE)
+    @Browsers(IE8)
     @Alerts("true")
     public void fireEvent() throws Exception {
         final String html
@@ -62,7 +65,7 @@ public class EventNodeTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Browsers(IE)
+    @Browsers(IE8)
     @Alerts("hello")
     public void fireEvent_initFromTemplate() throws Exception {
         final String html = "<html>\n"
@@ -83,20 +86,14 @@ public class EventNodeTest extends WebDriverTestCase {
     }
 
     /**
-     * Note concerning Chrome: "focus textarea" is generated when testing manually but
-     * not through the driver. A bug in the driver?
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "mousedown span,mouseup span,click span,mousedown text,focus text,mouseup text,"
-            + "click text,mousedown image,focus image,mouseup image,click image,mousedown textarea,focus textarea,"
-            + "mouseup textarea,click textarea,",
-            CHROME = "mousedown span,mouseup span,click span,mousedown text,focus text,mouseup text,"
-                + "click text,mousedown image,mouseup image,click image,mousedown textarea,focus textarea,"
-                + "mouseup textarea,click textarea,focus textarea,",
-            FF10 = "mousedown span,mouseup span,click span,mousedown text,focus text,mouseup text,"
-                    + "click text,mousedown image,focus image,mouseup image,click image,mousedown textarea,"
-                    + "focus textarea,mouseup textarea,click textarea,")
+    @Alerts("mousedown span,mouseup span,click span,mousedown text,focus text,mouseup text,"
+        + "click text,mousedown image,focus image,mouseup image,click image,mousedown textarea,focus textarea,"
+        + "mouseup textarea,click textarea,")
+    @BuggyWebDriver(IE)
+    // IEDriver generates the focus event for the image after the click although it's fired after the mousedown
     public void clickEvents() throws Exception {
         final String html = "<html>\n"
             + "<head>\n"
@@ -136,7 +133,6 @@ public class EventNodeTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    //Fails with InternetExplorerDriver, but works in independent IE :(
     public void eventOrder() throws Exception {
         final String html = "<html>\n"
             + "<head>\n"
@@ -161,14 +157,7 @@ public class EventNodeTest extends WebDriverTestCase {
         textField.sendKeys("a");
         webDriver.findElement(By.id("other")).click();
 
-        final String expected;
-        if (getBrowserVersion().isFirefox() && getBrowserVersion().getBrowserVersionNumeric() == 2) {
-            expected = "focus,keydown,keypress,keyup,blur,change,";
-        }
-        else {
-            expected = "focus,keydown,keypress,keyup,change,blur,";
-        }
-
+        final String expected = "focus,keydown,keypress,keyup,change,blur,";
         assertEquals(expected, webDriver.findElement(By.id("myTextarea")).getAttribute("value"));
     }
 }

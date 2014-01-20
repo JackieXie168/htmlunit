@@ -15,6 +15,8 @@
 package com.gargoylesoftware.htmlunit.javascript.host.html;
 
 import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE11;
+
 import static org.junit.Assert.assertSame;
 
 import org.junit.Test;
@@ -40,6 +42,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @author Ahmed Ashour
  * @author Daniel Gredler
  * @author Ronald Brill
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HTMLSelectElementTest extends WebDriverTestCase {
@@ -369,8 +372,8 @@ public class HTMLSelectElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
+    @Browsers({ FF, IE11 })
     @Alerts({ "4", "Four", "value4" })
-    @Browsers(FF)
     public void addOptionWithAddMethod_FF() throws Exception {
         final String html
             = "<html><head><title>foo</title><script>\n"
@@ -400,8 +403,7 @@ public class HTMLSelectElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF3_6 = "exception",
-            DEFAULT = { "4", "Four", "value4", "Three b", "value3b" })
+    @Alerts({ "4", "Four", "value4", "Three b", "value3b" })
     public void addOptionWithAddMethod_IE() throws Exception {
         final String html
             = "<html><head><title>foo</title><script>\n"
@@ -435,8 +437,8 @@ public class HTMLSelectElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "0", "exception" },
-            FF = { "0", "test", "testValue" })
+    @Alerts(DEFAULT = { "0", "test", "testValue" },
+            IE8 = { "0", "exception" })
     public void addOptionTooEmptySelectWithAddMethod_IE() throws Exception {
         final String html
             = "<html><head><title>foo</title><script>\n"
@@ -460,13 +462,12 @@ public class HTMLSelectElementTest extends WebDriverTestCase {
     }
 
     /**
-     * Regression test for bug 1304741.
-     * See https://sourceforge.net/tracker/index.php?func=detail&aid=1304741&group_id=47038&atid=448266.
+     * Regression test for bug 308.
+     * See http://sourceforge.net/p/htmlunit/bugs/308/.
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF3_6 = { "0", "exception" },
-            DEFAULT = { "0", "1" })
+    @Alerts({ "0", "1" })
     public void addWith1Arg() throws Exception {
         final String html
             = "<html><head>\n"
@@ -552,8 +553,7 @@ public class HTMLSelectElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF3_6 = "exception",
-            DEFAULT = { "2", "Three", "value3" })
+    @Alerts({ "2", "Three", "value3" })
     public void optionsRemoveMethod() throws Exception {
         final String html
             = "<html><head><title>foo</title><script>\n"
@@ -669,7 +669,8 @@ public class HTMLSelectElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = { "Two", "", "Two", "", "" }, IE = { "", "", "", "", "" })
+    @Alerts(DEFAULT = { "Two", "", "Two", "", "" },
+            IE8 = { "", "", "", "", "" })
     public void getValue() throws Exception {
         final String html
             = "<html><head><title>foo</title><script>\n"
@@ -734,7 +735,8 @@ public class HTMLSelectElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = "exception", IE = { "2-2", "1-1", "2-2", "0-0", "2-2", "1-1" })
+    @Alerts(FF = "exception",
+            IE = { "2-2", "1-1", "2-2", "0-0", "2-2", "1-1" })
     public void optionsDelegateToSelect() throws Exception {
         final String html
             = "<html><head>\n"
@@ -987,18 +989,50 @@ public class HTMLSelectElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts()
+    @Alerts({ "0", "1" })
     public void selectedIndex_onfocus() throws Exception {
         final String html =
             "<html><head>\n"
             + "<script>\n"
             + "  function test() {\n"
             + "    var s = document.getElementById('mySelect');\n"
+            + "    alert(s.selectedIndex);\n"
             + "    s.selectedIndex = 1;\n"
+            + "    alert(s.selectedIndex);\n"
             + "  }\n"
             + "</script>\n"
             + "<body onload='test()'>\n"
-            + "<select id='mySelect' onfocus='alert(1)'><option>hello</option><option>there</option></select>\n"
+            + "<body onload='test()'>\n"
+            + "  <select id='mySelect' onfocus='alert(\"select-focus\")'>\n"
+            + "    <option value='o1'>hello</option>\n"
+            + "    <option value='o2'>there</option>\n"
+            + "  </select>\n"
+            + "</body></html>";
+
+        loadPageWithAlerts2(html);
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts({ "o1", "o2" })
+    public void value_onfocus() throws Exception {
+        final String html =
+            "<html><head>\n"
+            + "<script>\n"
+            + "  function test() {\n"
+            + "    var s = document.getElementById('mySelect');\n"
+            + "    alert(s.value);\n"
+            + "    s.value = 'o2';\n"
+            + "    alert(s.value);\n"
+            + "  }\n"
+            + "</script>\n"
+            + "<body onload='test()'>\n"
+            + "  <select id='mySelect' onfocus='alert(\"select-focus\")'>\n"
+            + "    <option value='o1'>hello</option>\n"
+            + "    <option value='o2'>there</option>\n"
+            + "  </select>\n"
             + "</body></html>";
 
         loadPageWithAlerts2(html);
@@ -1089,7 +1123,8 @@ public class HTMLSelectElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = { "first", "null", "null" }, IE = { "first", "null", "exception" })
+    @Alerts(DEFAULT = { "first", "null", "null" },
+            IE8 = { "first", "null", "exception" })
     public void item() throws Exception {
         final String html =
             "<html><head>\n"
@@ -1113,7 +1148,8 @@ public class HTMLSelectElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "two", "" }, FF = { "two", "two" })
+    @Alerts(FF = { "two", "two" },
+            IE = { "two", "" })
     public void value() throws Exception {
         final String html =
             "<html><head>\n"
@@ -1138,7 +1174,8 @@ public class HTMLSelectElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "two", "" }, FF = { "two", "One" })
+    @Alerts(FF = { "two", "One" },
+            IE = { "two", "" })
     public void value2() throws Exception {
         final String html =
             "<html><head>\n"
@@ -1163,7 +1200,8 @@ public class HTMLSelectElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "two", "" }, FF = { "two", "two" })
+    @Alerts(FF = { "two", "two" },
+            IE = { "two", "" })
     public void valueNull() throws Exception {
         final String html =
             "<html><head>\n"

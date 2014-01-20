@@ -28,6 +28,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @version $Revision$
  * @author Ahmed Ashour
  * @author Marc Guillemot
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class CanvasRenderingContext2DTest extends WebDriverTestCase {
@@ -36,7 +37,8 @@ public class CanvasRenderingContext2DTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(FF = "done", IE = "exception")
+    @Alerts(DEFAULT = "done",
+            IE8 = "exception")
     public void test() throws Exception {
         final String html =
             "<html><head><script>\n"
@@ -74,16 +76,18 @@ public class CanvasRenderingContext2DTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(FF = { "drawCustomFocusRing", "drawSystemFocusRing", "getLineDash", "scrollPathIntoView", "setLineDash",
-            "33 methods" },
-            IE = "exception")
+    @Alerts(DEFAULT = { "addHitRegion", "drawCustomFocusRing", "drawSystemFocusRing", "ellipse", "getLineDash",
+                "removeHitRegion", "scrollPathIntoView", "setLineDash", "33 methods" },
+            IE8 = "exception",
+            IE11 = { "addHitRegion", "drawCustomFocusRing", "drawSystemFocusRing", "ellipse", "removeHitRegion",
+                "scrollPathIntoView", "35 methods" })
     public void methods() throws Exception {
-        final String[] methods = {"arc", "arcTo", "beginPath", "bezierCurveTo", "clearRect", "clip", "closePath",
-            "createImageData", "createLinearGradient", "createPattern", "createRadialGradient", "drawImage",
-            "drawCustomFocusRing", "drawSystemFocusRing", "fill", "fillRect", "fillText", "getImageData",
-            "getLineDash", "isPointInPath", "lineTo", "measureText", "moveTo", "putImageData", "quadraticCurveTo",
-            "rect", "restore", "rotate", "save", "scale", "scrollPathIntoView", "setLineDash", "setTransform",
-            "stroke", "strokeRect", "strokeText", "transform", "translate" };
+        final String[] methods = {"addHitRegion", "arc", "arcTo", "beginPath", "bezierCurveTo", "clearRect", "clip",
+            "closePath", "createImageData", "createLinearGradient", "createPattern", "createRadialGradient",
+            "drawImage", "drawCustomFocusRing", "drawSystemFocusRing", "ellipse", "fill", "fillRect", "fillText",
+            "getImageData", "getLineDash", "isPointInPath", "lineTo", "measureText", "moveTo", "putImageData",
+            "quadraticCurveTo", "rect", "removeHitRegion", "restore", "rotate", "save", "scale", "scrollPathIntoView",
+            "setLineDash", "setTransform", "stroke", "strokeRect", "strokeText", "transform", "translate" };
         final String html = "<html><body>\n"
             + "<canvas id='myCanvas'></canvas>\n"
             + "<script>\n"

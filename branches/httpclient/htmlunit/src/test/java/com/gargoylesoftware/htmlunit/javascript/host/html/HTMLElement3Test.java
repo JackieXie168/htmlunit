@@ -15,6 +15,7 @@
 package com.gargoylesoftware.htmlunit.javascript.host.html;
 
 import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE8;
 import static org.junit.Assert.fail;
 
 import java.net.URL;
@@ -51,6 +52,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
  * @author Ahmed Ashour
  * @author Sudhan Moghe
  * @author Ethan Glasser-Camp
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HTMLElement3Test extends SimpleWebTestCase {
@@ -60,14 +62,14 @@ public class HTMLElement3Test extends SimpleWebTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = {
-            "Old = <B>Old innerHTML</B><!-- old comment -->",
-            "New = <B><I id=newElt>New cell value</I></B>",
-            "I" },
-    DEFAULT = {
-            "Old = <b>Old innerHTML</b><!-- old comment -->",
-            "New =  <b><i id=\"newElt\">New cell value</i></b>",
-            "I" })
+    @Alerts(DEFAULT = {
+                "Old = <b>Old innerHTML</b><!-- old comment -->",
+                "New =  <b><i id=\"newElt\">New cell value</i></b>",
+                "I" },
+            IE8 = {
+                "Old = <B>Old innerHTML</B><!-- old comment -->",
+                "New = <B><I id=newElt>New cell value</I></B>",
+                "I" })
     public void getSetInnerHTMLComplex_FF() throws Exception {
         final String html = "<html>\n"
             + "<head>\n"
@@ -102,7 +104,12 @@ public class HTMLElement3Test extends SimpleWebTestCase {
      */
     @Test
     @Browsers(IE)
-    @Alerts(IE = { "Old = <B id=innerNode>Old outerHTML</B>", "New = <B><I id=newElt>New cell value</I></B>", "I" })
+    @Alerts(IE = { "Old = <B id=innerNode>Old outerHTML</B>",
+                "New = <B><I id=newElt>New cell value</I></B>",
+                "I" },
+            IE11 = { "Old = <b id=\"innerNode\">Old outerHTML</b>",
+                "New = <b><i id=\"newElt\">New cell value</i></b>",
+                "I" })
     public void getSetOuterHTMLComplex() throws Exception {
         final String html = "<html>\n"
             + "<head>\n"
@@ -130,105 +137,12 @@ public class HTMLElement3Test extends SimpleWebTestCase {
     }
 
     /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Browsers(IE)
-    @Alerts({ "outside", "1", "middle", "2", "3", "4" })
-    public void insertAdjacentHTML() throws Exception {
-        insertAdjacentHTML("beforeEnd", "afterEnd", "beforeBegin", "afterBegin");
-        insertAdjacentHTML("BeforeEnd", "AfterEnd", "BeFoReBeGiN", "afterbegin");
-    }
-
-    /**
-     * @param beforeEnd data to insert
-     * @param afterEnd data to insert
-     * @param beforeBegin data to insert
-     * @param afterBegin data to insert
-     * @throws Exception if the test fails
-     */
-    private void insertAdjacentHTML(final String beforeEnd,
-            final String afterEnd, final String beforeBegin, final String afterBegin) throws Exception {
-        final String html = "<html><head><title>First</title>\n"
-            + "<script>\n"
-            + "function test() {\n"
-            + "  var oNode = document.getElementById('middle');\n"
-            + "  oNode.insertAdjacentHTML('" + beforeEnd + "', ' <span id=3>before end</span> ');\n"
-            + "  oNode.insertAdjacentHTML('" + afterEnd + "', ' <span id=4>after end</span> ');\n"
-            + "  oNode.insertAdjacentHTML('" + beforeBegin + "', ' <span id=1>before begin</span> ');\n"
-            + "  oNode.insertAdjacentHTML('" + afterBegin + "', ' <span id=2>after begin</span> ');\n"
-            + "  var coll = document.getElementsByTagName('SPAN');\n"
-            + "  for (var i=0; i<coll.length; i++) {\n"
-            + "    alert(coll[i].id);\n"
-            + "  }\n"
-            + "}\n"
-            + "</script>\n"
-            + "</head>\n"
-            + "<body onload='test()'>\n"
-            + "<span id='outside' style='color: #00ff00'>\n"
-            + "<span id='middle' style='color: #ff0000'>\n"
-            + "inside\n"
-            + "</span>\n"
-            + "</span>\n"
-            + "</body></html>";
-        final HtmlPage page = loadPageWithAlerts(html);
-        final HtmlElement elt = page.getHtmlElementById("outside");
-        assertEquals("before begin after begin inside before end after end", elt.asText());
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Browsers(IE)
-    @Alerts({ "outside", "1", "middle", "2", "3", "4" })
-    public void insertAdjacentElement() throws Exception {
-        insertAdjacentElement("beforeEnd", "afterEnd", "beforeBegin", "afterBegin");
-        insertAdjacentElement("BeforeEnd", "AfterEnd", "BeFoReBeGiN", "afterbegin");
-    }
-
-    private void insertAdjacentElement(final String beforeEnd,
-            final String afterEnd, final String beforeBegin, final String afterBegin) throws Exception {
-        final String html = "<html><head><title>First</title>\n"
-            + "<script>\n"
-            + "function test() {\n"
-            + "  var oNode = document.getElementById('middle');\n"
-            + "  oNode.insertAdjacentElement('" + beforeEnd + "', makeElement(3, 'before end'));\n"
-            + "  oNode.insertAdjacentElement('" + afterEnd + "', makeElement(4, ' after end'));\n"
-            + "  oNode.insertAdjacentElement('" + beforeBegin + "', makeElement(1, 'before begin '));\n"
-            + "  oNode.insertAdjacentElement('" + afterBegin + "', makeElement(2, ' after begin'));\n"
-            + "  var coll = document.getElementsByTagName('SPAN');\n"
-            + "  for (var i=0; i<coll.length; i++) {\n"
-            + "    alert(coll[i].id);\n"
-            + "  }\n"
-            + "}\n"
-            + "function makeElement(id, value) {\n"
-            + "  var span = document.createElement('span');\n"
-            + "  span.appendChild(document.createTextNode(value));\n"
-            + "  span.id = id;\n"
-            + "  return span;\n"
-            + "}\n"
-            + "</script>\n"
-            + "</head>\n"
-            + "<body onload='test()'>\n"
-            + "<span id='outside' style='color: #00ff00'>\n"
-            + "<span id='middle' style='color: #ff0000'>\n"
-            + "inside\n"
-            + "</span>\n"
-            + "</span>\n"
-            + "</body></html>";
-        final HtmlPage page = loadPageWithAlerts(html);
-        final HtmlElement elt = page.getHtmlElementById("outside");
-        assertEquals("before begin after begin inside before end after end", elt.asText());
-    }
-
-    /**
      * Test the <tt>#default#homePage</tt> default IE behavior.
      * @throws Exception if the test fails
      */
     @Test
-    @Browsers(IE)
-    @Alerts(IE = { "isHomePage = false", "isHomePage = true", "isHomePage = true", "isHomePage = false" })
+    @Browsers(IE8)
+    @Alerts(IE8 = { "isHomePage = false", "isHomePage = true", "isHomePage = true", "isHomePage = false" })
     public void addBehaviorDefaultHomePage() throws Exception {
         final URL url1 = URL_FIRST;
         final URL url2 = URL_SECOND;

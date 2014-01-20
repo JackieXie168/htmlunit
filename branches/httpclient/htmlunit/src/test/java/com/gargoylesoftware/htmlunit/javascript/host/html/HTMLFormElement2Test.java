@@ -45,6 +45,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
  * @author Marc Guillemot
  * @author Chris Erskine
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HTMLFormElement2Test extends SimpleWebTestCase {
@@ -297,12 +298,13 @@ public class HTMLFormElement2Test extends SimpleWebTestCase {
 
     /**
      * Verifies that the event object is correctly made available.
-     * Regression test for https://sf.net/tracker/index.php?func=detail&aid=1648014&group_id=47038&atid=448266.
+     * Regression test for http://sourceforge.net/p/htmlunit/bugs/425/
      * @throws Exception if the test fails
      */
     @Test
     @Alerts(FF = { "srcElement null: true", "srcElement==form: false", "target null: false", "target==form: true" },
-        IE = { "srcElement null: false", "srcElement==form: true", "target null: true", "target==form: false" })
+            IE = { "srcElement null: false", "srcElement==form: true", "target null: true", "target==form: false" },
+            IE11 = { "srcElement null: false", "srcElement==form: true", "target null: false", "target==form: true" })
     public void onSubmitEvent() throws Exception {
         final WebClient client = getWebClient();
         final MockWebConnection webConnection = getMockWebConnection();
@@ -434,7 +436,8 @@ public class HTMLFormElement2Test extends SimpleWebTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = { "submit form", "listener: submitted ok" }, IE = { "submit form", "eventHandler: submitted ok" })
+    @Alerts(DEFAULT = { "submit form", "listener: submitted ok" },
+            IE8 = { "submit form", "eventHandler: submitted ok" })
     public void submitWithTargetOnIFrameAndOnload_bubbling() throws Exception {
         final String html
             = "<html><head><title>first</title></head><body>\n"

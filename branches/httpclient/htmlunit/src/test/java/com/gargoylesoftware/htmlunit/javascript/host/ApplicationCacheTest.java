@@ -19,28 +19,36 @@ import org.junit.runner.RunWith;
 
 import com.gargoylesoftware.htmlunit.BrowserRunner;
 import com.gargoylesoftware.htmlunit.BrowserRunner.Alerts;
+import com.gargoylesoftware.htmlunit.html.HtmlPageTest;
 import com.gargoylesoftware.htmlunit.WebDriverTestCase;
 
 /**
- * Unit tests for {@link OfflineResourceList}.
+ * Tests for {@link ApplicationCache}.
  *
  * @version $Revision$
  * @author Daniel Gredler
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
-public class OfflineResourceListTest extends WebDriverTestCase {
+public class ApplicationCacheTest extends WebDriverTestCase {
 
     /**
-     * @throws Exception if an error occurs
+     * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = "undefined", FF = "[object OfflineResourceList]")
-    public void existence() throws Exception {
-        final String html
-            = "<html><body><script>\n"
-            + "alert(window.applicationCache);\n"
-            + "</script></body></html>";
+    @Alerts(DEFAULT = "[object ApplicationCache]",
+            FF = "[object OfflineResourceList]",
+            IE8 = "undefined")
+    public void scriptableToString() throws Exception {
+        final String html = HtmlPageTest.STANDARDS_MODE_PREFIX_
+            + "<html><head><title>foo</title><script>\n"
+            + "  function test() {\n"
+            + "    alert(window.applicationCache);\n"
+            + "  }\n"
+            + "</script></head>\n"
+            + "<body onload='test()'>\n"
+            + "</body></html>";
+
         loadPageWithAlerts2(html);
     }
-
 }

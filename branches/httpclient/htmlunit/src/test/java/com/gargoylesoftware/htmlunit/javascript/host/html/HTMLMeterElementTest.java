@@ -25,6 +25,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * Tests for {@link HTMLMeterElement}.
  * @version $Revision$
  * @author Marc Guillemot
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HTMLMeterElementTest extends WebDriverTestCase {
@@ -33,9 +34,9 @@ public class HTMLMeterElementTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(IE = "[object]",
-            FF = "[object HTMLUnknownElement]",
-            FF17 = "[object HTMLMeterElement]")
+    @Alerts(DEFAULT = "[object HTMLUnknownElement]",
+            FF = "[object HTMLMeterElement]",
+            IE8 = "[object]")
     public void tag() throws Exception {
         final String html = "<html><body>\n"
             + "<meter id='it' min='200' max='500' value='350'>\n"
@@ -50,7 +51,7 @@ public class HTMLMeterElementTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { },
-            FF17 = { "number200", "number500",
+            FF = { "number200", "number500",
             "number200", "number500", "number350", "number350" })
     public void properties() throws Exception {
         final String html = "<html><body>\n"

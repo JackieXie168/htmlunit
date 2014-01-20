@@ -26,6 +26,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  *
  * @version $Revision$
  * @author Marc Guillemot
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HTMLVideoElementTest extends WebDriverTestCase {
@@ -34,7 +35,8 @@ public class HTMLVideoElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "false", IE = "exception")
+    @Alerts(DEFAULT = "false",
+            IE8 = "exception")
     public void prototype() throws Exception {
         final String html
             = "<html><body>\n"

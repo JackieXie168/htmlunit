@@ -58,47 +58,42 @@ import com.gargoylesoftware.htmlunit.html.HtmlTextArea;
  * @version $Revision$
  * @author Ahmed Ashour
  * @author Sudhan Moghe
+ * @author Frank Danek
  */
 @RunWith(Parameterized.class)
 public class PropertiesTest extends SimpleWebTestCase {
 
     private static final Log LOG = LogFactory.getLog(PropertiesTest.class);
 
-    private static List<String> IE6_;
-    private static List<String> IE7_;
     private static List<String> IE8_;
-    private static List<String> FF3_6_;
+    private static List<String> IE11_;
     private static List<String> FF17_;
+    private static List<String> FF24_;
 
-    private static List<String> IE6_SIMULATED_;
-    private static List<String> IE7_SIMULATED_;
     private static List<String> IE8_SIMULATED_;
-    private static List<String> FF3_6_SIMULATED_;
+    private static List<String> IE11_SIMULATED_;
     private static List<String> FF17_SIMULATED_;
+    private static List<String> FF24_SIMULATED_;
 
-    private static DefaultCategoryDataset CATEGORY_DATASET_IE6_ = new DefaultCategoryDataset();
-    private static DefaultCategoryDataset CATEGORY_DATASET_IE7_ = new DefaultCategoryDataset();
     private static DefaultCategoryDataset CATEGORY_DATASET_IE8_ = new DefaultCategoryDataset();
-    private static DefaultCategoryDataset CATEGORY_DATASET_FF3_6_ = new DefaultCategoryDataset();
+    private static DefaultCategoryDataset CATEGORY_DATASET_IE11_ = new DefaultCategoryDataset();
     private static DefaultCategoryDataset CATEGORY_DATASET_FF17_ = new DefaultCategoryDataset();
+    private static DefaultCategoryDataset CATEGORY_DATASET_FF24_ = new DefaultCategoryDataset();
 
-    private static StringBuilder IE6_HTML_ = new StringBuilder();
-    private static StringBuilder IE7_HTML_ = new StringBuilder();
     private static StringBuilder IE8_HTML_ = new StringBuilder();
-    private static StringBuilder FF3_6_HTML_ = new StringBuilder();
+    private static StringBuilder IE11_HTML_ = new StringBuilder();
     private static StringBuilder FF17_HTML_ = new StringBuilder();
+    private static StringBuilder FF24_HTML_ = new StringBuilder();
 
-    private static MutableInt IE6_ACTUAL_PROPERTY_COUNT_ = new MutableInt();
-    private static MutableInt IE7_ACTUAL_PROPERTY_COUNT_ = new MutableInt();
     private static MutableInt IE8_ACTUAL_PROPERTY_COUNT_ = new MutableInt();
-    private static MutableInt FF3_6_ACTUAL_PROPERTY_COUNT_ = new MutableInt();
+    private static MutableInt IE11_ACTUAL_PROPERTY_COUNT_ = new MutableInt();
     private static MutableInt FF17_ACTUAL_PROPERTY_COUNT_ = new MutableInt();
+    private static MutableInt FF24_ACTUAL_PROPERTY_COUNT_ = new MutableInt();
 
-    private static MutableInt IE6_REMAINING_PROPERTY_COUNT_ = new MutableInt();
-    private static MutableInt IE7_REMAINING_PROPERTY_COUNT_ = new MutableInt();
     private static MutableInt IE8_REMAINING_PROPERTY_COUNT_ = new MutableInt();
-    private static MutableInt FF3_6_REMAINING_PROPERTY_COUNT_ = new MutableInt();
+    private static MutableInt IE11_REMAINING_PROPERTY_COUNT_ = new MutableInt();
     private static MutableInt FF17_REMAINING_PROPERTY_COUNT_ = new MutableInt();
+    private static MutableInt FF24_REMAINING_PROPERTY_COUNT_ = new MutableInt();
 
     private final String name_;
     private final BrowserVersion browserVersion_;
@@ -108,7 +103,7 @@ public class PropertiesTest extends SimpleWebTestCase {
      * @return list of all test parameters
      * @throws Exception If an error occurs
      */
-    @Parameters
+    @Parameters(name = "{index}: {0} - {1}")
     public static Collection<Object[]> data() throws Exception {
         for (final File file : new File(getArtifactsDirectory()).listFiles()) {
             final String name = file.getName();
@@ -116,32 +111,28 @@ public class PropertiesTest extends SimpleWebTestCase {
                 file.delete();
             }
         }
-        IE6_ = getProperties(BrowserVersion.INTERNET_EXPLORER_6);
-        IE7_ = getProperties(BrowserVersion.INTERNET_EXPLORER_7);
         IE8_ = getProperties(BrowserVersion.INTERNET_EXPLORER_8);
-        FF3_6_ = getProperties(BrowserVersion.FIREFOX_3_6);
+        IE11_ = getProperties(BrowserVersion.INTERNET_EXPLORER_11);
         FF17_ = getProperties(BrowserVersion.FIREFOX_17);
-        Assert.assertEquals(IE6_.size(), IE7_.size());
-        Assert.assertEquals(IE6_.size(), IE8_.size());
-        Assert.assertEquals(IE6_.size(), FF3_6_.size());
-        Assert.assertEquals(IE6_.size(), FF17_.size());
-        IE6_SIMULATED_ = getSimulatedProperties(BrowserVersion.INTERNET_EXPLORER_6);
-        IE7_SIMULATED_ = getSimulatedProperties(BrowserVersion.INTERNET_EXPLORER_7);
+        FF24_ = getProperties(BrowserVersion.FIREFOX_24);
+        Assert.assertEquals(IE8_.size(), IE8_.size());
+        Assert.assertEquals(IE8_.size(), IE11_.size());
+        Assert.assertEquals(IE8_.size(), FF17_.size());
+        Assert.assertEquals(IE8_.size(), FF24_.size());
         IE8_SIMULATED_ = getSimulatedProperties(BrowserVersion.INTERNET_EXPLORER_8);
-        FF3_6_SIMULATED_ = getSimulatedProperties(BrowserVersion.FIREFOX_3_6);
+        IE11_SIMULATED_ = getSimulatedProperties(BrowserVersion.INTERNET_EXPLORER_11);
         FF17_SIMULATED_ = getSimulatedProperties(BrowserVersion.FIREFOX_17);
-        Assert.assertEquals(IE6_SIMULATED_.size(), IE7_SIMULATED_.size());
-        Assert.assertEquals(IE6_SIMULATED_.size(), IE8_SIMULATED_.size());
-        Assert.assertEquals(IE6_SIMULATED_.size(), FF3_6_SIMULATED_.size());
-        Assert.assertEquals(IE6_SIMULATED_.size(), FF17_SIMULATED_.size());
+        FF24_SIMULATED_ = getSimulatedProperties(BrowserVersion.FIREFOX_24);
+        Assert.assertEquals(IE8_SIMULATED_.size(), IE11_SIMULATED_.size());
+        Assert.assertEquals(IE8_SIMULATED_.size(), FF17_SIMULATED_.size());
+        Assert.assertEquals(IE8_SIMULATED_.size(), FF24_SIMULATED_.size());
         final Collection<Object[]> list = new ArrayList<Object[]>();
-        for (final String line : IE6_) {
+        for (final String line : IE8_) {
             final String name = line.substring(0, line.indexOf(':'));
-            list.add(new Object[] {name, BrowserVersion.INTERNET_EXPLORER_6});
-            list.add(new Object[] {name, BrowserVersion.INTERNET_EXPLORER_7});
             list.add(new Object[] {name, BrowserVersion.INTERNET_EXPLORER_8});
-            list.add(new Object[] {name, BrowserVersion.FIREFOX_3_6});
+            list.add(new Object[] {name, BrowserVersion.INTERNET_EXPLORER_11});
             list.add(new Object[] {name, BrowserVersion.FIREFOX_17});
+            list.add(new Object[] {name, BrowserVersion.FIREFOX_24});
         }
         return list;
     }
@@ -179,48 +170,40 @@ public class PropertiesTest extends SimpleWebTestCase {
         final List<String> realList;
         final List<String> simulatedList;
         final DefaultCategoryDataset dataset;
-        final StringBuilder html;
+        final StringBuilder detailsHtml;
         final MutableInt actualPropertyCount;
         final MutableInt remainingPropertyCount;
-        if (browserVersion_ == BrowserVersion.INTERNET_EXPLORER_6) {
-            realList = IE6_;
-            simulatedList = IE6_SIMULATED_;
-            dataset = CATEGORY_DATASET_IE6_;
-            html = IE6_HTML_;
-            actualPropertyCount = IE6_ACTUAL_PROPERTY_COUNT_;
-            remainingPropertyCount = IE6_REMAINING_PROPERTY_COUNT_;
-        }
-        else if (browserVersion_ == BrowserVersion.INTERNET_EXPLORER_7) {
-            realList = IE7_;
-            simulatedList = IE7_SIMULATED_;
-            dataset = CATEGORY_DATASET_IE7_;
-            html = IE7_HTML_;
-            actualPropertyCount = IE7_ACTUAL_PROPERTY_COUNT_;
-            remainingPropertyCount = IE7_REMAINING_PROPERTY_COUNT_;
-        }
-        else if (browserVersion_ == BrowserVersion.INTERNET_EXPLORER_8) {
+        if (browserVersion_ == BrowserVersion.INTERNET_EXPLORER_8) {
             realList = IE8_;
             simulatedList = IE8_SIMULATED_;
             dataset = CATEGORY_DATASET_IE8_;
-            html = IE8_HTML_;
+            detailsHtml = IE8_HTML_;
             actualPropertyCount = IE8_ACTUAL_PROPERTY_COUNT_;
             remainingPropertyCount = IE8_REMAINING_PROPERTY_COUNT_;
         }
-        else if (browserVersion_ == BrowserVersion.FIREFOX_3_6) {
-            realList = FF3_6_;
-            simulatedList = FF3_6_SIMULATED_;
-            dataset = CATEGORY_DATASET_FF3_6_;
-            html = FF3_6_HTML_;
-            actualPropertyCount = FF3_6_ACTUAL_PROPERTY_COUNT_;
-            remainingPropertyCount = FF3_6_REMAINING_PROPERTY_COUNT_;
+        else if (browserVersion_ == BrowserVersion.INTERNET_EXPLORER_11) {
+            realList = IE11_;
+            simulatedList = IE11_SIMULATED_;
+            dataset = CATEGORY_DATASET_IE11_;
+            detailsHtml = IE11_HTML_;
+            actualPropertyCount = IE11_ACTUAL_PROPERTY_COUNT_;
+            remainingPropertyCount = IE11_REMAINING_PROPERTY_COUNT_;
         }
         else if (browserVersion_ == BrowserVersion.FIREFOX_17) {
             realList = FF17_;
             simulatedList = FF17_SIMULATED_;
             dataset = CATEGORY_DATASET_FF17_;
-            html = FF17_HTML_;
+            detailsHtml = FF17_HTML_;
             actualPropertyCount = FF17_ACTUAL_PROPERTY_COUNT_;
             remainingPropertyCount = FF17_REMAINING_PROPERTY_COUNT_;
+        }
+        else if (browserVersion_ == BrowserVersion.FIREFOX_24) {
+            realList = FF24_;
+            simulatedList = FF24_SIMULATED_;
+            dataset = CATEGORY_DATASET_FF24_;
+            detailsHtml = FF24_HTML_;
+            actualPropertyCount = FF24_ACTUAL_PROPERTY_COUNT_;
+            remainingPropertyCount = FF24_REMAINING_PROPERTY_COUNT_;
         }
         else {
             fail("Unknown BrowserVersion " + browserVersion_);
@@ -262,32 +245,81 @@ public class PropertiesTest extends SimpleWebTestCase {
             LOG.debug("Error" + ':' + erroredProperties);
         }
 
-        appendHtml(html, originalRealProperties, simulatedProperties, erroredProperties);
-        if (dataset.getColumnCount() == IE7_.size()) {
+        htmlDetails(detailsHtml, originalRealProperties, simulatedProperties, erroredProperties);
+        if (dataset.getColumnCount() == IE8_.size()) {
             saveChart(dataset);
-            html.append("<tr><td colspan='3' align='right'><b>Total Implemented: ")
-                .append(actualPropertyCount.intValue() - remainingPropertyCount.intValue()).append(" / ")
-                .append(actualPropertyCount.intValue()).append("</b></td></tr>");
-            html.append("</table>").append('\n').append("<br>").append("Legend:").append("<br>")
-                .append("<span style='color: blue'>").append("To be implemented").append("</span>").append("<br>")
-                .append("<span style='color: green'>").append("Implemented").append("</span>").append("<br>")
-                .append("<span style='color: red'>").append("Should not be implemented").append("</span>")
-                .append("</html>");
 
             FileUtils.writeStringToFile(new File(getArtifactsDirectory()
-                + "/properties-"
-                + browserVersion_.getNickname()
-                + ".html"), html.toString());
+                    + "/properties-" + browserVersion_.getNickname() + ".html"),
+                    htmlHeader()
+                        .append(overview(actualPropertyCount.intValue(), remainingPropertyCount.intValue()))
+                        .append(htmlDetailsHeader())
+                        .append(detailsHtml)
+                        .append(htmlDetailsFooter())
+                        .append(htmlFooter()).toString());
         }
     }
 
-    private void appendHtml(final StringBuilder html, final List<String> originalRealProperties,
+    private StringBuilder htmlHeader() {
+        final StringBuilder html = new StringBuilder();
+        html.append("<html><head>\n");
+        html.append("<style type=\"text/css\">\n");
+        html.append("table.bottomBorder { border-collapse:collapse; }\n");
+        html.append("table.bottomBorder td, table.bottomBorder th { "
+                            + "border-bottom:1px dotted black;padding:5px; }\n");
+        html.append("table.bottomBorder td.numeric { text-align:right; }\n");
+        html.append("</style>\n");
+        html.append("</head><body>\n");
+
+        html.append("<div align='center'>").append("<h2>")
+        .append("HtmlUnit implemented properties and methods for " + browserVersion_.getNickname())
+        .append("</h2>").append("</div>\n");
+        return html;
+    }
+
+    private StringBuilder overview(final int actualPropertyCount, final int remainingPropertyCount) {
+        final StringBuilder html = new StringBuilder();
+        html.append("<table class='bottomBorder'>");
+        html.append("<tr>\n");
+
+        html.append("<th>Total Implemented:</th>\n");
+        html.append("<td>" + (actualPropertyCount - remainingPropertyCount))
+            .append(" / " + actualPropertyCount).append("</td>\n");
+
+        html.append("</tr>\n");
+        html.append("</table>\n");
+
+        html.append("<p><br></p>\n");
+
+        return html;
+    }
+
+    private StringBuilder htmlFooter() {
+        final StringBuilder html = new StringBuilder();
+
+        html.append("<br>").append("Legend:").append("<br>")
+        .append("<span style='color: blue'>").append("To be implemented").append("</span>").append("<br>")
+        .append("<span style='color: green'>").append("Implemented").append("</span>").append("<br>")
+        .append("<span style='color: red'>").append("Should not be implemented").append("</span>");
+        html.append("\n");
+
+        html.append("</body>\n");
+        html.append("</html>\n");
+        return html;
+    }
+
+    private StringBuilder htmlDetailsHeader() {
+        final StringBuilder html = new StringBuilder();
+
+        html.append("<table class='bottomBorder' width='100%'>");
+        html.append("<tr>\n");
+        html.append("<th>Class</th><th>Methods/Properties</th><th>Counts</th>\n");
+        html.append("</tr>");
+        return html;
+    }
+
+    private StringBuilder htmlDetails(final StringBuilder html, final List<String> originalRealProperties,
             final List<String> simulatedProperties, final List<String> erroredProperties) {
-        if (html.length() == 0) {
-            html.append("<html>").append('\n').append("<div align='center'>").append("<h2>")
-            .append("HtmlUnit implemented properties and methods for " + browserVersion_.getNickname())
-            .append("</h2>").append("</div>").append("<table width='100%' border='1'>");
-        }
         html.append("<tr>").append('\n').append("<td rowspan='2'>").append("<a name='" + name_ + "'>").append(name_)
             .append("</a>").append("</td>").append('\n').append("<td>");
         int implementedCount = 0;
@@ -325,7 +357,16 @@ public class PropertiesTest extends SimpleWebTestCase {
             html.append("&nbsp;");
         }
         html.append("</td>")
-            .append("<td>").append(erroredProperties.size()).append("</td>").append("</tr>").append('\n');
+            .append("<td>").append(erroredProperties.size()).append("</td>").append("</tr>\n");
+
+        return html;
+    }
+
+    private StringBuilder htmlDetailsFooter() {
+        final StringBuilder html = new StringBuilder();
+
+        html.append("</table>");
+        return html;
     }
 
     private String getValueOf(final List<String> list, final String name) {

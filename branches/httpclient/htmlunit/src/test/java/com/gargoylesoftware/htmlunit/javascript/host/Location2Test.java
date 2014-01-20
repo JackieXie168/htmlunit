@@ -14,7 +14,12 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host;
 
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.CHROME;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF24;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE11;
+
 import java.net.URL;
+import java.util.Map;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,8 +28,9 @@ import org.openqa.selenium.WebDriver;
 
 import com.gargoylesoftware.htmlunit.BrowserRunner;
 import com.gargoylesoftware.htmlunit.BrowserRunner.Alerts;
-import com.gargoylesoftware.htmlunit.BrowserRunner.Browser;
+import com.gargoylesoftware.htmlunit.BrowserRunner.BuggyWebDriver;
 import com.gargoylesoftware.htmlunit.BrowserRunner.NotYetImplemented;
+import com.gargoylesoftware.htmlunit.MockWebConnection;
 import com.gargoylesoftware.htmlunit.WebDriverTestCase;
 
 /**
@@ -37,6 +43,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @author Daniel Gredler
  * @author Ahmed Ashour
  * @author Ronald Brill
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class Location2Test extends WebDriverTestCase {
@@ -115,7 +122,8 @@ public class Location2Test extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = { "", "about:blank", "", "", "about:", "" },
+    @Alerts(CHROME = { "", "about:blank", "blank", "", "about:", "" },
+            FF = { "", "about:blank", "", "", "about:", "" },
             IE = { "", "about:blank", "/blank", "", "about:", "" })
     public void about_blank_attributes() throws Exception {
         final String html = "<html><head><title>First</title><script>\n"
@@ -138,12 +146,12 @@ public class Location2Test extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(FF = { "#a b", "§§URL§§#a%20b", "#a b", "§§URL§§#a%20b", "#abc;,/?:@&=+$-_.!~*()ABC123foo",
-            "#% ^[]|\"<>{}\\" },
+    @Alerts(DEFAULT = { "#a b", "§§URL§§#a b", "#a%20b", "§§URL§§#a%20b", "#abc;,/?:@&=+$-_.!~*()ABC123foo",
+                    "#%25%20%5E%5B%5D%7C%22%3C%3E%7B%7D%5C" },
+            FF = { "#a b", "§§URL§§#a%20b", "#a b", "§§URL§§#a%20b", "#abc;,/?:@&=+$-_.!~*()ABC123foo",
+                    "#% ^[]|\"<>{}\\" },
             IE8 = { "#a b", "§§URL§§#a%20b", "#a b", "§§URL§§#a%20b", "#abc;,/?:@&=+$-_.!~*()ABC123foo",
-            "#% ^[]|\"<>{}\\" },
-            IE = { "#a b", "§§URL§§#a b", "#a%20b", "§§URL§§#a%20b", "#abc;,/?:@&=+$-_.!~*()ABC123foo",
-            "#%25%20%5E%5B%5D%7C%22%3C%3E%7B%7D%5C" })
+                    "#% ^[]|\"<>{}\\" })
     public void hashEncoding() throws Exception {
         final String html = "<html><head><title>First</title><script>\n"
             + "  function test() {\n"
@@ -168,8 +176,8 @@ public class Location2Test extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(FF = { "#myDataTable=foo=ojkoj", "§§URL§§#myDataTable=foo%3Dojkoj" },
-            IE = { "#myDataTable=foo%3Dojkoj", "§§URL§§#myDataTable=foo%3Dojkoj" },
+    @Alerts(DEFAULT = { "#myDataTable=foo%3Dojkoj", "§§URL§§#myDataTable=foo%3Dojkoj" },
+            FF = { "#myDataTable=foo=ojkoj", "§§URL§§#myDataTable=foo%3Dojkoj" },
             IE8 = { "#myDataTable=foo=ojkoj", "§§URL§§#myDataTable=foo%3Dojkoj" })
     public void hashEncoding2() throws Exception {
         final String html = "<html><body><script>\n"
@@ -185,9 +193,8 @@ public class Location2Test extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(FF = { "#üöä", "§§URL§§#%C3%BC%C3%B6%C3%A4" },
-            CHROME = { "#üöä", "§§URL§§#üöä" },
-            IE = { "#üöä", "§§URL§§#üöä" },
+    @Alerts(DEFAULT = { "#üöä", "§§URL§§#üöä" },
+            FF = { "#üöä", "§§URL§§#%C3%BC%C3%B6%C3%A4" },
             IE8 = { "#üöä", "§§URL§§#%C3%BC%C3%B6%C3%A4" })
     public void hashEncoding3() throws Exception {
         final String html = "<html><body><script>\n"
@@ -203,10 +210,31 @@ public class Location2Test extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(FF = "#<a>foobar</a>",
-            IE8 = "#<a>foobar</a>",
-            IE = "#%3Ca%3Efoobar%3C/a%3E")
+    @Alerts("#<a>foobar</a>")
     public void hash() throws Exception {
+        checkHash(getDefaultUrl().toExternalForm() + "?#<a>foobar</a>");
+    }
+
+    /**
+     * @throws Exception if an error occurs
+     */
+    @Test
+    @Alerts(DEFAULT = "",
+            IE = "#")
+    public void emptyHash() throws Exception {
+        checkHash(getDefaultUrl().toExternalForm() + "#");
+    }
+
+    /**
+     * @throws Exception if an error occurs
+     */
+    @Test
+    @Alerts("")
+    public void noHash() throws Exception {
+        checkHash(getDefaultUrl().toExternalForm());
+    }
+
+    private void checkHash(final String url) throws Exception {
         final String html = "<html><body onload='test()'>\n"
             + "<script>\n"
             + "function test() {\n"
@@ -216,7 +244,7 @@ public class Location2Test extends WebDriverTestCase {
             + "</body></html>";
 
         getMockWebConnection().setDefaultResponse(html);
-        loadPageWithAlerts2(html, new URL(getDefaultUrl().toExternalForm() + "?#<a>foobar</a>"));
+        loadPageWithAlerts2(html, new URL(url));
     }
 
     /**
@@ -442,6 +470,10 @@ public class Location2Test extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
+    @Alerts(DEFAULT = {"", "foo3.html", "foo2.html" },
+            CHROME = {"", "foo2.html" },
+            FF24 = {"", "foo2.html" })
+    @NotYetImplemented({ CHROME, FF24 })
     public void onlick_set_location() throws Exception {
         final String html =
             "<html><head></head>\n"
@@ -450,11 +482,10 @@ public class Location2Test extends WebDriverTestCase {
             + "</body></html>";
 
         getMockWebConnection().setDefaultResponse("");
-        final WebDriver driver = loadPageWithAlerts2(html);
+        final WebDriver driver = loadPage2(html);
         driver.findElement(By.tagName("a")).click();
 
-        final String[] expectedRequests = {"", "foo3.html", "foo2.html"};
-        assertEquals(expectedRequests, getMockWebConnection().getRequestedUrls(getDefaultUrl()));
+        assertEquals(getExpectedAlerts(), getMockWebConnection().getRequestedUrls(getDefaultUrl()));
 
         assertEquals(new URL(getDefaultUrl(), "foo2.html").toString(), driver.getCurrentUrl());
     }
@@ -463,13 +494,9 @@ public class Location2Test extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = { "supported", "onhashchange undefined  undefined" },
-            FF10 = { "supported", "onhashchange http://localhost:12345/#1  http://localhost:12345/" },
-            FF17 = { "supported", "onhashchange http://localhost:12345/#1  http://localhost:12345/" },
-            IE6 = { },
-            IE7 = { },
+    @Alerts(DEFAULT = { "supported", "onhashchange http://localhost:12345/#1  http://localhost:12345/" },
+            IE = { "supported", "onhashchange undefined  undefined" },
             IE8 = { "supported", "onhashchange -" })
-    @NotYetImplemented({ Browser.FF10, Browser.FF17 })
     public void onHashChange() throws Exception {
         final String html =
             "<html><head>\n"
@@ -497,11 +524,8 @@ public class Location2Test extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = { "supported", "onhashchange undefined  undefined" },
-            FF10 = { "supported", "onhashchange http://localhost:12345/#1  http://localhost:12345/" },
-            FF17 = { "supported", "onhashchange http://localhost:12345/#1  http://localhost:12345/" },
-            IE6 = { },
-            IE7 = { },
+    @Alerts(DEFAULT = { "supported", "onhashchange §§URL§§#1  §§URL§§" },
+            IE = { "supported", "onhashchange undefined  undefined" },
             IE8 = { "supported", "onhashchange -" })
     public void onHashChangeJS() throws Exception {
         final String html =
@@ -522,6 +546,7 @@ public class Location2Test extends WebDriverTestCase {
             + " <button id='click' onclick='location.hash=1'>change hash</button>\n"
             + "</body></html>";
 
+        expandExpectedAlertsVariables(getDefaultUrl());
         final WebDriver driver = loadPage2(html);
         driver.findElement(By.id("click")).click();
         assertEquals(getExpectedAlerts(), getCollectedAlerts(driver));
@@ -531,6 +556,7 @@ public class Location2Test extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
+    @BuggyWebDriver(IE11)
     public void testLocationAfterOpenClosePopup() throws Exception {
         final String html =
               "<html>\n"
@@ -571,6 +597,94 @@ public class Location2Test extends WebDriverTestCase {
 
         final WebDriver driver = loadPage2(html);
         driver.findElement(By.id("click")).click();
-        assertEquals(new URL(URL_FIRST, "test.html").toExternalForm(), driver.getCurrentUrl());
+        try {
+            assertEquals(new URL(URL_FIRST, "test.html").toExternalForm(), driver.getCurrentUrl());
+        }
+        finally {
+            // TODO [IE11] when run with real IE11 the window is closed and all following tests are broken
+            shutDownAll();
+        }
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts("§§URL§§")
+    public void refererHeaderWhenSettingLocation() throws Exception {
+        final String html = "<html><head><title>Base</title></head>\n"
+                + "<body>\n"
+                + "  <a id='link' href='content.html' target='content'>Link</a>"
+                + "  <a id='jsLink' href='#' onclick=\"javascript:window.location='content.html';\">jsLink</a>\n"
+                + "</body></html>";
+
+        final String content = "<html><head><title>Content</title></head><body><p>content</p></body></html>";
+
+        final MockWebConnection conn = getMockWebConnection();
+        conn.setResponse(new URL(getDefaultUrl(), "content.html"), content);
+        conn.setResponse(new URL(getDefaultUrl(), "content.html"), content);
+
+        expandExpectedAlertsVariables(getDefaultUrl());
+        final WebDriver driver = loadPage2(html);
+
+        assertEquals(1, conn.getRequestCount());
+
+        // click an anchor with href and target
+        driver.findElement(By.id("link")).click();
+        assertEquals(2, conn.getRequestCount());
+        Map<String, String> lastAdditionalHeaders = conn.getLastAdditionalHeaders();
+        assertEquals(getExpectedAlerts()[0], lastAdditionalHeaders.get("Referer"));
+
+        loadPage2(html);
+        assertEquals(3, conn.getRequestCount());
+        // click an anchor with onclick which sets frame.location
+        driver.findElement(By.id("jsLink")).click();
+        assertEquals(4, conn.getRequestCount());
+        lastAdditionalHeaders = conn.getLastAdditionalHeaders();
+        assertEquals(getExpectedAlerts()[0], lastAdditionalHeaders.get("Referer"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts("§§URL§§menu.html")
+    public void refererHeaderWhenSettingFrameLocation() throws Exception {
+        final String html = "<html><head><title>Frameset</title></head>\n"
+                + "<frameset rows='20%,80%'>\n"
+                + "  <frame src='menu.html' name='menu'>\n"
+                + "  <frame src='' name='content'>\n"
+                + "</frameset></html>";
+
+        final String menu = "<html><head><title>Menu</title></head>\n"
+                + "<body>\n"
+                + "  <a id='link' href='content.html' target='content'>Link</a>"
+                + "  <a id='jsLink' href='#' onclick=\"javascript:top.content.location='content.html';\">jsLink</a>\n"
+                + "</body></html>";
+
+        final String content = "<html><head><title>Content</title></head><body><p>content</p></body></html>";
+
+        final MockWebConnection conn = getMockWebConnection();
+        conn.setResponse(new URL(getDefaultUrl(), "menu.html"), menu);
+        conn.setResponse(new URL(getDefaultUrl(), "content.html"), content);
+        conn.setResponse(new URL(getDefaultUrl(), "content.html"), content);
+
+        expandExpectedAlertsVariables(getDefaultUrl());
+        final WebDriver driver = loadPage2(html);
+
+        assertEquals(2, conn.getRequestCount());
+
+        // click an anchor with href and target
+        driver.switchTo().frame(0);
+        driver.findElement(By.id("link")).click();
+        assertEquals(3, conn.getRequestCount());
+        Map<String, String> lastAdditionalHeaders = conn.getLastAdditionalHeaders();
+        assertEquals(getExpectedAlerts()[0], lastAdditionalHeaders.get("Referer"));
+
+        // click an anchor with onclick which sets frame.location
+        driver.findElement(By.id("jsLink")).click();
+        assertEquals(4, conn.getRequestCount());
+        lastAdditionalHeaders = conn.getLastAdditionalHeaders();
+        assertEquals(getExpectedAlerts()[0], lastAdditionalHeaders.get("Referer"));
     }
 }

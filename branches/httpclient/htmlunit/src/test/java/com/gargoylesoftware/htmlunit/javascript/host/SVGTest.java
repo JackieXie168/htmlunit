@@ -26,6 +26,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  *
  * @version $Revision$
  * @author Marc Guillemot
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class SVGTest extends WebDriverTestCase {
@@ -35,7 +36,8 @@ public class SVGTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = "svgElem", IE = "exception")
+    @Alerts(DEFAULT = "svgElem",
+            IE8 = "exception")
     public void getAttribute() throws Exception {
         final String html = "<html><body><script>\n"
             + "try {\n"

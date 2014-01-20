@@ -14,7 +14,7 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host.html;
 
-import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE8;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,6 +30,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @version $Revision$
  * @author Daniel Gredler
  * @author Ronald Brill
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HTMLTableCaptionElementTest extends WebDriverTestCase {
@@ -40,7 +41,7 @@ public class HTMLTableCaptionElementTest extends WebDriverTestCase {
     @Test
     @Alerts(DEFAULT = { "left", "right", "bottom", "top", "wrong", "" },
             IE = { "left", "right", "bottom", "top", "", "" })
-    @NotYetImplemented(IE)
+    @NotYetImplemented(IE8)
     public void getAlign() throws Exception {
         final String html
             = "<html><body>\n"
@@ -68,7 +69,7 @@ public class HTMLTableCaptionElementTest extends WebDriverTestCase {
     @Test
     @Alerts(DEFAULT = { "CenTer", "8", "foo", "left", "right", "bottom", "top" },
             IE = { "center", "error", "center", "error", "center", "left", "right", "bottom", "top" })
-    @NotYetImplemented(IE)
+    @NotYetImplemented(IE8)
     public void setAlign() throws Exception {
         final String html
             = "<html><body>\n"
@@ -104,7 +105,7 @@ public class HTMLTableCaptionElementTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "undefined", "undefined", "undefined", "middle", "8", "BOTtom" },
-        IE = { "top", "", "", "error", "error", "top", "", "bottom" })
+            IE = { "top", "", "", "error", "error", "top", "", "bottom" })
     public void vAlign() throws Exception {
         final String html
             = "<html><body><table>\n"

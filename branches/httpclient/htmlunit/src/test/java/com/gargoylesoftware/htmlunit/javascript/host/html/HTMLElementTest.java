@@ -16,7 +16,10 @@ package com.gargoylesoftware.htmlunit.javascript.host.html;
 
 import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF;
 import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF17;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF24;
 import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE11;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE8;
 
 import java.net.URL;
 
@@ -57,9 +60,9 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @NotYetImplemented(FF)
-    @Alerts(IE = { "all node for body: DIV A IMG DIV ", "all node for testDiv: A IMG ",
+    @Alerts(IE8 = { "all node for body: DIV A IMG DIV ", "all node for testDiv: A IMG ",
             "all node for testA: IMG ", "all node for testImg: ", "all node for testDiv2: " })
+    @NotYetImplemented(FF)
     public void all_IndexByInt() throws Exception {
         final String html = "<html><head>\n"
             + "<script>\n"
@@ -120,10 +123,30 @@ public class HTMLElementTest extends WebDriverTestCase {
     }
 
     /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "null", IE8 = "[object]")
+    public void getAttribute_styleAttribute() throws Exception {
+        final String html = "<html><head><title>foo</title><script>\n"
+            + "  function test() {\n"
+            + "    var elem = document.getElementById('tester');\n"
+            + "    alert(elem.getAttribute('style'));\n"
+            + "  }\n"
+            + "</script>\n"
+            + "<body onload='test()'>\n"
+            + "  <div id='tester'>tester</div>\n"
+            + "</body></html>";
+
+        loadPageWithAlerts2(html);
+    }
+
+    /**
      * @throws Exception on test failure
      */
     @Test
-    @Alerts(DEFAULT = "color: green;", IE = "")
+    @Alerts(DEFAULT = "color: green;",
+            IE8 = "")
     public void getAttribute_styleAttributeWithFlag() throws Exception {
         final String html =
               "<html><body onload='test()'><div id='div' style='color: green;'>abc</div>\n"
@@ -144,7 +167,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception on test failure
      */
     @Test
-    @Alerts(DEFAULT = "0 attribute", IE = "at least 1 attribute")
+    @Alerts(DEFAULT = "0 attribute",
+            IE8 = "at least 1 attribute")
     public void attributes() throws Exception {
         final String html = "<html>\n"
                 + "<head>\n"
@@ -171,10 +195,10 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception on test failure
      */
     @Test
-    @Alerts(IE = "exception",
-            FF17 = { "null", "bla", "true" },
-            DEFAULT = { "", "bla", "true" })
-    @NotYetImplemented(FF17)
+    @Alerts(DEFAULT = { "", "bla", "true" },
+            FF = { "null", "bla", "true" },
+            IE8 = "exception")
+    @NotYetImplemented({ FF17, FF24 })
     public void getSetAttributeNS() throws Exception {
         final String html = "<html>\n"
                 + "<head>\n"
@@ -238,11 +262,11 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception on test failure
      */
     @Test
-    @Alerts(IE = {
+    @Alerts(DEFAULT = {
             "null",
-            "expando=true",
-            "firstChild=null",
-            "lastChild=null",
+            "expando=undefined",
+            "firstChild=[object Text]",
+            "lastChild=[object Text]",
             "name=custom_attribute",
             "nextSibling=null",
             "nodeName=custom_attribute",
@@ -252,8 +276,9 @@ public class HTMLElementTest extends WebDriverTestCase {
             "parentNode=null",
             "previousSibling=null",
             "specified=true",
-            "value=bleh" },
-            FF17 = {
+            "value=bleh"
+            },
+            FF = {
             "null",
             "expando=undefined",
             "firstChild=null",
@@ -269,9 +294,24 @@ public class HTMLElementTest extends WebDriverTestCase {
             "specified=true",
             "value=bleh"
             },
-            DEFAULT = {
+            IE8 = {
             "null",
-            "expando=undefined",
+            "expando=true",
+            "firstChild=null",
+            "lastChild=null",
+            "name=custom_attribute",
+            "nextSibling=null",
+            "nodeName=custom_attribute",
+            "nodeType=2",
+            "nodeValue=bleh",
+            "(ownerDocument==document)=true",
+            "parentNode=null",
+            "previousSibling=null",
+            "specified=true",
+            "value=bleh" },
+            IE11 = {
+            "null",
+            "expando=true",
             "firstChild=[object Text]",
             "lastChild=[object Text]",
             "name=custom_attribute",
@@ -285,7 +325,7 @@ public class HTMLElementTest extends WebDriverTestCase {
             "specified=true",
             "value=bleh"
             })
-    @NotYetImplemented(FF17)
+    @NotYetImplemented({ FF17, FF24 })
     public void getAttributeNode() throws Exception {
         final String html =
               "<html>\n"
@@ -332,7 +372,7 @@ public class HTMLElementTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "onfocus1", "onclick1", "onblur1", "onfocus2" },
-            IE = { })
+            IE8 = { })
     public void setAttribute_eventHandler() throws Exception {
         final String html = "<html><head><title>foo</title><script>\n"
             + "  function test() {\n"
@@ -366,8 +406,9 @@ public class HTMLElementTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "null", "inform('newHandler')", "" },
-            IE = { "null", "inform('newHandler')", "null" })
-    @NotYetImplemented(FF)
+            FF24 = { "null", "inform('newHandler')", "null" },
+            IE8 = { "null", "inform('newHandler')", "null" })
+    @NotYetImplemented(FF17)
     public void setAttribute_eventHandlerNull() throws Exception {
         final String html = "<html><head><title>foo</title><script>\n"
             + "  function test() {\n"
@@ -472,8 +513,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "inform(\"onclick\")", "inform('newHandler')", "newHandler" },
-            IE = { "function onclick()\n{\ninform(\"onclick\")\n}", "inform('newHandler')" })
-    @NotYetImplemented(IE)
+            IE8 = { "function onclick()\n{\ninform(\"onclick\")\n}", "inform('newHandler')" })
+    @NotYetImplemented(IE8)
     public void getAttribute_eventHandler() throws Exception {
         final String html = "<html><head><title>foo</title><script>\n"
             + "  function test() {\n"
@@ -698,7 +739,7 @@ public class HTMLElementTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = "if (1 > 2 & 3 < 2) willNotHappen('yo');",
-            IE = "\r\nif (1 > 2 & 3 < 2) willNotHappen('yo');")
+            IE8 = "\r\nif (1 > 2 & 3 < 2) willNotHappen('yo');")
     public void getInnerHTML() throws Exception {
         final String html = "<html>\n"
             + "<head>\n"
@@ -724,7 +765,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(IE = "<DIV id=i foo=\"\" name=\"\"></DIV>", DEFAULT = "<div id=\"i\" foo=\"\" name=\"\"></div>")
+    @Alerts(DEFAULT = "<div id=\"i\" foo=\"\" name=\"\"></div>",
+            IE8 = "<DIV id=i foo=\"\" name=\"\"></DIV>")
     public void getInnerHTML_EmptyAttributes() throws Exception {
         final String html = "<body onload='alert(document.body.innerHTML)'><div id='i' foo='' name=''></div></body>";
         loadPageWithAlerts2(html);
@@ -734,8 +776,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "Old = <B>Old innerHTML</B>", "New = New cell value" },
-            DEFAULT = { "Old = <b>Old innerHTML</b>", "New = New  cell value" })
+    @Alerts(DEFAULT = { "Old = <b>Old innerHTML</b>", "New = New  cell value" },
+            IE8 = { "Old = <B>Old innerHTML</B>", "New = New cell value" })
     public void getSetInnerHTMLSimple_FF() throws Exception {
         final String html = "<html>\n"
             + "<head>\n"
@@ -785,12 +827,12 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = {
-            "Old = <B>Old innerHTML</B>",
-            "New = New cell value &amp; \u0110 \u0110" },
-            DEFAULT = {
+    @Alerts(DEFAULT = {
             "Old = <b>Old innerHTML</b>",
-            "New = New  cell value &amp; \u0110 \u0110" })
+            "New = New  cell value &amp; \u0110 \u0110" },
+            IE8 = {
+            "Old = <B>Old innerHTML</B>",
+            "New = New cell value &amp; \u0110 \u0110" })
     public void getSetInnerHTMLChar_FF() throws Exception {
         final String html = "<html>\n"
             + "<head>\n"
@@ -816,7 +858,6 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Alerts(DEFAULT = { "true", "true", "false" },
-            FF3_6 = { "false", "true", "false" },
             IE = { "true", "true", "true" })
     @Test
     public void outerHTMLinNewDiv() throws Exception {
@@ -838,11 +879,9 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "<DIV id=div><UL></UL></DIV>", "<UL></UL>", "" },
-            CHROME = { "<div id=\"div\"><ul></ul></div>", "<ul></ul>", "" },
-            FF3_6 = { "undefined", "<ul></ul>", "undefined" },
-            FF10 = { "undefined", "<ul></ul>", "undefined" },
-            FF17 = { "<div id=\"div\"><ul></ul></div>", "<ul></ul>", "undefined" })
+    @Alerts(DEFAULT = { "<div id=\"div\"><ul></ul></div>", "<ul></ul>", "" },
+            FF = { "<div id=\"div\"><ul></ul></div>", "<ul></ul>", "undefined" },
+            IE8 = { "<DIV id=div><UL></UL></DIV>", "<UL></UL>", "" })
     public void getSetInnerHtmlEmptyTag_FF() throws Exception {
         final String html = "<html><body onload='test()'><script>\n"
             + "   function test() {\n"
@@ -862,11 +901,9 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "<DIV id=div><SPAN class=\"a b\"></SPAN></DIV>", "<SPAN class=\"a b\"></SPAN>", "" },
-            CHROME = { "<div id=\"div\"><span class=\"a b\"></span></div>", "<span class=\"a b\"></span>", "" },
-            FF3_6 = { "undefined", "<span class=\"a b\"></span>", "undefined" },
-            FF10 = { "undefined", "<span class=\"a b\"></span>", "undefined" },
-            FF17 = { "<div id=\"div\"><span class=\"a b\"></span></div>", "<span class=\"a b\"></span>", "undefined" })
+    @Alerts(DEFAULT = { "<div id=\"div\"><span class=\"a b\"></span></div>", "<span class=\"a b\"></span>", "" },
+            FF = { "<div id=\"div\"><span class=\"a b\"></span></div>", "<span class=\"a b\"></span>", "undefined" },
+            IE8 = { "<DIV id=div><SPAN class=\"a b\"></SPAN></DIV>", "<SPAN class=\"a b\"></SPAN>", "" })
     public void getSetInnerHtmlAttributeWithWhitespace_FF() throws Exception {
         final String html = "<html><body onload='test()'><script>\n"
             + "   function test() {\n"
@@ -903,7 +940,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = "Null ChildrenLength: 1", DEFAULT = "Null ChildrenLength: 0")
+    @Alerts(DEFAULT = "Null ChildrenLength: 0",
+            IE = "Null ChildrenLength: 1")
     public void setInnerHTMLNull() throws Exception {
         final String html = "<html><head></head><body>\n"
                 + "<div id='testDiv'>foo</div>\n"
@@ -921,10 +959,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "Outer = <DIV id=myNode>New cell value</DIV>" },
-            DEFAULT = { "Outer = <div id=\"myNode\">New  cell value</div>" },
-            FF3_6 = { "Outer = undefined" },
-            FF10 = { "Outer = undefined" })
+    @Alerts(DEFAULT = { "Outer = <div id=\"myNode\">New  cell value</div>" },
+            IE8 = { "Outer = <DIV id=myNode>New cell value</DIV>" })
     public void getOuterHTMLFromBlock() throws Exception {
         final String html = createPageForGetOuterHTML("div", "New  cell value", false);
         loadPageWithAlerts2(html);
@@ -935,10 +971,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "Outer = <SPAN id=myNode>New cell value</SPAN>" },
-            DEFAULT = { "Outer = <span id=\"myNode\">New  cell value</span>" },
-            FF3_6 = { "Outer = undefined" },
-            FF10 = { "Outer = undefined" })
+    @Alerts(DEFAULT = { "Outer = <span id=\"myNode\">New  cell value</span>" },
+            IE8 = { "Outer = <SPAN id=myNode>New cell value</SPAN>" })
     public void getOuterHTMLFromInline() throws Exception {
         final String html = createPageForGetOuterHTML("span", "New  cell value", false);
         loadPageWithAlerts2(html);
@@ -949,10 +983,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "Outer = <BR id=myNode>" },
-            DEFAULT = { "Outer = <br id=\"myNode\">" },
-            FF3_6 = { "Outer = undefined" },
-            FF10 = { "Outer = undefined" })
+    @Alerts(DEFAULT = { "Outer = <br id=\"myNode\">" },
+            IE8 = { "Outer = <BR id=myNode>" })
     public void getOuterHTMLFromEmpty() throws Exception {
         final String html = createPageForGetOuterHTML("br", "", true);
         loadPageWithAlerts2(html);
@@ -964,12 +996,10 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "Outer = <P id=myNode>New cell value\n</P>" },
-            DEFAULT = { "Outer = <p id=\"myNode\">New  cell value\n</p>" },
-            FF3_6 = { "Outer = undefined" },
-            FF10 = { "Outer = undefined" },
-            FF17 = { "Outer = <p id=\"myNode\">New  cell value\n\n</p>" })
-    @NotYetImplemented(FF17)
+    @Alerts(FF = { "Outer = <p id=\"myNode\">New  cell value\n\n</p>" },
+            IE8 = { "Outer = <P id=myNode>New cell value\n</P>" },
+            IE11 = { "Outer = <p id=\"myNode\">New  cell value\n\n" })
+    @NotYetImplemented({ FF17, FF24 })
     public void getOuterHTMLFromUnclosedParagraph() throws Exception {
         final String html = createPageForGetOuterHTML("p", "New  cell value", true);
         loadPageWithAlerts2(html);
@@ -999,12 +1029,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "Old = <SPAN id=innerNode>Old outerHTML</SPAN>", "New = New cell value" },
-            DEFAULT = { "Old = <span id=\"innerNode\">Old outerHTML</span>", "New = New  cell value" },
-            FF3_6 = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
-                    "New = <span id=\"innerNode\">Old outerHTML</span>" },
-            FF10 = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
-                    "New = <span id=\"innerNode\">Old outerHTML</span>" })
+    @Alerts(DEFAULT = { "Old = <span id=\"innerNode\">Old outerHTML</span>", "New = New  cell value" },
+            IE8 = { "Old = <SPAN id=innerNode>Old outerHTML</SPAN>", "New = New cell value" })
     public void setOuterHTMLAddTextToBlock() throws Exception {
         final String html = createPageForSetOuterHTML("div", "New  cell value");
         loadPageWithAlerts2(html);
@@ -1015,12 +1041,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "Old = <SPAN id=innerNode>Old outerHTML</SPAN>", "New = New cell value" },
-            DEFAULT = { "Old = <span id=\"innerNode\">Old outerHTML</span>", "New = New  cell value" },
-            FF3_6 = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
-                    "New = <span id=\"innerNode\">Old outerHTML</span>" },
-            FF10 = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
-                    "New = <span id=\"innerNode\">Old outerHTML</span>" })
+    @Alerts(DEFAULT = { "Old = <span id=\"innerNode\">Old outerHTML</span>", "New = New  cell value" },
+            IE8 = { "Old = <SPAN id=innerNode>Old outerHTML</SPAN>", "New = New cell value" })
     public void setOuterHTMLAddTextToInline() throws Exception {
         final String html = createPageForSetOuterHTML("span", "New  cell value");
         loadPageWithAlerts2(html);
@@ -1031,12 +1053,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "Old = <SPAN id=innerNode>Old outerHTML</SPAN>", "New = <DIV>test</DIV>" },
-            DEFAULT = { "Old = <span id=\"innerNode\">Old outerHTML</span>", "New = <div>test</div>" },
-            FF3_6 = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
-                    "New = <span id=\"innerNode\">Old outerHTML</span>" },
-            FF10 = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
-                    "New = <span id=\"innerNode\">Old outerHTML</span>" })
+    @Alerts(DEFAULT = { "Old = <span id=\"innerNode\">Old outerHTML</span>", "New = <div>test</div>" },
+            IE8 = { "Old = <SPAN id=innerNode>Old outerHTML</SPAN>", "New = <DIV>test</DIV>" })
     public void setOuterHTMLAddBlockToBlock() throws Exception {
         final String html = createPageForSetOuterHTML("div", "<div>test</div>");
         loadPageWithAlerts2(html);
@@ -1047,12 +1065,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "Old = <SPAN id=innerNode>Old outerHTML</SPAN>", "New = <DIV>test</DIV>" },
-            DEFAULT = { "Old = <span id=\"innerNode\">Old outerHTML</span>", "New = <div>test</div>" },
-            FF3_6 = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
-                    "New = <span id=\"innerNode\">Old outerHTML</span>" },
-            FF10 = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
-                    "New = <span id=\"innerNode\">Old outerHTML</span>" })
+    @Alerts(DEFAULT = { "Old = <span id=\"innerNode\">Old outerHTML</span>", "New = <div>test</div>" },
+            IE8 = { "Old = <SPAN id=innerNode>Old outerHTML</SPAN>", "New = <DIV>test</DIV>" })
     public void setOuterHTMLAddBlockToInline() throws Exception {
         final String html = createPageForSetOuterHTML("span", "<div>test</div>");
         loadPageWithAlerts2(html);
@@ -1063,12 +1077,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "Old = <SPAN id=innerNode>Old outerHTML</SPAN>", "New = <SPAN>test</SPAN>" },
-            DEFAULT = { "Old = <span id=\"innerNode\">Old outerHTML</span>", "New = <span>test</span>" },
-            FF3_6 = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
-                    "New = <span id=\"innerNode\">Old outerHTML</span>" },
-            FF10 = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
-                    "New = <span id=\"innerNode\">Old outerHTML</span>" })
+    @Alerts(DEFAULT = { "Old = <span id=\"innerNode\">Old outerHTML</span>", "New = <span>test</span>" },
+            IE8 = { "Old = <SPAN id=innerNode>Old outerHTML</SPAN>", "New = <SPAN>test</SPAN>" })
     public void setOuterHTMLAddInlineToInline() throws Exception {
         final String html = createPageForSetOuterHTML("span", "<span>test</span>");
         loadPageWithAlerts2(html);
@@ -1079,12 +1089,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "Old = <SPAN id=innerNode>Old outerHTML</SPAN>", "New = <SPAN>test</SPAN>" },
-            DEFAULT = { "Old = <span id=\"innerNode\">Old outerHTML</span>", "New = <span>test</span>" },
-            FF3_6 = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
-                    "New = <span id=\"innerNode\">Old outerHTML</span>" },
-            FF10 = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
-                    "New = <span id=\"innerNode\">Old outerHTML</span>" })
+    @Alerts(DEFAULT = { "Old = <span id=\"innerNode\">Old outerHTML</span>", "New = <span>test</span>" },
+            IE8 = { "Old = <SPAN id=innerNode>Old outerHTML</SPAN>", "New = <SPAN>test</SPAN>" })
     public void setOuterHTMLAddInlineToBlock() throws Exception {
         final String html = createPageForSetOuterHTML("div", "<span>test</span>");
         loadPageWithAlerts2(html);
@@ -1095,12 +1101,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "Old = <SPAN id=innerNode>Old outerHTML</SPAN>", "New = <BR>" },
-            DEFAULT = { "Old = <span id=\"innerNode\">Old outerHTML</span>", "New = <br>" },
-            FF3_6 = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
-                    "New = <span id=\"innerNode\">Old outerHTML</span>" },
-            FF10 = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
-                    "New = <span id=\"innerNode\">Old outerHTML</span>" })
+    @Alerts(DEFAULT = { "Old = <span id=\"innerNode\">Old outerHTML</span>", "New = <br>" },
+            IE8 = { "Old = <SPAN id=innerNode>Old outerHTML</SPAN>", "New = <BR>" })
     public void setOuterHTMLAddEmpty() throws Exception {
         final String html = createPageForSetOuterHTML("div", "<br>");
         loadPageWithAlerts2(html);
@@ -1111,9 +1113,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11" },
-            FF17 = { "-0", "1", "2", "3", "-4", "5", "6", "7", "8", "9", "10", "11" },
-            DEFAULT = { "-0", "-1", "-2", "-3", "-4", "-5", "-6", "-7", "-8", "-9", "-10", "-11" })
+    @Alerts(DEFAULT = { "-0", "1", "2", "3", "-4", "5", "6", "7", "8", "9", "10", "11" },
+            IE8 = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11" })
     public void setOuterHTMLToReadOnly() throws Exception {
         final String html =  "<html>\n"
             + "<head>\n"
@@ -1153,14 +1154,11 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "Old = <SPAN id=innerNode>Old outerHTML</SPAN>", "exception" },
+    @Alerts(DEFAULT = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
+                    "New = <div>test</div>" },
             CHROME = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
                     "New = <span id=\"innerNode\">Old outerHTML</span>" },
-            FF17 = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
-                    "New = <div>test</div>" },
-            FF = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
-                    "New = <span id=\"innerNode\">Old outerHTML</span>" })
-    @NotYetImplemented(FF17)
+            IE8 = { "Old = <SPAN id=innerNode>Old outerHTML</SPAN>", "exception" })
     public void setOuterHTMLAddBlockToParagraph() throws Exception {
         final String html = createPageForSetOuterHTML("p", "<div>test</div>");
         loadPageWithAlerts2(html);
@@ -1172,14 +1170,11 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "Old = <SPAN id=innerNode>Old outerHTML</SPAN>", "exception" },
+    @Alerts(DEFAULT = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
+                    "New = <p>test</p>" },
             CHROME = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
-                        "New = <span id=\"innerNode\">Old outerHTML</span>" },
-            FF = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
                     "New = <span id=\"innerNode\">Old outerHTML</span>" },
-            FF17 = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
-                    "New = <p>test</p>" })
-    @NotYetImplemented(FF17)
+            IE8 = { "Old = <SPAN id=innerNode>Old outerHTML</SPAN>", "exception" })
     public void setOuterHTMLAddParagraphToParagraph() throws Exception {
         final String html = createPageForSetOuterHTML("p", "<p>test</p>");
         loadPageWithAlerts2(html);
@@ -1191,12 +1186,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "Old = <SPAN id=innerNode>Old outerHTML</SPAN>", "New = <P>test</P>" },
-            DEFAULT = { "Old = <span id=\"innerNode\">Old outerHTML</span>", "New = <p>test</p>" },
-            FF3_6 = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
-                    "New = <span id=\"innerNode\">Old outerHTML</span>" },
-            FF10 = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
-                    "New = <span id=\"innerNode\">Old outerHTML</span>" })
+    @Alerts(DEFAULT = { "Old = <span id=\"innerNode\">Old outerHTML</span>", "New = <p>test</p>" },
+            IE8 = { "Old = <SPAN id=innerNode>Old outerHTML</SPAN>", "New = <P>test</P>" })
     public void setOuterHTMLAddUnclosedParagraph() throws Exception {
         final String html = createPageForSetOuterHTML("div", "<p>test");
         loadPageWithAlerts2(html);
@@ -1208,14 +1199,11 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "Old = <SPAN id=innerNode>Old outerHTML</SPAN>", "exception" },
+    @Alerts(DEFAULT = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
+                    "New = <a>test</a>" },
             CHROME = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
-                        "New = <span id=\"innerNode\">Old outerHTML</span>" },
-            FF = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
                     "New = <span id=\"innerNode\">Old outerHTML</span>" },
-            FF17 = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
-                    "New = <a>test</a>" })
-    @NotYetImplemented(FF17)
+            IE8 = { "Old = <SPAN id=innerNode>Old outerHTML</SPAN>", "exception" })
     public void setOuterHTMLAddAnchorToAnchor() throws Exception {
         final String html = createPageForSetOuterHTML("a", "<a>test</a>");
         loadPageWithAlerts2(html);
@@ -1226,12 +1214,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "Old = <SPAN id=innerNode>Old outerHTML</SPAN>", "New = <DIV></DIV>" },
-            DEFAULT = { "Old = <span id=\"innerNode\">Old outerHTML</span>", "New = <div></div>" },
-            FF3_6 = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
-                    "New = <span id=\"innerNode\">Old outerHTML</span>" },
-            FF10 = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
-                    "New = <span id=\"innerNode\">Old outerHTML</span>" })
+    @Alerts(DEFAULT = { "Old = <span id=\"innerNode\">Old outerHTML</span>", "New = <div></div>" },
+            IE8 = { "Old = <SPAN id=innerNode>Old outerHTML</SPAN>", "New = <DIV></DIV>" })
     public void setOuterHTMLAddSelfClosingBlock() throws Exception {
         final String html = createPageForSetOuterHTML("div", "<div/>");
         loadPageWithAlerts2(html);
@@ -1242,15 +1226,11 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "Old = <SPAN id=innerNode>Old outerHTML</SPAN>", "New = <DIV></DIV><DIV></DIV>" },
+    @Alerts(DEFAULT = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
+                    "New = <div><div></div></div>" },
             CHROME = { "Old = <span id=\"innerNode\">Old outerHTML</span>", "New = <div></div><div></div>" },
-            FF3_6 = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
-                    "New = <span id=\"innerNode\">Old outerHTML</span>" },
-            FF10 = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
-                    "New = <span id=\"innerNode\">Old outerHTML</span>" },
-            FF17 = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
-                    "New = <div><div></div></div>" })
-    @NotYetImplemented(FF17)
+            IE8 = { "Old = <SPAN id=innerNode>Old outerHTML</SPAN>", "New = <DIV></DIV><DIV></DIV>" })
+    @NotYetImplemented({ FF17, FF24 })
     public void setOuterHTMLAddMultipleSelfClosingBlock() throws Exception {
         final String html = createPageForSetOuterHTML("div", "<div/><div>");
         loadPageWithAlerts2(html);
@@ -1261,12 +1241,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "Old = <SPAN id=innerNode>Old outerHTML</SPAN>", "New = <SPAN></SPAN>" },
-            DEFAULT = { "Old = <span id=\"innerNode\">Old outerHTML</span>", "New = <span></span>" },
-            FF3_6 = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
-                    "New = <span id=\"innerNode\">Old outerHTML</span>" },
-            FF10 = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
-                    "New = <span id=\"innerNode\">Old outerHTML</span>" })
+    @Alerts(DEFAULT = { "Old = <span id=\"innerNode\">Old outerHTML</span>", "New = <span></span>" },
+            IE8 = { "Old = <SPAN id=innerNode>Old outerHTML</SPAN>", "New = <SPAN></SPAN>" })
     public void setOuterHTMLAddSelfClosingInline() throws Exception {
         final String html = createPageForSetOuterHTML("div", "<span/>");
         loadPageWithAlerts2(html);
@@ -1277,12 +1253,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "Old = <SPAN id=innerNode>Old outerHTML</SPAN>", "New = <BR>" },
-            DEFAULT = { "Old = <span id=\"innerNode\">Old outerHTML</span>", "New = <br>" },
-            FF3_6 = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
-                    "New = <span id=\"innerNode\">Old outerHTML</span>" },
-            FF10 = { "Old = <span id=\"innerNode\">Old outerHTML</span>",
-                    "New = <span id=\"innerNode\">Old outerHTML</span>" })
+    @Alerts(DEFAULT = { "Old = <span id=\"innerNode\">Old outerHTML</span>", "New = <br>" },
+            IE8 = { "Old = <SPAN id=innerNode>Old outerHTML</SPAN>", "New = <BR>" })
     public void setOuterHTMLAddSelfClosingEmpty() throws Exception {
         final String html = createPageForSetOuterHTML("div", "<br/>");
         loadPageWithAlerts2(html);
@@ -1317,10 +1289,7 @@ public class HTMLElementTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "body.cpuClass = undefined", "exception" },
-            IE = {
-            "body.cpuClass = undefined",
-            "body.cpuClass = x86",
-            "body.cpuClass = undefined" })
+            IE8 = { "body.cpuClass = undefined", "body.cpuClass = x86", "body.cpuClass = undefined" })
     public void addBehaviorDefaultClientCaps() throws Exception {
         final String html = "<html><body><script>\n"
             + "try {\n"
@@ -1343,7 +1312,7 @@ public class HTMLElementTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "body.isHomePage = undefined", "exception" },
-            IE = { "body.isHomePage = undefined", "body.isHomePage = false", "body.isHomePage = undefined" })
+            IE8 = { "body.isHomePage = undefined", "body.isHomePage = false", "body.isHomePage = undefined" })
     public void removeBehavior() throws Exception {
         final String html = "<html><body><script>\n"
             + "try {\n"
@@ -1362,7 +1331,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "exception", IE = { "BR", "DIV", "2", "3" })
+    @Alerts(DEFAULT = "exception",
+            IE = { "BR", "DIV", "2", "3" })
     @NotYetImplemented(FF)
     public void children() throws Exception {
         final String html = "<html><body>\n"
@@ -1385,9 +1355,9 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "Old = Old \r\ninnerText", "New = New cell value" },
-            CHROME = { "Old = Old\ninnerText", "New = New cell value" },
-            FF = { "Old = undefined", "New = New cell value" })
+    @Alerts(CHROME = { "Old = Old\ninnerText", "New = New cell value" },
+            FF = { "Old = undefined", "New = New cell value" },
+            IE = { "Old = Old \r\ninnerText", "New = New cell value" })
     public void getSetInnerTextSimple() throws Exception {
         final String html = "<html>\n"
             + "<head>\n"
@@ -1440,7 +1410,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = { "hello", "null", "hello" }, IE = { "hello", "hello", "undefined" })
+    @Alerts(DEFAULT = { "hello", "null", "hello" },
+            IE8 = { "hello", "hello", "undefined" })
     public void removeAttribute_property() throws Exception {
         final String html = "<html>\n"
             + "<head>\n"
@@ -1684,7 +1655,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = { "null", "null" }, IE = { "exception", "null" })
+    @Alerts(DEFAULT = { "null", "null" },
+            IE8 = { "exception", "null" })
     public void offsetParent_newElement() throws Exception {
         final String html = "<html><body>\n"
             + "<script>\n"
@@ -1706,11 +1678,11 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(IE = { "null", "body", "body", "body", "body", "body",
-            "body", "body", "h1", "i1", "td", "td", "td", "body", "body" },
+    @Alerts(DEFAULT = { "null", "body", "exception" },
             FF = { "null", "body", "body", "body", "body", "body",
             "f1", "body", "h1", "i1", "td", "body", "td", "body", "body" },
-            CHROME = { "null", "body", "exception" })
+            IE8 = { "null", "body", "body", "body", "body", "body",
+            "body", "body", "h1", "i1", "td", "td", "td", "body", "body" })
     public void offsetParent_WithCSS() throws Exception {
         final String html = "<html>\n"
             + "  <body id='body' onload='test()'>\n"
@@ -1792,7 +1764,7 @@ public class HTMLElementTest extends WebDriverTestCase {
     @Test
     @Alerts(DEFAULT = { "undefined", "undefined", "undefined", "undefined",
             "undefined", "123", "from myFunction", "123", "from myFunction" },
-            IE = { "undefined", "undefined", "undefined", "undefined", "exception" })
+            IE8 = { "undefined", "undefined", "undefined", "undefined", "exception" })
     public void prototype() throws Exception {
         final String html = "<html><head><title>Prototype test</title>\n"
             + "<script>\n"
@@ -1826,7 +1798,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "in selectNodes", IE = "exception")
+    @Alerts(DEFAULT = "in selectNodes",
+            IE8 = "exception")
     public void prototype_Element() throws Exception {
         final String html = "<html><head><title>foo</title><script>\n"
             + "  function test() {\n"
@@ -1847,7 +1820,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = { "true", "true" }, IE = "exception")
+    @Alerts(DEFAULT = { "true", "true" },
+            IE8 = "exception")
     public void instanceOf() throws Exception {
         final String html = "<html><head><title>instanceof test</title>\n"
             + "<script>\n"
@@ -1870,9 +1844,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "null", "[object]" },
-            FF3_6 = { "undefined", "undefined" },
-            DEFAULT = { "null", "[object HTMLBodyElement]" })
+    @Alerts(DEFAULT = { "null", "[object HTMLBodyElement]" },
+            IE8 = { "null", "[object]" })
     public void parentElement() throws Exception {
         final String html
             = "<html id='htmlID'>\n"
@@ -1893,8 +1866,9 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts("rgb(0, 0, 0)")
     @Browsers(IE)
+    @Alerts(DEFAULT = "rgb(0, 0, 0)",
+            IE11 = "#000000")
     public void currentStyle() throws Exception {
         style("currentStyle");
     }
@@ -1944,7 +1918,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = { "0", "0" }, IE = { "2", "2" })
+    @Alerts(DEFAULT = { "0", "0" },
+            IE8 = { "2", "2" })
     public void clientLeftTop_documentElement() throws Exception {
         final String html =
               "<!DOCTYPE HTML "
@@ -1963,7 +1938,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = { "4", "4" }, IE = { "0", "0" })
+    @Alerts(DEFAULT = { "4", "4" },
+            IE8 = { "0", "0" })
     public void clientLeftTopWithBorder() throws Exception {
         final String html = "<html><body>"
             + "<div id='div1' style='border: 4px solid black;'>hello</div><script>\n"
@@ -1978,7 +1954,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "[object ClientRect]", IE = "[object]")
+    @Alerts(DEFAULT = "[object ClientRect]",
+            IE8 = "[object]")
     public void getBoundingClientRect() throws Exception {
         final String html = "<html><body><div id='div1'>hello</div><script>\n"
             + "try {\n"
@@ -1994,7 +1971,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = { "400", "100" }, IE = { "402", "102" })
+    @Alerts(DEFAULT = { "400", "100" },
+            IE8 = { "402", "102" })
     public void getBoundingClientRect2() throws Exception {
         final String html = "<html><head><title>foo</title><script>\n"
             + "  function test() {\n"
@@ -2016,7 +1994,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = { "0", "100", "100", "50" }, IE = { "2", "102", "102", "52" })
+    @Alerts(DEFAULT = { "0", "100", "100", "50" },
+            IE8 = { "2", "102", "102", "52" })
     public void getBoundingClientRect_Scroll() throws Exception {
         final String html = "<html><head><title>foo</title><script>\n"
             + "  function test() {\n"
@@ -2069,7 +2048,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "null", "#document-fragment" }, DEFAULT = { "null", "null" })
+    @Alerts(DEFAULT = { "null", "null" },
+            IE8 = { "null", "#document-fragment" })
     public void innerHTML_parentNode() throws Exception {
         final String html = "<html><head><title>foo</title><script>\n"
             + "  function test() {\n"
@@ -2090,7 +2070,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "null", "#document-fragment" }, DEFAULT = { "null", "null" })
+    @Alerts(DEFAULT = { "null", "null" },
+            IE8 = { "null", "#document-fragment" })
     public void innerText_parentNode() throws Exception {
         final String html = "<html><head><title>foo</title><script>\n"
             + "  function test() {\n"
@@ -2111,7 +2092,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "false", "true", "false" }, DEFAULT = { "true", "true", "true" })
+    @Alerts(DEFAULT = { "true", "true", "true" },
+            IE = { "false", "true", "false" })
     public void uniqueID() throws Exception {
         final String html = "<html><head><title>foo</title><script>\n"
             + "  function test() {\n"
@@ -2196,7 +2178,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = "clicked", IE = "exception")
+    @Alerts(DEFAULT = "clicked",
+            IE8 = "exception")
     public void dispatchEvent() throws Exception {
         final String html =
             "<html><head>\n"
@@ -2219,7 +2202,9 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = "page2 loaded", IE = "exception")
+    @Alerts(DEFAULT = "page2 loaded",
+            IE = "exception",
+            IE11 = "")
     public void dispatchEvent_submitOnForm() throws Exception {
         final String html = "<html><head><title>page 1</title></head><body>\n"
             + "<form action='page2' id='theForm'><span id='foo'/></form>\n"
@@ -2241,7 +2226,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(IE = "exception")
+    @Alerts(IE = "exception",
+            IE11 = "")
     public void dispatchEvent_submitOnFormChild() throws Exception {
         final String html = "<html><head><title>page 1</title></head><body>\n"
             + "<form action='page2'><span id='foo'/></form>\n"
@@ -2261,7 +2247,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = { "true", "true", "false" }, IE = "exception")
+    @Alerts(DEFAULT = { "true", "true", "false" },
+            IE8 = "exception")
     public void hasAttribute() throws Exception {
         final String html =
               "<html>\n"
@@ -2286,7 +2273,7 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Browsers(IE)
+    @Browsers(IE8)
     @Alerts({ "undefined", "x86", "0", "undefined" })
     public void getComponentVersion() throws Exception {
         final String html = "<html><head><title>foo</title><script>\n"
@@ -2308,7 +2295,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(IE = { "30", "40" }, DEFAULT = { "36", "46" })
+    @Alerts(DEFAULT = { "36", "46" },
+            IE8 = { "30", "40" })
     public void clientWidthAndHeight() throws Exception {
         final String html =
               "<html><head><title>foo</title><script>\n"
@@ -2347,7 +2335,7 @@ public class HTMLElementTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "x", "null", "[object Attr]", "null", "x", "byClassname" },
-            IE = { "null", "x", "[object]", "null", "null", "byClassname" })
+            IE8 = { "null", "x", "[object]", "null", "null", "byClassname" })
     public void class_className_attribute() throws Exception {
         final String html
             = "<html><head>\n"
@@ -2375,7 +2363,7 @@ public class HTMLElementTest extends WebDriverTestCase {
     @Test
     @Alerts(DEFAULT = { "-undefined-x", "null-x-null", "null-[object Attr]-null", "null-[object Attr]-null",
             "x-byClassname", "[object Attr]-[object Attr]", "byClassname-byClassname", "[object Attr]-[object Attr]" },
-            IE = { "-undefined-x", "-null-x", "[object]-[object]-null", "[object]-[object]-null", "null-byClassname",
+            IE8 = { "-undefined-x", "-null-x", "[object]-[object]-null", "[object]-[object]-null", "null-byClassname",
             "[object]-null", "byClassname-byClassname", "[object]-null" })
     public void class_className_attribute2() throws Exception {
         final String html
@@ -2407,8 +2395,9 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF3_6 = "exception",
-            DEFAULT = { "true", "true", "true", "false", "false", "false", "false", "true", "true", "false", "false" })
+    @Alerts(DEFAULT = { "true", "true", "true", "false", "false", "false", "false", "true", "true", "false", "false" },
+            IE11 = { "true", "true", "true", "false", "false", "false", "false", "true", "false", "false",
+                        "exception" })
     public void contains() throws Exception {
         final String html
             = "<html><head>\n"
@@ -2450,7 +2439,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts("exception")
+    @Alerts(DEFAULT = "exception",
+            IE11 = "false")
     public void contains_invalid_argument() throws Exception {
         final String html = "<html><body><script>\n"
             + "try {\n"
@@ -2465,7 +2455,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "undefined", IE = "defined")
+    @Alerts(DEFAULT = "undefined",
+            IE8 = "defined")
     public void filters() throws Exception {
         final String html
             = "<html><head>\n"
@@ -2512,7 +2503,7 @@ public class HTMLElementTest extends WebDriverTestCase {
     @Test
     @Alerts(DEFAULT = { "function", "* => body: 0, div1: 0", "foo => body: 3, div1: 1", "foo red => body: 1, div1: 0",
             "red foo => body: 1, div1: 0", "blue foo => body: 0, div1: 0", "null => body: 0, div1: 0" },
-            IE = { "undefined", "exception" })
+            IE8 = { "undefined", "exception" })
     public void getElementsByClassName() throws Exception {
         final String html
             = "<html><head><title>First</title><script>\n"
@@ -2553,9 +2544,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF3_6 = { "undefined", "undefined" },
-            DEFAULT = { "null", "[object HTMLDivElement]" },
-            IE = { "null", "[object]" })
+    @Alerts(DEFAULT = { "null", "[object HTMLDivElement]" },
+            IE8 = { "null", "[object]" })
     public void parentElement2() throws Exception {
         final String html
             = "<html><head>\n"
@@ -2581,7 +2571,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = { "exception", "exception" }, IE = { "exception", "success" })
+    @Alerts(DEFAULT = { "exception", "exception" },
+            IE8 = { "exception", "success" })
     public void doScroll() throws Exception {
         final String html
             = "<html><head>\n"
@@ -2637,7 +2628,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = { "undefined", "false", "hello", "true" }, IE = { "undefined", "true", "undefined", "false" })
+    @Alerts(DEFAULT = { "undefined", "false", "hello", "true" },
+            IE8 = { "undefined", "true", "undefined", "false" })
     public void firefox__proto__() throws Exception {
         final String html
             = "<html><head>\n"
@@ -2663,7 +2655,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      */
     @Test
     @Browsers(IE)
-    @Alerts(IE = { "false,false,false,false,false,false,false", "false,false,false,false,false,true,true" })
+    @Alerts(IE = { "false,false,false,false,false,false,false", "false,false,false,false,false,true,true" },
+            IE11 = { "false,false,false,false,false,true,false", "false,false,false,false,false,true,false" })
     public void clearAttributes() throws Exception {
         final String html
             = "<input type='text' id='i' name='i' style='color:red' onclick='alert(1)' custom1='a' /><script>\n"
@@ -2683,7 +2676,7 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Browsers(IE)
+    @Browsers(IE8)
     public void mergeAttributes() throws Exception {
         mergeAttributes("i2", "false,false,false,false,false,true,true", "i", "",
             "false,false,false,false,false,false,false", "i", "");
@@ -2691,6 +2684,20 @@ public class HTMLElementTest extends WebDriverTestCase {
             "false,false,false,false,false,false,false", "i", "");
         mergeAttributes("i2, false", "false,false,false,false,false,true,true", "i", "",
             "false,false,false,false,false,false,false", "i2", "i2");
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Browsers(IE11)
+    public void mergeAttributesIE11() throws Exception {
+        mergeAttributes("i2", "false,false,false,false,false,true,true", "i", "",
+                "false,false,false,false,false,true,true", "i", "");
+        mergeAttributes("i2, true", "false,false,false,false,false,true,true", "i", "",
+            "false,false,false,false,false,true,true", "i", "");
+        mergeAttributes("i2, false", "false,false,false,false,false,true,true", "i", "",
+            "false,false,false,false,false,true,true", "i2", "i2");
     }
 
     private void mergeAttributes(final String params, final String... expectedAlerts) throws Exception {
@@ -2721,7 +2728,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "false", IE = "true")
+    @Alerts(DEFAULT = "false",
+            IE8 = "true")
     public void document() throws Exception {
         final String html
             = "<html><head>\n"
@@ -2739,8 +2747,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF3_6 = { "undefined", "true" }, CHROME = { "undefined", "true" },
-            DEFAULT = "exception")
+    @Alerts(DEFAULT = "exception",
+            CHROME = { "undefined", "true" })
     @NotYetImplemented(FF)
     public void prototype_innerHTML() throws Exception {
         final String html = "<html><body>\n"
@@ -2760,10 +2768,10 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(IE = {"", "#0000aa", "#000000", "#ffebcd", "#ab00e0", "#b00e00" },
+    @Alerts(DEFAULT = {"", "#0000aa", "x", "BlanchedAlmond", "aBlue", "bluex" },
+            IE = {"", "#0000aa", "#000000", "#ffebcd", "#ab00e0", "#b00e00" },
             IE9 = {"", "#0000aa", "#0", "blanchedalmond", "#ab00e", "#b00e0" },
-            DEFAULT = {"", "#0000aa", "x", "BlanchedAlmond", "aBlue", "bluex" },
-            FF3_6 = {"", "#0000aa", "#000000", "#ffebcd", "#ab00e0", "#b00e00" })
+            IE11 = {"", "#0000aa", "#0", "blanchedalmond", "#ab00e", "#b00e0" })
     public void setColorAttribute() throws Exception {
         final String html =
             "<html>\n"
@@ -2794,8 +2802,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = "<SPAN onclick=\"var f = &quot;hello&quot; + 'world'\">test span</SPAN>",
-            DEFAULT = "<span onclick=\"var f = &quot;hello&quot; + 'world'\">test span</span>")
+    @Alerts(DEFAULT = "<span onclick=\"var f = &quot;hello&quot; + 'world'\">test span</span>",
+            IE8 = "<SPAN onclick=\"var f = &quot;hello&quot; + 'world'\">test span</SPAN>")
     public void innerHTMLwithQuotes() throws Exception {
         final String html = "<html>\n"
             + "<head>\n"
@@ -2815,10 +2823,10 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "button", "getAttributeNS() not supported" },
-            FF17 = { "button", "null", "false", "true" },
-            DEFAULT = { "button", "", "false", "true" })
-    @NotYetImplemented(FF17)
+    @Alerts(DEFAULT = { "button", "", "false", "true" },
+            FF = { "button", "null", "false", "true" },
+            IE8 = { "button", "getAttributeNS() not supported" })
+    @NotYetImplemented({ FF17, FF24 })
     public void attributeNS() throws Exception {
         final String html
             = "<html><head>\n"
@@ -2846,7 +2854,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = "undefined", FF3_6 = "undefined", DEFAULT = "[object DOMStringMap]")
+    @Alerts(DEFAULT = "[object DOMStringMap]",
+            IE8 = "undefined")
     public void dataset() throws Exception {
         final String html
             = "<html><head>\n"
@@ -2866,7 +2875,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception on test failure
      */
     @Test
-    @Alerts(IE = "t", FF = "")
+    @Alerts(DEFAULT = "",
+            IE8 = "t")
     public void setAttribute_className() throws Exception {
         final String html = "<html><head>\n"
             + "<script>\n"
@@ -2886,7 +2896,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception on test failure
      */
     @Test
-    @Alerts(IE = "", DEFAULT = "t")
+    @Alerts(DEFAULT = "t",
+            IE8 = "")
     public void setAttribute_class() throws Exception {
         final String html = "<html><head>\n"
             + "<script>\n"
@@ -2946,7 +2957,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception on test failure
      */
     @Test
-    @Alerts(DEFAULT = { "null", "", "null", "undefined" }, IE = { "", "", "null", "undefined" })
+    @Alerts(DEFAULT = { "null", "", "null", "undefined" },
+            IE8 = { "", "", "null", "undefined" })
     public void getAttribute2() throws Exception {
         final String html = "<html>\n"
                 + "<head>\n"
@@ -2999,12 +3011,17 @@ public class HTMLElementTest extends WebDriverTestCase {
     }
 
     private String outerHTML(final String elementName) {
-        return "<html><head>\n"
+        return "<!DOCTYPE html><html><head>\n"
                 + "  <script>\n"
                 + "    function test(){\n"
-                + "      var value = document.createElement('" + elementName + "').cloneNode(true).outerHTML;\n"
-                + "      while (value && (value.charAt(0) == '\\r' || value.charAt(0) == '\\n'))\n"
+                + "      var value = document.createElement('" + elementName + "').outerHTML;\n"
+                + "      while (value && (value.charAt(0) == '\\r' || value.charAt(0) == '\\n')) {\n"
                 + "        value = value.substring(1);\n"
+                + "      }\n"
+                // IE8 inserts a fancy namespace declaration if the tag is unknown
+                // and of course IE10 is different
+                + "      value = value.replace('<?XML:NAMESPACE PREFIX = PUBLIC NS = \"URN:COMPONENT\" />', '');\n"
+                + "      value = value.replace('<?XML:NAMESPACE PREFIX = \"PUBLIC\" NS = \"URN:COMPONENT\" />', '');\n"
                 + "      alert(value);\n"
                 + "    }\n"
                 + "  </script>\n"
@@ -3016,7 +3033,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<abbr></abbr>", IE = "<ABBR></ABBR>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts(DEFAULT = "<abbr></abbr>",
+            IE8 = "<ABBR></ABBR>")
     public void outerHTML_abbr() throws Exception {
         loadPageWithAlerts2(outerHTML("abbr"));
     }
@@ -3025,7 +3043,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<acronym></acronym>", IE = "<ACRONYM></ACRONYM>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts(DEFAULT = "<acronym></acronym>",
+            IE8 = "<ACRONYM></ACRONYM>")
     public void outerHTML_acronym() throws Exception {
         loadPageWithAlerts2(outerHTML("acronym"));
     }
@@ -3034,7 +3053,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<a></a>", IE = "<A></A>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts(DEFAULT = "<a></a>",
+            IE8 = "<A></A>")
     public void outerHTML_a() throws Exception {
         loadPageWithAlerts2(outerHTML("a"));
     }
@@ -3043,7 +3063,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<address></address>", IE = "<ADDRESS></ADDRESS>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts(DEFAULT = "<address></address>",
+            IE8 = "<ADDRESS></ADDRESS>")
     public void outerHTML_address() throws Exception {
         loadPageWithAlerts2(outerHTML("address"));
     }
@@ -3052,7 +3073,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<applet></applet>", IE = "<APPLET></APPLET>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts(DEFAULT = "<applet></applet>",
+            IE8 = "<APPLET></APPLET>")
     public void outerHTML_applet() throws Exception {
         loadPageWithAlerts2(outerHTML("applet"));
     }
@@ -3061,7 +3083,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<area>", IE = "<AREA>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts(DEFAULT = "<area>",
+            IE8 = "<AREA>")
     public void outerHTML_area() throws Exception {
         loadPageWithAlerts2(outerHTML("area"));
     }
@@ -3070,7 +3093,25 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<audio></audio>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts("<article></article>")
+    public void outerHTML_article() throws Exception {
+        loadPageWithAlerts2(outerHTML("article"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts("<aside></aside>")
+    public void outerHTML_aside() throws Exception {
+        loadPageWithAlerts2(outerHTML("aside"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts("<audio></audio>")
     public void outerHTML_audio() throws Exception {
         loadPageWithAlerts2(outerHTML("audio"));
     }
@@ -3079,7 +3120,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<bgsound>", IE = "<BGSOUND>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts(DEFAULT = "<bgsound>",
+            IE8 = "<BGSOUND>")
     public void outerHTML_bgsound() throws Exception {
         loadPageWithAlerts2(outerHTML("bgsound"));
     }
@@ -3088,7 +3130,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<base>", IE = "<BASE>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts(DEFAULT = "<base>",
+            IE8 = "<BASE>")
     public void outerHTML_base() throws Exception {
         loadPageWithAlerts2(outerHTML("base"));
     }
@@ -3097,7 +3140,9 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<basefont>", IE = "<BASEFONT></BASEFONT>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts(DEFAULT = "<basefont>",
+            IE = "<BASEFONT></BASEFONT>",
+            IE11 = "<basefont></basefont>")
     public void outerHTML_basefont() throws Exception {
         loadPageWithAlerts2(outerHTML("basefont"));
     }
@@ -3106,7 +3151,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<bdo></bdo>", IE = "<BDO></BDO>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts(DEFAULT = "<bdo></bdo>",
+            IE8 = "<BDO></BDO>")
     public void outerHTML_bdo() throws Exception {
         loadPageWithAlerts2(outerHTML("bdo"));
     }
@@ -3115,7 +3161,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<big></big>", IE = "<BIG></BIG>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts(DEFAULT = "<big></big>",
+            IE8 = "<BIG></BIG>")
     public void outerHTML_big() throws Exception {
         loadPageWithAlerts2(outerHTML("big"));
     }
@@ -3124,7 +3171,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<blink></blink>", IE = "<BLINK></BLINK>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts(DEFAULT = "<blink></blink>",
+            IE8 = "<BLINK></BLINK>")
     public void outerHTML_blink() throws Exception {
         loadPageWithAlerts2(outerHTML("blink"));
     }
@@ -3133,8 +3181,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<blockquote></blockquote>", IE = "<BLOCKQUOTE></BLOCKQUOTE>",
-        FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts(DEFAULT = "<blockquote></blockquote>",
+            IE8 = "<BLOCKQUOTE></BLOCKQUOTE>")
     public void outerHTML_blockquote() throws Exception {
         loadPageWithAlerts2(outerHTML("blockquote"));
     }
@@ -3143,7 +3191,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<body></body>", IE = "<BODY></BODY>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts(DEFAULT = "<body></body>",
+            IE8 = "<BODY></BODY>")
     public void outerHTML_body() throws Exception {
         loadPageWithAlerts2(outerHTML("body"));
     }
@@ -3152,7 +3201,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<b></b>", IE = "<B></B>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts(DEFAULT = "<b></b>",
+            IE8 = "<B></B>")
     public void outerHTML_b() throws Exception {
         loadPageWithAlerts2(outerHTML("b"));
     }
@@ -3161,7 +3211,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<br>", IE = "<BR>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts(DEFAULT = "<br>",
+            IE8 = "<BR>")
     public void outerHTML_br() throws Exception {
         loadPageWithAlerts2(outerHTML("br"));
     }
@@ -3170,7 +3221,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<button></button>", IE = "<BUTTON></BUTTON>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts(DEFAULT = "<button></button>",
+            IE8 = "<BUTTON></BUTTON>")
     public void outerHTML_button() throws Exception {
         loadPageWithAlerts2(outerHTML("button"));
     }
@@ -3179,7 +3231,7 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<canvas></canvas>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts("<canvas></canvas>")
     public void outerHTML_canvas() throws Exception {
         loadPageWithAlerts2(outerHTML("canvas"));
     }
@@ -3188,7 +3240,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<caption></caption>", IE = "<CAPTION></CAPTION>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts(DEFAULT = "<caption></caption>",
+            IE8 = "<CAPTION></CAPTION>")
     public void outerHTML_caption() throws Exception {
         loadPageWithAlerts2(outerHTML("caption"));
     }
@@ -3197,7 +3250,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<center></center>", IE = "<CENTER></CENTER>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts(DEFAULT = "<center></center>",
+            IE8 = "<CENTER></CENTER>")
     public void outerHTML_center() throws Exception {
         loadPageWithAlerts2(outerHTML("center"));
     }
@@ -3206,7 +3260,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<cite></cite>", IE = "<CITE></CITE>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts(DEFAULT = "<cite></cite>",
+            IE8 = "<CITE></CITE>")
     public void outerHTML_cite() throws Exception {
         loadPageWithAlerts2(outerHTML("cite"));
     }
@@ -3215,7 +3270,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<code></code>", IE = "<CODE></CODE>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts(DEFAULT = "<code></code>",
+            IE8 = "<CODE></CODE>")
     public void outerHTML_code() throws Exception {
         loadPageWithAlerts2(outerHTML("code"));
     }
@@ -3224,622 +3280,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<dfn></dfn>", IE = "<DFN></DFN>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_dfn() throws Exception {
-        loadPageWithAlerts2(outerHTML("dfn"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<dd></dd>", IE = "<DD></DD>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_dd() throws Exception {
-        loadPageWithAlerts2(outerHTML("dd"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<del></del>", IE = "<DEL></DEL>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_del() throws Exception {
-        loadPageWithAlerts2(outerHTML("del"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<dir></dir>", IE = "<DIR></DIR>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_dir() throws Exception {
-        loadPageWithAlerts2(outerHTML("dir"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<div></div>", IE = "<DIV></DIV>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_div() throws Exception {
-        loadPageWithAlerts2(outerHTML("div"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<dl></dl>", IE = "<DL></DL>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_dl() throws Exception {
-        loadPageWithAlerts2(outerHTML("dl"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<dt></dt>", IE = "<DT></DT>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_dt() throws Exception {
-        loadPageWithAlerts2(outerHTML("dt"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<embed>", IE = "<EMBED>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_embed() throws Exception {
-        loadPageWithAlerts2(outerHTML("embed"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<em></em>", IE = "<EM></EM>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_em() throws Exception {
-        loadPageWithAlerts2(outerHTML("em"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<fieldset></fieldset>", IE = "<FIELDSET></FIELDSET>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_fieldset() throws Exception {
-        loadPageWithAlerts2(outerHTML("fieldset"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<font></font>", IE = "<FONT></FONT>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_font() throws Exception {
-        loadPageWithAlerts2(outerHTML("font"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<form></form>", IE = "<FORM></FORM>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_form() throws Exception {
-        loadPageWithAlerts2(outerHTML("form"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<frame>", IE = "<FRAME>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_frame() throws Exception {
-        loadPageWithAlerts2(outerHTML("frame"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<frameset></frameset>", IE = "<FRAMESET></FRAMESET>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_frameset() throws Exception {
-        loadPageWithAlerts2(outerHTML("frameset"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<h1></h1>", IE = "<H1></H1>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_h1() throws Exception {
-        loadPageWithAlerts2(outerHTML("h1"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<h2></h2>", IE = "<H2></H2>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_h2() throws Exception {
-        loadPageWithAlerts2(outerHTML("h2"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<h3></h3>", IE = "<H3></H3>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_h3() throws Exception {
-        loadPageWithAlerts2(outerHTML("h3"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<h4></h4>", IE = "<H4></H4>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_h4() throws Exception {
-        loadPageWithAlerts2(outerHTML("h4"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<h5></h5>", IE = "<H5></H5>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_h5() throws Exception {
-        loadPageWithAlerts2(outerHTML("h5"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<h6></h6>", IE = "<H6></H6>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_h6() throws Exception {
-        loadPageWithAlerts2(outerHTML("h6"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<head></head>", IE = "<HEAD></HEAD>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_head() throws Exception {
-        loadPageWithAlerts2(outerHTML("head"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<hr>", IE = "<HR>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_hr() throws Exception {
-        loadPageWithAlerts2(outerHTML("hr"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<html></html>", IE = "<HTML></HTML>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_html() throws Exception {
-        loadPageWithAlerts2(outerHTML("html"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<iframe></iframe>", IE = "<IFRAME></IFRAME>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_iframe() throws Exception {
-        loadPageWithAlerts2(outerHTML("iframe"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<q></q>", IE = "<Q></Q>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_q() throws Exception {
-        loadPageWithAlerts2(outerHTML("q"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<img>", IE = "<IMG>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_img() throws Exception {
-        loadPageWithAlerts2(outerHTML("img"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<ins></ins>", IE = "<INS></INS>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_ins() throws Exception {
-        loadPageWithAlerts2(outerHTML("ins"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<isindex></isindex>", IE = "<ISINDEX>", FF3_6 = "undefined", FF10 = "undefined")
-    @NotYetImplemented(FF17)
-    public void outerHTML_isindex() throws Exception {
-        loadPageWithAlerts2(outerHTML("isindex"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<i></i>", IE = "<I></I>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_i() throws Exception {
-        loadPageWithAlerts2(outerHTML("i"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<kbd></kbd>", IE = "<KBD></KBD>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_kbd() throws Exception {
-        loadPageWithAlerts2(outerHTML("kbd"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<label></label>", IE = "<LABEL></LABEL>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_label() throws Exception {
-        loadPageWithAlerts2(outerHTML("label"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<legend></legend>", IE = "<LEGEND></LEGEND>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_legend() throws Exception {
-        loadPageWithAlerts2(outerHTML("legend"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<listing></listing>", IE = "<LISTING></LISTING>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_listing() throws Exception {
-        loadPageWithAlerts2(outerHTML("listing"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<li></li>", IE = "<LI></LI>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_li() throws Exception {
-        loadPageWithAlerts2(outerHTML("li"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<link>", IE = "<LINK>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_link() throws Exception {
-        loadPageWithAlerts2(outerHTML("link"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<map></map>", IE = "<MAP></MAP>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_map() throws Exception {
-        loadPageWithAlerts2(outerHTML("map"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<marquee></marquee>", IE = "<MARQUEE></MARQUEE>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_marquee() throws Exception {
-        loadPageWithAlerts2(outerHTML("marquee"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<menu></menu>", IE = "<MENU></MENU>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_menu() throws Exception {
-        loadPageWithAlerts2(outerHTML("menu"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<meta>", IE = "<META>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_meta() throws Exception {
-        loadPageWithAlerts2(outerHTML("meta"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<meter></meter>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_meter() throws Exception {
-        loadPageWithAlerts2(outerHTML("meter"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<multicol></multicol>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_multicol() throws Exception {
-        loadPageWithAlerts2(outerHTML("multicol"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<nobr></nobr>", IE = "<NOBR></NOBR>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_nobr() throws Exception {
-        loadPageWithAlerts2(outerHTML("nobr"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<noembed></noembed>", IE = "<NOEMBED></NOEMBED>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_noembed() throws Exception {
-        loadPageWithAlerts2(outerHTML("noembed"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<noframes></noframes>", IE = "<NOFRAMES></NOFRAMES>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_noframes() throws Exception {
-        loadPageWithAlerts2(outerHTML("noframes"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<noscript></noscript>", IE = "<NOSCRIPT></NOSCRIPT>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_noscript() throws Exception {
-        loadPageWithAlerts2(outerHTML("noscript"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<object></object>", IE = "<OBJECT></OBJECT>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_object() throws Exception {
-        loadPageWithAlerts2(outerHTML("object"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<ol></ol>", IE = "<OL></OL>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_ol() throws Exception {
-        loadPageWithAlerts2(outerHTML("ol"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<optgroup></optgroup>", IE = "<OPTGROUP></OPTGROUP>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_optgroup() throws Exception {
-        loadPageWithAlerts2(outerHTML("optgroup"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<option></option>", IE = "<OPTION></OPTION>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_option() throws Exception {
-        loadPageWithAlerts2(outerHTML("option"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<p></p>", IE = "<P></P>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_p() throws Exception {
-        loadPageWithAlerts2(outerHTML("p"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<param>", IE = "<PARAM>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_param() throws Exception {
-        loadPageWithAlerts2(outerHTML("param"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<plaintext></plaintext>", IE = "<PLAINTEXT></PLAINTEXT>",
-        FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_plaintext() throws Exception {
-        loadPageWithAlerts2(outerHTML("plaintext"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<pre></pre>", IE = "<PRE></PRE>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_pre() throws Exception {
-        loadPageWithAlerts2(outerHTML("pre"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<progress></progress>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_progress() throws Exception {
-        loadPageWithAlerts2(outerHTML("progress"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<s></s>", IE = "<S></S>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_s() throws Exception {
-        loadPageWithAlerts2(outerHTML("s"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<samp></samp>", IE = "<SAMP></SAMP>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_samp() throws Exception {
-        loadPageWithAlerts2(outerHTML("samp"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<script></script>", IE = "<SCRIPT></SCRIPT>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_script() throws Exception {
-        loadPageWithAlerts2(outerHTML("script"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<select></select>", IE = "<SELECT></SELECT>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_select() throws Exception {
-        loadPageWithAlerts2(outerHTML("select"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<small></small>", IE = "<SMALL></SMALL>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_small() throws Exception {
-        loadPageWithAlerts2(outerHTML("small"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<source>", IE = "<source></source>", FF3_6 = "undefined", FF10 = "undefined")
-    @NotYetImplemented(FF17)
-    public void outerHTML_source() throws Exception {
-        loadPageWithAlerts2(outerHTML("source"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<spacer></spacer>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_spacer() throws Exception {
-        loadPageWithAlerts2(outerHTML("spacer"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<span></span>", IE = "<SPAN></SPAN>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_span() throws Exception {
-        loadPageWithAlerts2(outerHTML("span"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<strike></strike>", IE = "<STRIKE></STRIKE>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_strike() throws Exception {
-        loadPageWithAlerts2(outerHTML("strike"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<strong></strong>", IE = "<STRONG></STRONG>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_strong() throws Exception {
-        loadPageWithAlerts2(outerHTML("strong"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<style></style>", IE = "<STYLE></STYLE>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_style() throws Exception {
-        loadPageWithAlerts2(outerHTML("style"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<sub></sub>", IE = "<SUB></SUB>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_sub() throws Exception {
-        loadPageWithAlerts2(outerHTML("sub"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<sup></sup>", IE = "<SUP></SUP>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_sup() throws Exception {
-        loadPageWithAlerts2(outerHTML("sup"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<table></table>", IE = "<TABLE></TABLE>", FF3_6 = "undefined", FF10 = "undefined")
-    public void outerHTML_table() throws Exception {
-        loadPageWithAlerts2(outerHTML("table"));
-    }
-
-    /**
-     * @throws Exception if the test fails
-     */
-    @Test
-    @Alerts(DEFAULT = "<col>", IE = "<COL>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts(DEFAULT = "<col>",
+            IE8 = "<COL>")
     public void outerHTML_col() throws Exception {
         loadPageWithAlerts2(outerHTML("col"));
     }
@@ -3848,7 +3290,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<colgroup></colgroup>", IE = "<COLGROUP></COLGROUP>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts(DEFAULT = "<colgroup></colgroup>",
+            IE8 = "<COLGROUP></COLGROUP>")
     public void outerHTML_colgroup() throws Exception {
         loadPageWithAlerts2(outerHTML("colgroup"));
     }
@@ -3857,8 +3300,831 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<tbody></tbody>", IE = "<TBODY></TBODY>", FF3_6 = "undefined", FF10 = "undefined")
-    @NotYetImplemented(FF17)
+    @Alerts("<datalist></datalist>")
+    public void outerHTML_datalist() throws Exception {
+        loadPageWithAlerts2(outerHTML("datalist"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<dfn></dfn>",
+            IE8 = "<DFN></DFN>")
+    public void outerHTML_dfn() throws Exception {
+        loadPageWithAlerts2(outerHTML("dfn"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<dd></dd>",
+            IE8 = "<DD></DD>")
+    public void outerHTML_dd() throws Exception {
+        loadPageWithAlerts2(outerHTML("dd"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<del></del>",
+            IE8 = "<DEL></DEL>")
+    public void outerHTML_del() throws Exception {
+        loadPageWithAlerts2(outerHTML("del"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<dir></dir>",
+            IE8 = "<DIR></DIR>")
+    public void outerHTML_dir() throws Exception {
+        loadPageWithAlerts2(outerHTML("dir"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<div></div>",
+            IE8 = "<DIV></DIV>")
+    public void outerHTML_div() throws Exception {
+        loadPageWithAlerts2(outerHTML("div"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<dl></dl>",
+            IE8 = "<DL></DL>")
+    public void outerHTML_dl() throws Exception {
+        loadPageWithAlerts2(outerHTML("dl"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<dt></dt>",
+            IE8 = "<DT></DT>")
+    public void outerHTML_dt() throws Exception {
+        loadPageWithAlerts2(outerHTML("dt"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<embed>",
+            IE8 = "<EMBED>")
+    public void outerHTML_embed() throws Exception {
+        loadPageWithAlerts2(outerHTML("embed"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<em></em>",
+            IE8 = "<EM></EM>")
+    public void outerHTML_em() throws Exception {
+        loadPageWithAlerts2(outerHTML("em"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<fieldset></fieldset>",
+            IE8 = "<FIELDSET></FIELDSET>")
+    public void outerHTML_fieldset() throws Exception {
+        loadPageWithAlerts2(outerHTML("fieldset"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts("<figcaption></figcaption>")
+    public void outerHTML_figcaption() throws Exception {
+        loadPageWithAlerts2(outerHTML("figcaption"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts("<figure></figure>")
+    public void outerHTML_figure() throws Exception {
+        loadPageWithAlerts2(outerHTML("figure"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<font></font>",
+            IE8 = "<FONT></FONT>")
+    public void outerHTML_font() throws Exception {
+        loadPageWithAlerts2(outerHTML("font"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<form></form>",
+            IE8 = "<FORM></FORM>")
+    public void outerHTML_form() throws Exception {
+        loadPageWithAlerts2(outerHTML("form"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts("<footer></footer>")
+    public void outerHTML_footer() throws Exception {
+        loadPageWithAlerts2(outerHTML("footer"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<frame>",
+            IE8 = "<FRAME>")
+    public void outerHTML_frame() throws Exception {
+        loadPageWithAlerts2(outerHTML("frame"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<frameset></frameset>",
+            IE8 = "<FRAMESET></FRAMESET>")
+    public void outerHTML_frameset() throws Exception {
+        loadPageWithAlerts2(outerHTML("frameset"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<h1></h1>",
+            IE8 = "<H1></H1>")
+    public void outerHTML_h1() throws Exception {
+        loadPageWithAlerts2(outerHTML("h1"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<h2></h2>",
+            IE8 = "<H2></H2>")
+    public void outerHTML_h2() throws Exception {
+        loadPageWithAlerts2(outerHTML("h2"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<h3></h3>",
+            IE8 = "<H3></H3>")
+    public void outerHTML_h3() throws Exception {
+        loadPageWithAlerts2(outerHTML("h3"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<h4></h4>",
+            IE8 = "<H4></H4>")
+    public void outerHTML_h4() throws Exception {
+        loadPageWithAlerts2(outerHTML("h4"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<h5></h5>",
+            IE8 = "<H5></H5>")
+    public void outerHTML_h5() throws Exception {
+        loadPageWithAlerts2(outerHTML("h5"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<h6></h6>",
+            IE8 = "<H6></H6>")
+    public void outerHTML_h6() throws Exception {
+        loadPageWithAlerts2(outerHTML("h6"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<head></head>",
+            IE8 = "<HEAD></HEAD>")
+    public void outerHTML_head() throws Exception {
+        loadPageWithAlerts2(outerHTML("head"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts("<header></header>")
+    public void outerHTML_header() throws Exception {
+        loadPageWithAlerts2(outerHTML("header"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<hr>",
+            IE8 = "<HR>")
+    public void outerHTML_hr() throws Exception {
+        loadPageWithAlerts2(outerHTML("hr"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<html></html>",
+            IE8 = "<HTML></HTML>")
+    public void outerHTML_html() throws Exception {
+        loadPageWithAlerts2(outerHTML("html"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<iframe></iframe>",
+            IE8 = "<IFRAME></IFRAME>")
+    public void outerHTML_iframe() throws Exception {
+        loadPageWithAlerts2(outerHTML("iframe"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<q></q>",
+            IE8 = "<Q></Q>")
+    public void outerHTML_q() throws Exception {
+        loadPageWithAlerts2(outerHTML("q"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<ruby></ruby>",
+            IE8 = "<RUBY></RUBY>")
+    public void outerHTML_ruby() throws Exception {
+        loadPageWithAlerts2(outerHTML("ruby"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<rt></rt>",
+            IE8 = "<RT></RT>")
+    public void outerHTML_rt() throws Exception {
+        loadPageWithAlerts2(outerHTML("rt"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<rp></rp>",
+            IE8 = "<RP></RP>")
+    public void outerHTML_rp() throws Exception {
+        loadPageWithAlerts2(outerHTML("rp"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<image></image>",
+            IE8 = "<IMG>",
+            IE11 = "<img>")
+    @NotYetImplemented(IE8)
+    public void outerHTML_image() throws Exception {
+        loadPageWithAlerts2(outerHTML("image"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<img>",
+            IE8 = "<IMG>")
+    public void outerHTML_img() throws Exception {
+        loadPageWithAlerts2(outerHTML("img"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<ins></ins>",
+            IE8 = "<INS></INS>")
+    public void outerHTML_ins() throws Exception {
+        loadPageWithAlerts2(outerHTML("ins"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<isindex></isindex>",
+            IE = "<ISINDEX>",
+            IE11 = "<isindex>")
+    public void outerHTML_isindex() throws Exception {
+        loadPageWithAlerts2(outerHTML("isindex"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<i></i>",
+            IE8 = "<I></I>")
+    public void outerHTML_i() throws Exception {
+        loadPageWithAlerts2(outerHTML("i"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<kbd></kbd>",
+            IE8 = "<KBD></KBD>")
+    public void outerHTML_kbd() throws Exception {
+        loadPageWithAlerts2(outerHTML("kbd"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<keygen>",
+            IE8 = "<keygen></keygen>")
+    public void outerHTML_keygen() throws Exception {
+        loadPageWithAlerts2(outerHTML("keygen"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<label></label>",
+            IE8 = "<LABEL></LABEL>")
+    public void outerHTML_label() throws Exception {
+        loadPageWithAlerts2(outerHTML("label"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<legend></legend>",
+            IE8 = "<LEGEND></LEGEND>")
+    public void outerHTML_legend() throws Exception {
+        loadPageWithAlerts2(outerHTML("legend"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<listing></listing>",
+            IE8 = "<LISTING></LISTING>")
+    public void outerHTML_listing() throws Exception {
+        loadPageWithAlerts2(outerHTML("listing"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<li></li>",
+            IE8 = "<LI></LI>")
+    public void outerHTML_li() throws Exception {
+        loadPageWithAlerts2(outerHTML("li"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<link>",
+            IE8 = "<LINK>")
+    public void outerHTML_link() throws Exception {
+        loadPageWithAlerts2(outerHTML("link"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<map></map>",
+            IE8 = "<MAP></MAP>")
+    public void outerHTML_map() throws Exception {
+        loadPageWithAlerts2(outerHTML("map"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<marquee></marquee>",
+            IE8 = "<MARQUEE></MARQUEE>")
+    public void outerHTML_marquee() throws Exception {
+        loadPageWithAlerts2(outerHTML("marquee"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts("<mark></mark>")
+    public void outerHTML_mark() throws Exception {
+        loadPageWithAlerts2(outerHTML("mark"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<menu></menu>",
+            IE8 = "<MENU></MENU>")
+    public void outerHTML_menu() throws Exception {
+        loadPageWithAlerts2(outerHTML("menu"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<meta>",
+            IE8 = "<META>")
+    public void outerHTML_meta() throws Exception {
+        loadPageWithAlerts2(outerHTML("meta"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts("<meter></meter>")
+    public void outerHTML_meter() throws Exception {
+        loadPageWithAlerts2(outerHTML("meter"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts("<multicol></multicol>")
+    public void outerHTML_multicol() throws Exception {
+        loadPageWithAlerts2(outerHTML("multicol"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts("<nav></nav>")
+    public void outerHTML_nav() throws Exception {
+        loadPageWithAlerts2(outerHTML("nav"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<nextid></nextid>",
+            IE8 = "<NEXTID>",
+            IE11 = "<nextid>")
+    public void outerHTML_nextid() throws Exception {
+        loadPageWithAlerts2(outerHTML("nextid"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<nobr></nobr>",
+            IE8 = "<NOBR></NOBR>")
+    public void outerHTML_nobr() throws Exception {
+        loadPageWithAlerts2(outerHTML("nobr"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<noembed></noembed>",
+            IE8 = "<NOEMBED></NOEMBED>")
+    public void outerHTML_noembed() throws Exception {
+        loadPageWithAlerts2(outerHTML("noembed"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<noframes></noframes>",
+            IE8 = "<NOFRAMES></NOFRAMES>")
+    public void outerHTML_noframes() throws Exception {
+        loadPageWithAlerts2(outerHTML("noframes"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<noscript></noscript>",
+            IE8 = "<NOSCRIPT></NOSCRIPT>")
+    public void outerHTML_noscript() throws Exception {
+        loadPageWithAlerts2(outerHTML("noscript"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<object></object>",
+            IE8 = "<OBJECT></OBJECT>")
+    public void outerHTML_object() throws Exception {
+        loadPageWithAlerts2(outerHTML("object"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<ol></ol>",
+            IE8 = "<OL></OL>")
+    public void outerHTML_ol() throws Exception {
+        loadPageWithAlerts2(outerHTML("ol"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<optgroup></optgroup>",
+            IE8 = "<OPTGROUP></OPTGROUP>")
+    public void outerHTML_optgroup() throws Exception {
+        loadPageWithAlerts2(outerHTML("optgroup"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<option></option>",
+            IE8 = "<OPTION></OPTION>")
+    public void outerHTML_option() throws Exception {
+        loadPageWithAlerts2(outerHTML("option"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts("<output></output>")
+    public void outerHTML_output() throws Exception {
+        loadPageWithAlerts2(outerHTML("output"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<p></p>",
+            IE8 = "<P></P>")
+    public void outerHTML_p() throws Exception {
+        loadPageWithAlerts2(outerHTML("p"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<param>",
+            IE8 = "<PARAM>")
+    public void outerHTML_param() throws Exception {
+        loadPageWithAlerts2(outerHTML("param"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<plaintext></plaintext>",
+            IE8 = "<PLAINTEXT></PLAINTEXT>")
+    public void outerHTML_plaintext() throws Exception {
+        loadPageWithAlerts2(outerHTML("plaintext"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<pre></pre>",
+            IE8 = "<PRE></PRE>")
+    public void outerHTML_pre() throws Exception {
+        loadPageWithAlerts2(outerHTML("pre"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts("<progress></progress>")
+    public void outerHTML_progress() throws Exception {
+        loadPageWithAlerts2(outerHTML("progress"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<s></s>",
+            IE8 = "<S></S>")
+    public void outerHTML_s() throws Exception {
+        loadPageWithAlerts2(outerHTML("s"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<samp></samp>",
+            IE8 = "<SAMP></SAMP>")
+    public void outerHTML_samp() throws Exception {
+        loadPageWithAlerts2(outerHTML("samp"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<script></script>",
+            IE8 = "<SCRIPT></SCRIPT>")
+    public void outerHTML_script() throws Exception {
+        loadPageWithAlerts2(outerHTML("script"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts("<section></section>")
+    public void outerHTML_section() throws Exception {
+        loadPageWithAlerts2(outerHTML("section"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<select></select>",
+            IE8 = "<SELECT></SELECT>")
+    public void outerHTML_select() throws Exception {
+        loadPageWithAlerts2(outerHTML("select"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<small></small>",
+            IE8 = "<SMALL></SMALL>")
+    public void outerHTML_small() throws Exception {
+        loadPageWithAlerts2(outerHTML("small"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<source>",
+            IE8 = "<source></source>")
+    @NotYetImplemented({ FF17, FF24 })
+    public void outerHTML_source() throws Exception {
+        loadPageWithAlerts2(outerHTML("source"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts("<spacer></spacer>")
+    public void outerHTML_spacer() throws Exception {
+        loadPageWithAlerts2(outerHTML("spacer"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<span></span>",
+            IE8 = "<SPAN></SPAN>")
+    public void outerHTML_span() throws Exception {
+        loadPageWithAlerts2(outerHTML("span"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<strike></strike>",
+            IE8 = "<STRIKE></STRIKE>")
+    public void outerHTML_strike() throws Exception {
+        loadPageWithAlerts2(outerHTML("strike"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<strong></strong>",
+            IE8 = "<STRONG></STRONG>")
+    public void outerHTML_strong() throws Exception {
+        loadPageWithAlerts2(outerHTML("strong"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<style></style>",
+            IE8 = "<STYLE></STYLE>")
+    public void outerHTML_style() throws Exception {
+        loadPageWithAlerts2(outerHTML("style"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<sub></sub>",
+            IE8 = "<SUB></SUB>")
+    public void outerHTML_sub() throws Exception {
+        loadPageWithAlerts2(outerHTML("sub"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<sup></sup>",
+            IE8 = "<SUP></SUP>")
+    public void outerHTML_sup() throws Exception {
+        loadPageWithAlerts2(outerHTML("sup"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<table></table>",
+            IE8 = "<TABLE></TABLE>")
+    public void outerHTML_table() throws Exception {
+        loadPageWithAlerts2(outerHTML("table"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<tbody></tbody>",
+            IE8 = "<TBODY></TBODY>")
+    @NotYetImplemented({ FF17, FF24 })
     public void outerHTML_tbody() throws Exception {
         loadPageWithAlerts2(outerHTML("tbody"));
     }
@@ -3867,7 +4133,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<td></td>", IE = "<TD></TD>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts(DEFAULT = "<td></td>",
+            IE8 = "<TD></TD>")
     public void outerHTML_td() throws Exception {
         loadPageWithAlerts2(outerHTML("td"));
     }
@@ -3876,7 +4143,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<th></th>", IE = "<TH></TH>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts(DEFAULT = "<th></th>",
+            IE8 = "<TH></TH>")
     public void outerHTML_th() throws Exception {
         loadPageWithAlerts2(outerHTML("th"));
     }
@@ -3885,7 +4153,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<tr></tr>", IE = "<TR></TR>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts(DEFAULT = "<tr></tr>",
+            IE8 = "<TR></TR>")
     public void outerHTML_tr() throws Exception {
         loadPageWithAlerts2(outerHTML("tr"));
     }
@@ -3894,7 +4163,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<textarea></textarea>", IE = "<TEXTAREA></TEXTAREA>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts(DEFAULT = "<textarea></textarea>",
+            IE8 = "<TEXTAREA></TEXTAREA>")
     public void outerHTML_textarea() throws Exception {
         loadPageWithAlerts2(outerHTML("textarea"));
     }
@@ -3903,8 +4173,9 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<tfoot></tfoot>", IE = "<TFOOT></TFOOT>", FF3_6 = "undefined", FF10 = "undefined")
-    @NotYetImplemented(FF17)
+    @Alerts(DEFAULT = "<tfoot></tfoot>",
+            IE8 = "<TFOOT></TFOOT>")
+    @NotYetImplemented({ FF17, FF24 })
     public void outerHTML_tfoot() throws Exception {
         loadPageWithAlerts2(outerHTML("tfoot"));
     }
@@ -3913,8 +4184,9 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<thead></thead>", IE = "<THEAD></THEAD>", FF3_6 = "undefined", FF10 = "undefined")
-    @NotYetImplemented(FF17)
+    @Alerts(DEFAULT = "<thead></thead>",
+            IE8 = "<THEAD></THEAD>")
+    @NotYetImplemented({ FF17, FF24 })
     public void outerHTML_thead() throws Exception {
         loadPageWithAlerts2(outerHTML("thead"));
     }
@@ -3923,7 +4195,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<tt></tt>", IE = "<TT></TT>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts(DEFAULT = "<tt></tt>",
+            IE8 = "<TT></TT>")
     public void outerHTML_tt() throws Exception {
         loadPageWithAlerts2(outerHTML("tt"));
     }
@@ -3932,7 +4205,17 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<title></title>", IE = "<TITLE></TITLE>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts("<time></time>")
+    public void outerHTML_time() throws Exception {
+        loadPageWithAlerts2(outerHTML("time"));
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<title></title>",
+            IE8 = "<TITLE></TITLE>")
     public void outerHTML_title() throws Exception {
         loadPageWithAlerts2(outerHTML("title"));
     }
@@ -3941,7 +4224,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<u></u>", IE = "<U></U>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts(DEFAULT = "<u></u>",
+            IE8 = "<U></U>")
     public void outerHTML_u() throws Exception {
         loadPageWithAlerts2(outerHTML("u"));
     }
@@ -3950,7 +4234,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<ul></ul>", IE = "<UL></UL>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts(DEFAULT = "<ul></ul>",
+            IE8 = "<UL></UL>")
     public void outerHTML_ul() throws Exception {
         loadPageWithAlerts2(outerHTML("ul"));
     }
@@ -3959,7 +4244,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<var></var>", IE = "<VAR></VAR>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts(DEFAULT = "<var></var>",
+            IE8 = "<VAR></VAR>")
     public void outerHTML_var() throws Exception {
         loadPageWithAlerts2(outerHTML("var"));
     }
@@ -3968,7 +4254,7 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<video></video>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts("<video></video>")
     public void outerHTML_video() throws Exception {
         loadPageWithAlerts2(outerHTML("video"));
     }
@@ -3977,8 +4263,9 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<wbr>", IE = "<WBR>", FF3_6 = "undefined", FF10 = "undefined")
-    @NotYetImplemented(FF17)
+    @Alerts(DEFAULT = "<wbr>",
+            IE8 = "<WBR>")
+    @NotYetImplemented({ FF17, FF24 })
     public void outerHTML_wbr() throws Exception {
         loadPageWithAlerts2(outerHTML("wbr"));
     }
@@ -3987,7 +4274,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<xmp></xmp>", IE = "<XMP></XMP>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts(DEFAULT = "<xmp></xmp>",
+            IE8 = "<XMP></XMP>")
     public void outerHTML_xmp() throws Exception {
         loadPageWithAlerts2(outerHTML("xmp"));
     }
@@ -3996,7 +4284,7 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "<abcdefg></abcdefg>", FF3_6 = "undefined", FF10 = "undefined")
+    @Alerts("<abcdefg></abcdefg>")
     public void outerHTML_arbitrary() throws Exception {
         loadPageWithAlerts2(outerHTML("abcdefg"));
     }
@@ -4005,11 +4293,9 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "DIV", "section", "<DIV></DIV>", "<section></section>" },
-            FF3_6 = { "DIV", "SECTION", "undefined", "undefined" },
-            FF10 = { "DIV", "SECTION", "undefined", "undefined" },
-            DEFAULT = { "DIV", "SECTION", "<div></div>", "<section></section>" })
-    @NotYetImplemented(IE)
+    @Alerts(DEFAULT = { "DIV", "SECTION", "<div></div>", "<section></section>" },
+            IE8 = { "DIV", "section", "<DIV></DIV>", "<section></section>" })
+    @NotYetImplemented(IE8)
     public void nodeNameVsOuterElement() throws Exception {
         final String html = "<html>\n"
             + "<head>\n"
@@ -4069,7 +4355,8 @@ public class HTMLElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = { "[object Text]", "[object Text]" }, IE = { "[object]", "[object]" })
+    @Alerts(DEFAULT = { "[object Text]", "[object Text]" },
+            IE8 = { "[object]", "[object]" })
     public void textContentShouldNotDetachNestedNode() throws Exception {
         final String html = "<html><body><div><div id='it'>foo</div></div><script>\n"
             + "try {\n"
@@ -4080,6 +4367,138 @@ public class HTMLElementTest extends WebDriverTestCase {
             + "} catch (e) { alert('exception'); }\n"
             + "</script></body></html>";
 
+        loadPageWithAlerts2(html);
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "<svg id=\"svgElem2\"></svg>",
+            IE = "undefined",
+            IE11 = "<svg xmlns=\"http://www.w3.org/2000/svg\" id=\"svgElem2\" />")
+    public void innerHTML_svg() throws Exception {
+        final String html = "<html>\n"
+                + "<head>\n"
+                + "  <script>\n"
+                + "    function test() {\n"
+                + "      var div = document.createElement('div');\n"
+                + "      document.body.appendChild(div);\n"
+                + "      if (document.createElementNS) {\n"
+                + "        var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');\n"
+                + "        svg.setAttribute('id', 'svgElem2');\n"
+                + "        div.appendChild(svg);\n"
+                + "        alert(div.innerHTML);\n"
+                + "      } else {\n"
+                + "        alert('undefined');\n"
+                + "      }\n"
+                + "    }\n"
+                + "  </script>\n"
+                + "</head><body onload='test()'>\n"
+                + "</body></html>";
+
+        loadPageWithAlerts2(html);
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts({ "outside", "1", "middle", "2", "3", "4",
+        "before-begin after-begin inside before-end after-end" })
+    public void insertAdjacentHTML() throws Exception {
+        insertAdjacentHTML("beforeEnd", "afterEnd", "beforeBegin", "afterBegin");
+        insertAdjacentHTML("BeforeEnd", "AfterEnd", "BeFoReBeGiN", "afterbegin");
+    }
+
+    /**
+     * @param beforeEnd data to insert
+     * @param afterEnd data to insert
+     * @param beforeBegin data to insert
+     * @param afterBegin data to insert
+     * @throws Exception if the test fails
+     */
+    private void insertAdjacentHTML(final String beforeEnd,
+            final String afterEnd, final String beforeBegin, final String afterBegin) throws Exception {
+        final String html = "<html><head><title>First</title>\n"
+            + "<script>\n"
+            + "function test() {\n"
+            + "  var oNode = document.getElementById('middle');\n"
+            + "  oNode.insertAdjacentHTML('" + beforeEnd + "', ' <span id=3>before-end</span> ');\n"
+            + "  oNode.insertAdjacentHTML('" + afterEnd + "', ' <span id=4>after-end</span> ');\n"
+            + "  oNode.insertAdjacentHTML('" + beforeBegin + "', ' <span id=1>before-begin</span> ');\n"
+            + "  oNode.insertAdjacentHTML('" + afterBegin + "', ' <span id=2>after-begin</span> ');\n"
+            + "  var coll = document.getElementsByTagName('SPAN');\n"
+            + "  for (var i=0; i<coll.length; i++) {\n"
+            + "    alert(coll[i].id);\n"
+            + "  }\n"
+            + "  var outside = document.getElementById('outside');\n"
+            + "  var text = outside.textContent ? outside.textContent : outside.innerText;\n"
+            + "  text = text.replace(/(\\r\\n|\\r|\\n)/gm, '');\n"
+            + "  text = text.replace(/(\\s{2,})/g, ' ');\n"
+            + "  text = text.replace(/^\\s+|\\s+$/g, '');\n"
+            + "  alert(text);\n"
+            + "}\n"
+            + "</script>\n"
+            + "</head>\n"
+            + "<body onload='test()'>\n"
+            + "  <span id='outside' style='color: #00ff00'>\n"
+            + "    <span id='middle' style='color: #ff0000'>\n"
+            + "      inside\n"
+            + "    </span>\n"
+            + "  </span>\n"
+            + "</body></html>";
+        loadPageWithAlerts2(html);
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Browsers(IE)
+    @Alerts({ "outside", "1", "middle", "2", "3", "4",
+                "before-begin after-begin inside before-end after-end" })
+    public void insertAdjacentElement() throws Exception {
+        insertAdjacentElement("beforeEnd", "afterEnd", "beforeBegin", "afterBegin");
+        insertAdjacentElement("BeforeEnd", "AfterEnd", "BeFoReBeGiN", "afterbegin");
+    }
+
+    private void insertAdjacentElement(final String beforeEnd,
+            final String afterEnd, final String beforeBegin, final String afterBegin) throws Exception {
+        final String html = "<html><head><title>First</title>\n"
+            + "<script>\n"
+            + "function test() {\n"
+            + "  var oNode = document.getElementById('middle');\n"
+            + "  oNode.insertAdjacentElement('" + beforeEnd + "', makeElement(3, 'before-end'));\n"
+            + "  oNode.insertAdjacentElement('" + afterEnd + "', makeElement(4, ' after-end'));\n"
+            + "  oNode.insertAdjacentElement('" + beforeBegin + "', makeElement(1, 'before-begin '));\n"
+            + "  oNode.insertAdjacentElement('" + afterBegin + "', makeElement(2, ' after-begin'));\n"
+            + "  var coll = document.getElementsByTagName('SPAN');\n"
+            + "  for (var i=0; i<coll.length; i++) {\n"
+            + "    alert(coll[i].id);\n"
+            + "  }\n"
+            + "  var outside = document.getElementById('outside');\n"
+            + "  var text = outside.textContent ? outside.textContent : outside.innerText;\n"
+            + "  text = text.replace(/(\\r\\n|\\r|\\n)/gm, '');\n"
+            + "  text = text.replace(/(\\s{2,})/g, ' ');\n"
+            + "  text = text.replace(/^\\s+|\\s+$/g, '');\n"
+            + "  alert(text);\n"
+            + "}\n"
+            + "function makeElement(id, value) {\n"
+            + "  var span = document.createElement('span');\n"
+            + "  span.appendChild(document.createTextNode(value));\n"
+            + "  span.id = id;\n"
+            + "  return span;\n"
+            + "}\n"
+            + "</script>\n"
+            + "</head>\n"
+            + "<body onload='test()'>\n"
+            + "  <span id='outside' style='color: #00ff00'>\n"
+            + "    <span id='middle' style='color: #ff0000'>\n"
+            + "      inside\n"
+            + "    </span>\n"
+            + "  </span>\n"
+            + "</body></html>";
         loadPageWithAlerts2(html);
     }
 }

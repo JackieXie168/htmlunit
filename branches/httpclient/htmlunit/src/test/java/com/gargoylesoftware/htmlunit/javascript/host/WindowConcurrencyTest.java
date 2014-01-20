@@ -56,6 +56,7 @@ import com.gargoylesoftware.htmlunit.javascript.JavaScriptErrorListener;
  * @version $Revision$
  * @author Brad Clarke
  * @author Daniel Gredler
+ * @author Frank Danek
  */
 public class WindowConcurrencyTest extends SimpleWebTestCase {
 
@@ -187,7 +188,7 @@ public class WindowConcurrencyTest extends SimpleWebTestCase {
             + "<script>var id = setInterval('document.getElementById(\"d\").innerHTML += \"x\"', 0);</script>\n"
             + "</body></html>";
 
-        WebClient client = new WebClient(BrowserVersion.FIREFOX_3_6);
+        WebClient client = new WebClient(BrowserVersion.FIREFOX_17);
         try {
             final HtmlPage page1 = loadPage(client, html, new ArrayList<String>());
             Thread.sleep(1000);
@@ -199,7 +200,7 @@ public class WindowConcurrencyTest extends SimpleWebTestCase {
             client.closeAllWindows();
         }
 
-        client = new WebClient(BrowserVersion.INTERNET_EXPLORER_7);
+        client = new WebClient(BrowserVersion.INTERNET_EXPLORER_8);
         try {
             final HtmlPage page2 = loadPage(client, html, new ArrayList<String>());
             client.waitForBackgroundJavaScript(1000);
@@ -348,8 +349,8 @@ public class WindowConcurrencyTest extends SimpleWebTestCase {
     }
 
     /**
-     * Regression test for bug #2093370 with clearInterval.
-     * @see <a href="http://sourceforge.net/tracker/index.php?func=detail&aid=2093370&group_id=47038&atid=448266">
+     * Regression test for bug #693 with clearInterval.
+     * @see <a href="http://sourceforge.net/p/htmlunit/bugs/693/">
      * bug details</a>
      * @throws Exception if the test fails
      */
@@ -360,7 +361,7 @@ public class WindowConcurrencyTest extends SimpleWebTestCase {
 
     /**
      * Regression test for bug #2093370 with clearTimeout.
-     * @see <a href="http://sourceforge.net/tracker/index.php?func=detail&aid=2093370&group_id=47038&atid=448266">
+     * @see <a href="http://sourceforge.net/p/htmlunit/bugs/693/">
      * bug details</a>
      * @throws Exception if the test fails
      */
@@ -524,7 +525,7 @@ public class WindowConcurrencyTest extends SimpleWebTestCase {
             + "setInterval(forceStyleComputationInParent, 10);\n"
             + "</script></head></body></html>";
 
-        client_ = new WebClient(BrowserVersion.FIREFOX_3_6);
+        client_ = new WebClient(BrowserVersion.FIREFOX_17);
         final MockWebConnection webConnection = new MockWebConnection();
         webConnection.setResponse(URL_FIRST, html);
         webConnection.setDefaultResponse(html2);
@@ -534,7 +535,7 @@ public class WindowConcurrencyTest extends SimpleWebTestCase {
 
         // Recreating what can occur with two threads requires
         // to know a bit about the style invalidation used in Window.DomHtmlAttributeChangeListenerImpl
-        final HtmlElement elt = new HtmlDivision("", "div", page1, new HashMap<String, DomAttr>()) {
+        final HtmlElement elt = new HtmlDivision("div", page1, new HashMap<String, DomAttr>()) {
             @Override
             public DomNode getParentNode() {
                 // this gets called by CSS invalidation logic

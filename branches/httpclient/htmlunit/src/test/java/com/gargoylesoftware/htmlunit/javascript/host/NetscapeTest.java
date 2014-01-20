@@ -18,16 +18,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.gargoylesoftware.htmlunit.BrowserRunner;
-import com.gargoylesoftware.htmlunit.BrowserRunner.Browser;
-import com.gargoylesoftware.htmlunit.BrowserRunner.NotYetImplemented;
-import com.gargoylesoftware.htmlunit.WebDriverTestCase;
 import com.gargoylesoftware.htmlunit.BrowserRunner.Alerts;
+import com.gargoylesoftware.htmlunit.WebDriverTestCase;
 
 /**
  * Tests for {@link Netscape}.
  *
  * @version $Revision$
  * @author Marc Guillemot
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class NetscapeTest extends WebDriverTestCase {
@@ -37,9 +36,7 @@ public class NetscapeTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "undefined", "undefined", "exception" },
-        FF3_6 = { "[object Object]", "undefined", "[object Object]", "[object Object]" },
-        FF = { "[object Object]", "undefined", "[object Object]", "undefined" })
-    @NotYetImplemented(Browser.FF3_6)
+            FF = { "[object Object]", "undefined", "[object Object]", "undefined" })
     public void netscape() throws Exception {
         final String html = "<html><body><script>\n"
             + "try {\n"

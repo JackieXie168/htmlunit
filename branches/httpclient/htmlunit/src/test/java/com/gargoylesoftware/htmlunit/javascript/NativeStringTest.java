@@ -27,6 +27,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @version $Revision$
  * @author Marc Guillemot
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class NativeStringTest extends WebDriverTestCase {
@@ -79,9 +80,10 @@ public class NativeStringTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = { "contains: undefined", "toSource: function", "trim: function" },
-            IE = { "contains: undefined", "toSource: undefined", "trim: undefined" },
-            CHROME = { "contains: undefined", "toSource: undefined", "trim: function" })
+    @Alerts(DEFAULT = { "contains: undefined", "toSource: undefined", "trim: function" },
+            FF = { "contains: undefined", "toSource: function", "trim: function" },
+            FF24 = { "contains: function", "toSource: function", "trim: function" },
+            IE8 = { "contains: undefined", "toSource: undefined", "trim: undefined" })
     public void methods_differences() throws Exception {
         final String[] methods = {"contains", "toSource", "trim" };
         final String html = NativeDateTest.createHTMLTestMethods("'hello'", methods);
@@ -92,7 +94,8 @@ public class NativeStringTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE8 = "", DEFAULT = "2")
+    @Alerts(DEFAULT = "2",
+            IE8 = "")
     public void trim() throws Exception {
         final String html
             = "<!DOCTYPE html>\n"
@@ -113,7 +116,8 @@ public class NativeStringTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = "", DEFAULT = "3")
+    @Alerts(DEFAULT = "3",
+            IE = "")
     public void trimRight() throws Exception {
         final String html
             = "<!DOCTYPE html>\n"
@@ -134,7 +138,8 @@ public class NativeStringTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = "", DEFAULT = "4")
+    @Alerts(DEFAULT = "4",
+            IE = "")
     public void trimLeft() throws Exception {
         final String html
             = "<!DOCTYPE html>\n"
@@ -144,6 +149,45 @@ public class NativeStringTest extends WebDriverTestCase {
             + "    if (''.trimLeft) {\n"
             + "      alert(string.trimLeft().length);\n"
             + "    }\n"
+            + "}\n"
+            + "</script></head><body onload='doTest()'>\n"
+            + "</body></html>";
+
+        loadPageWithAlerts2(html);
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "contains not supported",
+            FF24 = { "true", "false", "true", "true", "true", "false", "true", "true", "true", "false",
+                        "true", "true", "false", "false" })
+    public void contains() throws Exception {
+        final String html
+            = "<!DOCTYPE html>\n"
+            + "<html><head><title>foo</title><script>\n"
+            + "function doTest() {\n"
+            + "  if ('contains' in String.prototype) {"
+            + "    var str = 'To be, or not to be, that is the question.';\n"
+            + "    alert(str.contains('To be'));\n"
+            + "    alert(str.contains('TO'));\n"
+            + "    alert(str.contains(''));\n"
+            + "    alert(str.contains(' '));\n"
+            + "    alert(str.contains('To be', 0));\n"
+            + "    alert(str.contains('TO', 0));\n"
+            + "    alert(str.contains(' ', 0));\n"
+            + "    alert(str.contains('', 0));\n"
+            + "    alert(str.contains('or', 7));\n"
+            + "    alert(str.contains('or', 8));\n"
+
+            + "    alert(str.contains('or', -3));\n"
+            + "    alert(str.contains('or', 7.9));\n"
+            + "    alert(str.contains('or', 8.1));\n"
+            + "    alert(str.contains());\n"
+            + "  } else {\n"
+            + "    alert('contains not supported');\n"
+            + "  }\n"
             + "}\n"
             + "</script></head><body onload='doTest()'>\n"
             + "</body></html>";

@@ -27,6 +27,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @version $Revision$
  * @author Ahmed Ashour
  * @author Ronald Brill
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class TextTest extends WebDriverTestCase {
@@ -35,7 +36,8 @@ public class TextTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = "null", FF = "[object Text]")
+    @Alerts(DEFAULT = "[object Text]",
+            IE8 = "null")
     public void simpleScriptable() throws Exception {
         final String html
             = "<html><head><title>foo</title><script>\n"
@@ -51,7 +53,8 @@ public class TextTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = "undefined", FF = "abcd")
+    @Alerts(DEFAULT = "abcd",
+            IE8 = "undefined")
     public void wholeText() throws Exception {
         final String html
             = "<html><head><title>foo</title><script>\n"

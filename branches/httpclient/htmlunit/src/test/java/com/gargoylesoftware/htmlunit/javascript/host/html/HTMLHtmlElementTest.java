@@ -14,6 +14,8 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host.html;
 
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF24;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.By;
@@ -23,6 +25,7 @@ import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
 import com.gargoylesoftware.htmlunit.BrowserRunner;
 import com.gargoylesoftware.htmlunit.BrowserRunner.Alerts;
+import com.gargoylesoftware.htmlunit.BrowserRunner.NotYetImplemented;
 import com.gargoylesoftware.htmlunit.WebDriverTestCase;
 import com.gargoylesoftware.htmlunit.html.HtmlHtml;
 
@@ -32,6 +35,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlHtml;
  * @version $Revision$
  * @author Daniel Gredler
  * @author Marc Guillemot
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HTMLHtmlElementTest extends WebDriverTestCase {
@@ -40,7 +44,8 @@ public class HTMLHtmlElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = "[object HTMLHtmlElement]", IE = "[object]")
+    @Alerts(DEFAULT = "[object HTMLHtmlElement]",
+            IE8 = "[object]")
     public void simpleScriptable() throws Exception {
         final String html = "<html id='myId'><head><title>foo</title><script>\n"
             + "  function test() {\n"
@@ -60,8 +65,10 @@ public class HTMLHtmlElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "[object]", "exception" },
-            FF = { "[object HTMLHtmlElement]", "[object HTMLHtmlElement]" })
+    @Alerts(DEFAULT = { "[object HTMLHtmlElement]", "[object HTMLHtmlElement]" },
+            FF24 = { "[object HTMLHtmlElement]", "function HTMLHtmlElement() {\n    [native code]\n}" },
+            IE8 = { "[object]", "exception" })
+    @NotYetImplemented(FF24)
     public void HTMLHtmlElement_toString() throws Exception {
         final String html = "<html id='myId'><head><title>foo</title><script>\n"
             + "  function test() {\n"
@@ -116,8 +123,8 @@ public class HTMLHtmlElementTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(FF = { "true", "true", "true", "true" },
-            IE = { "true", "false", "true", "false" })
+    @Alerts(DEFAULT = { "true", "true", "true", "true" },
+            IE8 = { "true", "false", "true", "false" })
     public void clientWidth() throws Exception {
         final String html = "<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'"
             + " 'http://www.w3.org/TR/html4/loose.dtd'>" // important for IE6!!!

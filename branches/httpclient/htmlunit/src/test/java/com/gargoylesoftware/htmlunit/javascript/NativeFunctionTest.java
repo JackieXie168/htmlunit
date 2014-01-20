@@ -29,6 +29,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @version $Revision$
  * @author Marc Guillemot
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class NativeFunctionTest extends WebDriverTestCase {
@@ -50,7 +51,8 @@ public class NativeFunctionTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = "toSource: function", DEFAULT = "toSource: undefined")
+    @Alerts(DEFAULT = "toSource: undefined",
+            FF = "toSource: function")
     public void methods_toSource() throws Exception {
         final String html = NativeDateTest.createHTMLTestMethods("function() {}", "toSource");
         loadPageWithAlerts2(html);
@@ -61,8 +63,7 @@ public class NativeFunctionTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = "bind: function",
-            FF3_6 = "bind: undefined",
-            IE = "bind: undefined")
+            IE8 = "bind: undefined")
     public void methods_bind() throws Exception {
         final String html = NativeDateTest.createHTMLTestMethods("function() {}", "bind");
         loadPageWithAlerts2(html);

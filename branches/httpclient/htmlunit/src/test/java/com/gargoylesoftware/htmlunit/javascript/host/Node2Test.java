@@ -42,6 +42,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
  * @author Bruce Faulkner
  * @author Marc Guillemot
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class Node2Test extends SimpleWebTestCase {
@@ -67,7 +68,9 @@ public class Node2Test extends SimpleWebTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = "exception", IE = { "[object]", "[object]" })
+    @Alerts(FF = "exception",
+            IE = { "[object]", "[object]" },
+            IE11 = { "[object MouseEvent]", "[object MouseEvent]" })
     public void event() throws Exception {
         final String firstHtml = "<html>\n"
             + "<head><title>First Page</title>\n"
@@ -119,7 +122,7 @@ public class Node2Test extends SimpleWebTestCase {
 
     /**
      * Verifies that attributes belonging to cloned nodes are available via JavaScript.
-     * http://sourceforge.net/tracker/index.php?func=detail&aid=2024741&group_id=47038&atid=448266
+     * http://sourceforge.net/p/htmlunit/bugs/659/
      * @throws Exception if an error occurs
      */
     @Test

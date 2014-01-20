@@ -27,6 +27,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @version $Revision$
  * @author Marc Guillemot
  * @author Ronald Brill
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HTMLStyleElementTest extends WebDriverTestCase {
@@ -35,8 +36,8 @@ public class HTMLStyleElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "[object]", "undefined", "[object]" },
-            DEFAULT = { "[object HTMLStyleElement]", "[object CSSStyleSheet]", "undefined" })
+    @Alerts(DEFAULT = { "[object HTMLStyleElement]", "[object CSSStyleSheet]", "undefined" },
+            IE8 = { "[object]", "undefined", "[object]" })
     public void stylesheet() throws Exception {
         final String html
             = "<html><head><title>foo</title><script>\n"

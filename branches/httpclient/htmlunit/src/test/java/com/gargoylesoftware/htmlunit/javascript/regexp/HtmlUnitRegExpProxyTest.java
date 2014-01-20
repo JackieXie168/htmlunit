@@ -26,6 +26,7 @@ import org.junit.runner.RunWith;
 import com.gargoylesoftware.htmlunit.BrowserRunner;
 import com.gargoylesoftware.htmlunit.BrowserRunner.Alerts;
 import com.gargoylesoftware.htmlunit.BrowserRunner.Browsers;
+import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebDriverTestCase;
 
 /**
@@ -34,6 +35,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @version $Revision$
  * @author Marc Guillemot
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HtmlUnitRegExpProxyTest extends WebDriverTestCase {
@@ -73,7 +75,7 @@ public class HtmlUnitRegExpProxyTest extends WebDriverTestCase {
         + "assertArrEquals(s.match(re), [s, 'var a = 1;', ';']);\n";
 
     /**
-     * Test for bug http://sf.net/tracker/index.php?func=detail&aid=1780089&group_id=47038&atid=448266.
+     * Test for bug http://sourceforge.net/p/htmlunit/bugs/513/.
      * @throws Exception if the test fails
      */
     @Test
@@ -276,18 +278,20 @@ public class HtmlUnitRegExpProxyTest extends WebDriverTestCase {
         final Matcher matcher1group = Pattern.compile("(h)").matcher("hello");
         matcher1group.find();
 
-        assertEquals("$", HtmlUnitRegExpProxy.computeReplacementValue("$$", theString, matcher0group));
-        assertEquals("$$x$", HtmlUnitRegExpProxy.computeReplacementValue("$$$$x$$", theString, matcher0group));
+        final HtmlUnitRegExpProxy proxy = new HtmlUnitRegExpProxy(null, BrowserVersion.FIREFOX_24);
 
-        assertEquals("$1", HtmlUnitRegExpProxy.computeReplacementValue("$1", theString, matcher0group));
-        assertEquals("$2", HtmlUnitRegExpProxy.computeReplacementValue("$2", theString, matcher0group));
-        assertEquals("h", HtmlUnitRegExpProxy.computeReplacementValue("$1", theString, matcher1group));
-        assertEquals("$2", HtmlUnitRegExpProxy.computeReplacementValue("$2", theString, matcher1group));
+        assertEquals("$", proxy.computeReplacementValue("$$", theString, matcher0group));
+        assertEquals("$$x$", proxy.computeReplacementValue("$$$$x$$", theString, matcher0group));
 
-        assertEquals("$", HtmlUnitRegExpProxy.computeReplacementValue("$", theString, matcher0group));
-        assertEquals("$", HtmlUnitRegExpProxy.computeReplacementValue("$", theString, matcher1group));
-        assertEquals("\\\\$", HtmlUnitRegExpProxy.computeReplacementValue("\\\\$", theString, matcher1group));
-        assertEquals("$", HtmlUnitRegExpProxy.computeReplacementValue("$", theString, matcher1group));
+        assertEquals("$1", proxy.computeReplacementValue("$1", theString, matcher0group));
+        assertEquals("$2", proxy.computeReplacementValue("$2", theString, matcher0group));
+        assertEquals("h", proxy.computeReplacementValue("$1", theString, matcher1group));
+        assertEquals("$2", proxy.computeReplacementValue("$2", theString, matcher1group));
+
+        assertEquals("$", proxy.computeReplacementValue("$", theString, matcher0group));
+        assertEquals("$", proxy.computeReplacementValue("$", theString, matcher1group));
+        assertEquals("\\\\$", proxy.computeReplacementValue("\\\\$", theString, matcher1group));
+        assertEquals("$", proxy.computeReplacementValue("$", theString, matcher1group));
     }
 
     /**
@@ -448,7 +452,8 @@ public class HtmlUnitRegExpProxyTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts("afood$0$7b")
+    @Alerts(DEFAULT = "afood$0$7b",
+            IE11 = "afoodfoo$7b")
     public void replace_backReferences() throws Exception {
         testEvaluate("'afoob'.replace(/(foo)/g, '$1d$0$7')");
     }
@@ -521,6 +526,59 @@ public class HtmlUnitRegExpProxyTest extends WebDriverTestCase {
     public void replace_$backReference_tick() throws Exception {
         testEvaluate("'foo bar'.replace(/foo/g, '$$\\'')");
         testEvaluate("'foo bar'.replace(/foo/, '$$\\'')");
+    }
+
+    /**
+     * @throws Exception if an error occurs
+     */
+    @Test
+    @Alerts(DEFAULT = "ad$0db",
+            IE11 = "adfoodb")
+    public void replace_backReference_$0() throws Exception {
+        testEvaluate("'afoob'.replace(/(foo)/g, 'd$0d')");
+        testEvaluate("'afoob'.replace(/(foo)/, 'd$0d')");
+    }
+
+    /**
+     * @throws Exception if an error occurs
+     */
+    @Test
+    @Alerts(DEFAULT = "ad$0db",
+            IE11 = "adfkxxxkodb")
+    public void replace_backReference_$0WithMultipleGroups() throws Exception {
+        testEvaluate("'afkxxxkob'.replace(/(f)k(.*)k(o)/g, 'd$0d')");
+        testEvaluate("'afkxxxkob'.replace(/(f)k(.*)k(o)/, 'd$0d')");
+    }
+
+    /**
+     * @throws Exception if an error occurs
+     */
+    @Test
+    @Alerts(DEFAULT = "ad$0db",
+            IE11 = "adfoodb")
+    public void replace_backReference_$0WithNoGroups() throws Exception {
+        testEvaluate("'afoob'.replace(/foo/g, 'd$0d')");
+        testEvaluate("'afoob'.replace(/foo/, 'd$0d')");
+    }
+
+    /**
+     * @throws Exception if an error occurs
+     */
+    @Test
+    @Alerts(DEFAULT = "ad$0dbfuoc",
+            IE11 = "adfoodbfuoc")
+    public void replace_backReference_$0WithMultipleHits() throws Exception {
+        testEvaluate("'afoobfuoc'.replace(/(f.o)/, 'd$0d')");
+    }
+
+    /**
+     * @throws Exception if an error occurs
+     */
+    @Test
+    @Alerts(DEFAULT = "ad$0dbd$0dc",
+            IE11 = "adfoodbdfuodc")
+    public void replace_backReference_$0WithMultipleHitsGlobal() throws Exception {
+        testEvaluate("'afoobfuoc'.replace(/(f.o)/g, 'd$0d')");
     }
 
     /**

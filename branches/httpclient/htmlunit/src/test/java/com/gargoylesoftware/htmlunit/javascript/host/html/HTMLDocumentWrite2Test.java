@@ -32,6 +32,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @version $Revision$
  * @author Ahmed Ashour
  * @author Marc Guillemot
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HTMLDocumentWrite2Test extends WebDriverTestCase {
@@ -41,6 +42,7 @@ public class HTMLDocumentWrite2Test extends WebDriverTestCase {
      */
     @Test
     @Alerts("Hello There")
+    // TODO [IE11] real IE11 waits for the page to load until infinity
     public void write() throws Exception {
         final String html = "<html>\n"
             + "<head>\n"
@@ -196,6 +198,7 @@ public class HTMLDocumentWrite2Test extends WebDriverTestCase {
     @Test
     @Alerts("1")
     @NotYetImplemented
+    // TODO [IE11]SINGLE-VS-BULK test runs when executed as single but breaks as bulk
     public void writeInNewWindowAndReadFormCollection() throws Exception {
         final String html = "<html><head>"
             + "<script>"
@@ -251,7 +254,9 @@ public class HTMLDocumentWrite2Test extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(FF = { "<form></form>", "[object HTMLFormElement]" }, IE = { "<FORM></FORM>", "[object]" })
+    @Alerts(DEFAULT = { "<form></form>", "[object HTMLFormElement]" },
+            IE8 = { "<FORM></FORM>", "[object]" })
+    // TODO [IE11]SINGLE-VS-BULK test runs when executed as single but breaks as bulk
     public void writeOnOpenedWindow_WindowIsProxied() throws Exception {
         final String html
             = "<html><head><script>\n"
@@ -275,7 +280,8 @@ public class HTMLDocumentWrite2Test extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(FF = { "<form></form>", "[object HTMLFormElement]" }, IE = { "<FORM></FORM>", "[object]" })
+    @Alerts(DEFAULT = { "<form></form>", "[object HTMLFormElement]" },
+            IE8 = { "<FORM></FORM>", "[object]" })
     public void writeOnOpenedWindow_DocumentIsProxied() throws Exception {
         final String html
             = "<html><head><script>\n"
@@ -322,7 +328,7 @@ public class HTMLDocumentWrite2Test extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    public void write_LoadScript() throws Exception {
+    public void write_loadScript() throws Exception {
         final String html
             = "<html><head><title>First</title></head><body>\n"
             + "<script src='script.js'></script>\n"
@@ -341,7 +347,7 @@ public class HTMLDocumentWrite2Test extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(IE = "exception")
+    @Alerts(IE8 = "exception")
     public void write_fromScriptAddedWithAppendChild_inline() throws Exception {
         final String html = "<html><head></head><body>\n"
             + "<div id='it'><script>\n"

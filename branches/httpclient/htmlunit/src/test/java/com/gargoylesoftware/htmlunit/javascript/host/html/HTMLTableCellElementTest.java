@@ -16,7 +16,8 @@ package com.gargoylesoftware.htmlunit.javascript.host.html;
 
 import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF;
 import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF17;
-import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF24;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE8;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,6 +35,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @author Daniel Gredler
  * @author Ahmed Ashour
  * @author Ronald Brill
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HTMLTableCellElementTest extends WebDriverTestCase {
@@ -82,9 +84,8 @@ public class HTMLTableCellElementTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(FF3_6 = { "p", "po", ".", "u", "8", "U8" },
-            DEFAULT = { "p", "po", "", "u", "8", "U8" },
-            IE = { "", "", "", "u", "8", "U8" })
+    @Alerts(DEFAULT = { "p", "po", "", "u", "8", "U8" },
+            IE8 = { "", "", "", "u", "8", "U8" })
     public void ch() throws Exception {
         final String html
             = "<html><body><table>\n"
@@ -116,9 +117,8 @@ public class HTMLTableCellElementTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(FF3_6 = { "0", "4", "", "5", "0", "abc" },
-            DEFAULT = { "0", "4", "", "5.2", "-3", "abc" },
-            IE = { "", "", "", "5.2", "-3", "abc" })
+    @Alerts(DEFAULT = { "0", "4", "", "5.2", "-3", "abc" },
+            IE8 = { "", "", "", "5.2", "-3", "abc" })
     public void chOff() throws Exception {
         final String html
             = "<html><body><table>\n"
@@ -150,10 +150,9 @@ public class HTMLTableCellElementTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(FF3_6 = { "top", "baseline", "3", "middle", "8", "bottom" },
-            DEFAULT = { "top", "baseline", "3", "middle", "8", "BOTtom" },
+    @Alerts(DEFAULT = { "top", "baseline", "3", "middle", "8", "BOTtom" },
             IE = { "top", "baseline", "top", "error", "middle", "baseline", "bottom" })
-    @NotYetImplemented(FF17)
+    @NotYetImplemented({ FF17, FF24 })
     public void vAlign() throws Exception {
         final String html
             = "<html><body><table>\n"
@@ -192,9 +191,9 @@ public class HTMLTableCellElementTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(IE = {"", "#0000aa", "#000000" },
-            DEFAULT = {"", "#0000aa", "x" },
-            FF3_6 = { "", "#0000aa", "#000000" })
+    @Alerts(DEFAULT = {"", "#0000aa", "x" },
+            IE = {"", "#0000aa", "#000000" },
+            IE11 = {"", "#0000aa", "#0" })
     public void bgColor() throws Exception {
         final String html =
             "<html>\n"
@@ -222,7 +221,7 @@ public class HTMLTableCellElementTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = {"false", "null", "true", "", "true", "", "true", "blah", "false", "null" },
-            IE = {"false", "false", "true", "true", "true", "true", "true", "true", "false", "false" })
+            IE8 = {"false", "false", "true", "true", "true", "true", "true", "true", "false", "false" })
     public void noWrap() throws Exception {
         final String html =
             "<html>\n"
@@ -444,10 +443,9 @@ public class HTMLTableCellElementTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(IE = { "100", "200", "400", "error", "400", "error", "400", "100", "10%" },
-            FF3_6 = { "100", "200", "400", "abc", "0", "100", "10%" },
-            DEFAULT = { "100px", "200px", "400", "abc", "-5", "100.2", "10%" })
-    @NotYetImplemented(FF17)
+    @Alerts(DEFAULT = { "100px", "200px", "400", "abc", "-5", "100.2", "10%" },
+            IE = { "100", "200", "400", "error", "400", "error", "400", "100", "10%" })
+    @NotYetImplemented({ FF17, FF24 })
     public void width() throws Exception {
         final String html =
             "<html>\n"
@@ -490,8 +488,9 @@ public class HTMLTableCellElementTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = "0", IE = { "1" })
-    @NotYetImplemented(IE)
+    @Alerts(DEFAULT = "0",
+            IE8 = { "1" })
+    @NotYetImplemented(IE8)
     public void offsetHeight() throws Exception {
         final String html =
             "<html><body>\n"

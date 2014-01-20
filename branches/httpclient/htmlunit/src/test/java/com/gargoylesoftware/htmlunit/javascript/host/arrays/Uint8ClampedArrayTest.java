@@ -26,6 +26,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  *
  * @version $Revision$
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class Uint8ClampedArrayTest extends WebDriverTestCase {
@@ -34,7 +35,8 @@ public class Uint8ClampedArrayTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = "exception", FF3_6 = "exception", DEFAULT = { "0", "93", "255", "0", "93", "-1" })
+    @Alerts(DEFAULT = { "0", "93", "255", "0", "93", "-1" },
+            IE = "exception")
     public void arrayConstruction() throws Exception {
         final String html
             = "<html><head><title>foo</title><script>\n"

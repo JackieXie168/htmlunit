@@ -26,6 +26,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  *
  * @version $Revision$
  * @author Marc Guillemot
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class NativeGlobalTest extends WebDriverTestCase {
@@ -36,7 +37,7 @@ public class NativeGlobalTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "undefined", "NaN", "Infinity" },
-        IE = { "123", "123", "123" }, FF3_6 = { "123", "123", "123" })
+            IE8 = { "123", "123", "123" })
     public void assignConst() throws Exception {
         final String html
             = "<html><body><script>\n"
@@ -57,8 +58,7 @@ public class NativeGlobalTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "true", "undefined", "NaN", "Infinity" },
-        FF3_6 =  { "true", "123", "NaN", "Infinity" },
-        IE =  { "true", "123", "NaN", "Infinity" })
+            IE8 =  { "true", "123", "NaN", "Infinity" })
     public void redeclareConst() throws Exception {
         final String html
             = "<html><body><script>\n"

@@ -15,7 +15,9 @@
 package com.gargoylesoftware.htmlunit.javascript.host.css;
 
 import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF;
-import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF24;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE11;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE8;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,7 +26,6 @@ import org.openqa.selenium.WebDriver;
 
 import com.gargoylesoftware.htmlunit.BrowserRunner;
 import com.gargoylesoftware.htmlunit.BrowserRunner.Alerts;
-import com.gargoylesoftware.htmlunit.BrowserRunner.Browser;
 import com.gargoylesoftware.htmlunit.BrowserRunner.Browsers;
 import com.gargoylesoftware.htmlunit.BrowserRunner.NotYetImplemented;
 import com.gargoylesoftware.htmlunit.WebDriverTestCase;
@@ -36,6 +37,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @author Ahmed Ashour
  * @author Marc Guillemot
  * @author Ronald Brill
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
@@ -44,7 +46,8 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = "none", IE = "undefined")
+    @Alerts(DEFAULT = "none",
+            IE8 = "undefined")
     public void cssFloat() throws Exception {
         final String html = "<html>\n"
             + "<head>\n"
@@ -102,7 +105,7 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Browsers(FF)
+    @Browsers({ FF, IE11 })
     @Alerts({"", "", "auto", "pointer" })
     public void styleElement() throws Exception {
         final String html = "<html><head><title>foo</title>\n"
@@ -131,13 +134,13 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
     /**
      * Some style tests. There are two points in this case:
      * <ol>
-     *  <li>https://sourceforge.net/tracker/index.php?func=detail&aid=1566274&group_id=82996&atid=567969</li>
+     *  <li>http://sourceforge.net/p/cssparser/bugs/17/</li>
      *  <li>the "pointer" value gets inherited by "myDiv2", which is parsed as a child of "style_test_1"</li>
      * </ol>
      * @throws Exception if the test fails
      */
     @Test
-    @Browsers(FF)
+    @Browsers({ FF, IE11 })
     @Alerts({"", "", "pointer", "pointer" })
     public void styleElement2() throws Exception {
         final String html = "<html><head><title>foo</title>\n"
@@ -167,16 +170,17 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Browsers(IE)
-    @Alerts({ "0", "number" })
+    @Alerts(DEFAULT = { "auto", "string" },
+            IE8 = { "0", "number" })
     public void zIndex() throws Exception {
         final String html = "<html>\n"
             + "<head>\n"
             + "<script>\n"
             + "  function test() {\n"
-            + "    var e = document.getElementById('myDiv');\n"
-            + "    alert(e.currentStyle['zIndex']);\n"
-            + "    alert(typeof e.currentStyle['zIndex']);\n"
+            + "    var d = document.getElementById('myDiv');\n"
+            + "    var style = window.getComputedStyle ? window.getComputedStyle(d, null) : d.currentStyle;\n"
+            + "    alert(style.zIndex);\n"
+            + "    alert(typeof style.zIndex);\n"
             + "  }\n"
             + "</script>\n"
             + "</head>\n"
@@ -199,8 +203,7 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
             + "<div id='d' style='width:50px'>foo</div>\n"
             + "<script>\n"
             + "var d = document.getElementById('d');\n"
-            + "var style = d.currentStyle;\n"
-            + "style = style ? style : window.getComputedStyle(d,'');\n"
+            + "var style = window.getComputedStyle ? window.getComputedStyle(d, null) : d.currentStyle;\n"
             + "alert(style.width);\n"
             + "</script>\n"
             + "</body>\n"
@@ -212,17 +215,16 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(IE = { "1em 1em", "1em 1em", "1em 1em", "1em 1em", "1em 1em", "1em 1em", "1em 1em", "1em 1em", "1em 1em",
-                   "1em 1em", "1em 1em", "1em 1em", "1em 1em", "1em 1em" },
-            FF = { "1em 16px", "1em 16px", "1em 16px", "1em 16px", "1em 16px", "1em 16px", "1em 16px", "1em 16px",
-                   "1em 16px", "1em 16px", "1em 16px", "1em 16px", "1em 16px", "1em 16px" })
+    @Alerts(DEFAULT = { "1em 16px", "1em 16px", "1em 16px", "1em 16px", "1em 16px", "1em 16px", "1em 16px", "1em 16px",
+                   "1em 16px", "1em 16px", "1em 16px", "1em 16px", "1em 16px", "1em 16px" },
+            IE8 = { "1em 1em", "1em 1em", "1em 1em", "1em 1em", "1em 1em", "1em 1em", "1em 1em", "1em 1em", "1em 1em",
+                   "1em 1em", "1em 1em", "1em 1em", "1em 1em", "1em 1em" })
     public void lengthsConvertedToPixels() throws Exception {
         final String html = "<html><body>\n"
             + "<div id='d' style='width:1em; height:1em; border:1em solid black; padding:1em; margin:1em;'>d</div>\n"
             + "<script>\n"
             + "var d = document.getElementById('d');\n"
-            + "var cs = d.currentStyle;\n"
-            + "if(!cs) cs = window.getComputedStyle(d, '');\n"
+            + "var cs = window.getComputedStyle ? window.getComputedStyle(d, null) : d.currentStyle;\n"
             + "alert(d.style.width + ' ' + cs.width);\n"
             + "alert(d.style.height + ' ' + cs.height);\n"
             + "alert(d.style.borderBottomWidth + ' ' + cs.borderBottomWidth);\n"
@@ -247,7 +249,8 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "inline", "inline", "inline", "block", /* "inline-block", */ "none", "block", "block", "none" },
-            IE = { "inline", "inline", "inline", "block", /* "none", */ "inline", "inline", "inline", "inline" })
+            IE = { "inline", "inline", "inline", "block", /* "none", */ "inline", "inline", "inline", "inline" },
+            IE11 = { "inline", "inline", "inline", "block", /* "inline-block", */ "inline", "block", "block", "none" })
     public void defaultDisplayValues_A() throws Exception {
         final String html = "<!DOCTYPE HTML>\n<html><body>\n"
             + "  <p id='p'>\n"
@@ -271,7 +274,8 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
             + "  <script>\n"
             + "    function x(id) {\n"
             + "      var e = document.getElementById(id);\n"
-            + "      var disp = e.currentStyle ? e.currentStyle.display : window.getComputedStyle(e, '').display;\n"
+            + "      var cs = window.getComputedStyle ? window.getComputedStyle(e, null) : e.currentStyle;\n"
+            + "      var disp = cs ? cs.display : null;\n"
             + "      alert(disp);\n"
             + "    }\n"
             + "  </script>\n"
@@ -294,12 +298,12 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts({ "inline", "inline", "inline", "block", "inline", "inline-block" })
+    @Alerts({ "inline", "inline", "inline", "inline", "block", "inline", "inline-block" })
     public void defaultDisplayValues_B() throws Exception {
         final String html = "<!DOCTYPE HTML>\n<html><body>\n"
             + "  <p id='p'>\n"
             + "    <b id='b'></b>\n"
-            // + "    <bdi id='bdi'></bdi>\n"
+            + "    <bdi id='bdi'></bdi>\n"
             + "    <bdo id='bdo'></bdo>\n"
             + "    <big id='big'></big>\n"
             + "    <blockquote id='blockquote'></blockquote>\n"
@@ -310,13 +314,14 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
             + "  <script>\n"
             + "    function x(id) {\n"
             + "      var e = document.getElementById(id);\n"
-            + "      var disp = e.currentStyle ? e.currentStyle.display : window.getComputedStyle(e, '').display;\n"
+            + "      var cs = window.getComputedStyle ? window.getComputedStyle(e, null) : e.currentStyle;\n"
+            + "      var disp = cs ? cs.display : null;\n"
             + "      alert(disp);\n"
             + "    }\n"
             + "  </script>\n"
             + "  <script>\n"
             + "    x('b');\n"
-            // + "    x('bdi');\n"
+            + "    x('bdi');\n"
 
             + "    x('bdo');\n"
             + "    x('big');\n"
@@ -332,7 +337,7 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts({ "inline", "table-caption", "block", "inline", "inline", "table-column", "table-column-group" })
+    @Alerts({ "inline", "table-caption", "block", "inline", "inline", "table-column", "table-column-group", "inline" })
     public void defaultDisplayValues_C() throws Exception {
         final String html = "<!DOCTYPE HTML>\n<html><body>\n"
             + "  <canvas id='canvas'></canvas>\n"
@@ -351,13 +356,14 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
             + "  </p>\n"
 
             + "  <menu>\n"
-            // + "    <command id='command'></command>\n"
+            + "    <command id='command'></command>\n"
             + "  </menu>\n"
 
             + "  <script>\n"
             + "    function x(id) {\n"
             + "      var e = document.getElementById(id);\n"
-            + "      var disp = e.currentStyle ? e.currentStyle.display : window.getComputedStyle(e, '').display;\n"
+            + "      var cs = window.getComputedStyle ? window.getComputedStyle(e, null) : e.currentStyle;\n"
+            + "      var disp = cs ? cs.display : null;\n"
             + "      alert(disp);\n"
             + "    }\n"
             + "  </script>\n"
@@ -369,7 +375,7 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
             + "    x('code');\n"
             + "    x('col');\n"
             + "    x('colgroup');\n"
-            // + "    x('command');\n"
+            + "    x('command');\n"
             + "  </script>\n"
             + "</body></html>";
         loadPageWithAlerts2(html);
@@ -379,7 +385,8 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts({ "block", "inline", "inline", "block", "block", "block", "block" })
+    @Alerts(DEFAULT = { "none", "block", "inline", "inline", "inline", "inline", "block", "block", "block", "block" },
+            IE8 = { "inline", "block", "inline", "inline", "inline", "inline", "block", "block", "block", "block" })
     public void defaultDisplayValues_D() throws Exception {
         final String html = "<!DOCTYPE HTML>\n<html><body>\n"
             + "  <datalist id='datalist'></datalist>\n"
@@ -393,26 +400,27 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
             + "    <del id='del'></del>\n"
             + "  </p>\n"
 
-            // + "  <details id='details'></details>\n"
+            + "  <details id='details'></details>\n"
             + "  <dfn id='dfn'></dfn>\n"
-            // + "  <dialog id='dialog'></dialog>\n"
+            + "  <dialog id='dialog'></dialog>\n"
             + "  <dir id='dir'></dir>\n"
             + "  <dir id='div'></div>\n"
 
             + "  <script>\n"
             + "    function x(id) {\n"
             + "      var e = document.getElementById(id);\n"
-            + "      var disp = e.currentStyle ? e.currentStyle.display : window.getComputedStyle(e, '').display;\n"
+            + "      var cs = window.getComputedStyle ? window.getComputedStyle(e, null) : e.currentStyle;\n"
+            + "      var disp = cs ? cs.display : null;\n"
             + "      alert(disp);\n"
             + "    }\n"
             + "  </script>\n"
             + "  <script>\n"
-            // + "    x('datalist');\n"
+            + "    x('datalist');\n"
             + "    x('dd');\n"
             + "    x('del');\n"
-            // + "    x('details');\n"
+            + "    x('details');\n"
             + "    x('dfn');\n"
-            // + "    x('dialog');\n"
+            + "    x('dialog');\n"
             + "    x('dir');\n"
             + "    x('div');\n"
             + "    x('dl');\n"
@@ -439,7 +447,8 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
             + "  <script>\n"
             + "    function x(id) {\n"
             + "      var e = document.getElementById(id);\n"
-            + "      var disp = e.currentStyle ? e.currentStyle.display : window.getComputedStyle(e, '').display;\n"
+            + "      var cs = window.getComputedStyle ? window.getComputedStyle(e, null) : e.currentStyle;\n"
+            + "      var disp = cs ? cs.display : null;\n"
             + "      alert(disp);\n"
             + "    }\n"
             + "  </script>\n"
@@ -457,7 +466,7 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "block", "block", "block", "inline", "block", "block" },
-            IE = { "block", "inline", "inline", "inline", "inline", "block" })
+            IE8 = { "block", "inline", "inline", "inline", "inline", "block" })
     public void defaultDisplayValues_F() throws Exception {
         final String html = "<!DOCTYPE HTML>\n<html><body>\n"
             + "  <form id='form'>\n"
@@ -477,7 +486,8 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
             + "  <script>\n"
             + "    function x(id) {\n"
             + "      var e = document.getElementById(id);\n"
-            + "      var disp = e.currentStyle ? e.currentStyle.display : window.getComputedStyle(e, '').display;\n"
+            + "      var cs = window.getComputedStyle ? window.getComputedStyle(e, null) : e.currentStyle;\n"
+            + "      var disp = cs ? cs.display : null;\n"
             + "      alert(disp);\n"
             + "    }\n"
             + "  </script>\n"
@@ -499,7 +509,7 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "block", "block", "block", "block", "block", "block", "block", "block" },
-            IE = { "block", "block", "block", "block", "block", "block", "inline", "block" })
+            IE8 = { "block", "block", "block", "block", "block", "block", "inline", "block" })
     public void defaultDisplayValues_H() throws Exception {
         final String html = "<!DOCTYPE HTML>\n<html><body>\n"
             + "  <h1 id='h1'></h1>\n"
@@ -515,7 +525,8 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
             + "  <script>\n"
             + "    function x(id) {\n"
             + "      var e = document.getElementById(id);\n"
-            + "      var disp = e.currentStyle ? e.currentStyle.display : window.getComputedStyle(e, '').display;\n"
+            + "      var cs = window.getComputedStyle ? window.getComputedStyle(e, null) : e.currentStyle;\n"
+            + "      var disp = cs ? cs.display : null;\n"
             + "      alert(disp);\n"
             + "    }\n"
             + "  </script>\n"
@@ -564,7 +575,8 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
             + "  <script>\n"
             + "    function x(id) {\n"
             + "      var e = document.getElementById(id);\n"
-            + "      var disp = e.currentStyle ? e.currentStyle.display : window.getComputedStyle(e, '').display;\n"
+            + "      var cs = window.getComputedStyle ? window.getComputedStyle(e, null) : e.currentStyle;\n"
+            + "      var disp = cs ? cs.display : null;\n"
             + "      alert(disp);\n"
             + "    }\n"
             + "  </script>\n"
@@ -592,12 +604,12 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "inline", "inline", "inline", "block", "list-item" },
+            FF24 = { "inline", "inline-block", "inline", "block", "list-item" },
             IE = { "inline", "inline", "inline", "inline", "list-item" })
     public void defaultDisplayValues_KL() throws Exception {
         final String html = "<!DOCTYPE HTML>\n<html><body>\n"
             + "  <p id='p'>\n"
             + "    <kbd id='kbd'></kbd>\n"
-            + "    <ins id='ins'></ins>\n"
             + "  </p>\n"
 
             + "  <ol>\n"
@@ -615,7 +627,8 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
             + "  <script>\n"
             + "    function x(id) {\n"
             + "      var e = document.getElementById(id);\n"
-            + "      var disp = e.currentStyle ? e.currentStyle.display : window.getComputedStyle(e, '').display;\n"
+            + "      var cs = window.getComputedStyle ? window.getComputedStyle(e, null) : e.currentStyle;\n"
+            + "      var disp = cs ? cs.display : null;\n"
             + "      alert(disp);\n"
             + "    }\n"
             + "  </script>\n"
@@ -659,7 +672,8 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
             + "  <script>\n"
             + "    function x(id) {\n"
             + "      var e = document.getElementById(id);\n"
-            + "      var disp = e.currentStyle ? e.currentStyle.display : window.getComputedStyle(e, '').display;\n"
+            + "      var cs = window.getComputedStyle ? window.getComputedStyle(e, null) : e.currentStyle;\n"
+            + "      var disp = cs ? cs.display : null;\n"
             + "      alert(disp);\n"
             + "    }\n"
             + "  </script>\n"
@@ -679,7 +693,8 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "block", "none", "inline", "block", "block", "block", "inline" },
-            IE = { "inline", "inline", "inline", "block", "inline", "inline", "inline" })
+            IE = { "inline", "inline", "inline", "block", "inline", "inline", "inline" },
+            IE11 = { "block", "none", "inline", "block", "inline", "inline", "inline" })
     public void defaultDisplayValues_NO() throws Exception {
         final String html = "<!DOCTYPE HTML>\n<html><body>\n"
             + "  <nav id='nav'>\n"
@@ -706,7 +721,8 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
             + "  <script>\n"
             + "    function x(id) {\n"
             + "      var e = document.getElementById(id);\n"
-            + "      var disp = e.currentStyle ? e.currentStyle.display : window.getComputedStyle(e, '').display;\n"
+            + "      var cs = window.getComputedStyle ? window.getComputedStyle(e, null) : e.currentStyle;\n"
+            + "      var disp = cs ? cs.display : null;\n"
             + "      alert(disp);\n"
             + "    }\n"
             + "  </script>\n"
@@ -729,9 +745,10 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "block", "none", "block", "inline-block", "inline" },
-            IE = { "block", "inline", "block", "inline", "inline" })
+            IE8 = { "block", "null", "block", "inline", "inline" },
+            IE11 = { "block", "inline", "block", "inline", "inline" })
+    @NotYetImplemented(IE8)
     public void defaultDisplayValues_PQ() throws Exception {
-        // this fails in real IE8 but works in IE9
         final String html = "<!DOCTYPE HTML>\n<html><body>\n"
             + "  <p id='p'><q id='q'></q></p>\n"
 
@@ -745,7 +762,8 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
             + "  <script>\n"
             + "    function x(id) {\n"
             + "      var e = document.getElementById(id);\n"
-            + "      var disp = e.currentStyle ? e.currentStyle.display : window.getComputedStyle(e, '').display;\n"
+            + "      var cs = window.getComputedStyle ? window.getComputedStyle(e, null) : e.currentStyle;\n"
+            + "      var disp = cs ? cs.display : null;\n"
             + "      alert(disp);\n"
             + "    }\n"
             + "  </script>\n"
@@ -778,7 +796,8 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
             + "  <script>\n"
             + "    function x(id) {\n"
             + "      var e = document.getElementById(id);\n"
-            + "      var disp = e.currentStyle ? e.currentStyle.display : window.getComputedStyle(e, '').display;\n"
+            + "      var cs = window.getComputedStyle ? window.getComputedStyle(e, null) : e.currentStyle;\n"
+            + "      var disp = cs ? cs.display : null;\n"
             + "      alert(disp);\n"
             + "    }\n"
             + "  </script>\n"
@@ -795,9 +814,11 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = { "inline", "inline", "none", "block", "inline", "inline",
+    @Alerts(DEFAULT = { "inline", "inline", "none", "block", "inline-block", "inline",
                         "inline", "inline", "inline", "inline", "inline", "inline", "inline" },
-            IE = { "inline", "inline", "inline", "inline", "inline-block", "inline",
+            FF17 = { "inline", "inline", "none", "block", "inline", "inline",
+                        "inline", "inline", "inline", "inline", "inline", "inline", "inline" },
+            IE8 = { "inline", "inline", "inline", "inline", "inline-block", "inline",
                         "inline", "inline", "inline", "inline", "inline", "inline", "inline" })
     public void defaultDisplayValues_S() throws Exception {
         final String html = "<!DOCTYPE HTML>\n<html><body>\n"
@@ -828,7 +849,8 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
             + "  <script id='script'>\n"
             + "    function x(id) {\n"
             + "      var e = document.getElementById(id);\n"
-            + "      var disp = e.currentStyle ? e.currentStyle.display : window.getComputedStyle(e, '').display;\n"
+            + "      var cs = window.getComputedStyle ? window.getComputedStyle(e, null) : e.currentStyle;\n"
+            + "      var disp = cs ? cs.display : null;\n"
             + "      alert(disp);\n"
             + "    }\n"
             + "  </script>\n"
@@ -883,7 +905,8 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
             + "  <script id='script'>\n"
             + "    function x(id) {\n"
             + "      var e = document.getElementById(id);\n"
-            + "      var disp = e.currentStyle ? e.currentStyle.display : window.getComputedStyle(e, '').display;\n"
+            + "      var cs = window.getComputedStyle ? window.getComputedStyle(e, null) : e.currentStyle;\n"
+            + "      var disp = cs ? cs.display : null;\n"
             + "      alert(disp);\n"
             + "    }\n"
             + "  </script>\n"
@@ -908,7 +931,7 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = { "inline", "block", "inline", "inline", "inline" })
+    @Alerts({ "inline", "block", "inline", "inline", "inline" })
     public void defaultDisplayValues_UVW() throws Exception {
         final String html = "<!DOCTYPE HTML>\n<html><body>\n"
             + "  <p>\n"
@@ -926,7 +949,8 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
             + "  <script id='script'>\n"
             + "    function x(id) {\n"
             + "      var e = document.getElementById(id);\n"
-            + "      var disp = e.currentStyle ? e.currentStyle.display : window.getComputedStyle(e, '').display;\n"
+            + "      var cs = window.getComputedStyle ? window.getComputedStyle(e, null) : e.currentStyle;\n"
+            + "      var disp = cs ? cs.display : null;\n"
             + "      alert(disp);\n"
             + "    }\n"
             + "  </script>\n"
@@ -945,8 +969,8 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(IE = { "transparent", "red", "white" },
-            FF = { "transparent", "rgb(255, 0, 0)", "rgb(255, 255, 255)" })
+    @Alerts(DEFAULT = { "transparent", "rgb(255, 0, 0)", "rgb(255, 255, 255)" },
+            IE8 = { "transparent", "red", "white" })
     public void backgroundColor() throws Exception {
         final String html = "<html><body>\n"
             + "<div id='d0'>div 0</div>\n"
@@ -956,8 +980,7 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
             + "<script>\n"
             + "function getStyle(x) {\n"
             + "  var d = document.getElementById(x);\n"
-            + "  var cs = d.currentStyle;\n"
-            + "  if(!cs) cs = window.getComputedStyle(d, '');\n"
+            + "  var cs = window.getComputedStyle ? window.getComputedStyle(d, null) : d.currentStyle;\n"
             + "  return cs;\n"
             + "}\n"
             + "var cs0 = getStyle('d0');\n"
@@ -984,8 +1007,7 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
             + "<script>\n"
             + "function getStyle(x) {\n"
             + "  var d = document.getElementById(x);\n"
-            + "  var cs = d.currentStyle;\n"
-            + "  if(!cs) cs = window.getComputedStyle(d, '');\n"
+            + "  var cs = window.getComputedStyle ? window.getComputedStyle(d, null) : d.currentStyle;\n"
             + "  return cs;\n"
             + "}\n"
             + "var cs1 = getStyle('d1');\n"
@@ -999,7 +1021,11 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = { "1256px", "auto" }, IE = { "auto", "auto" })
+    @Alerts(FF = { "1256px", "auto" },
+            FF24 = { "1248px", "auto" },
+            IE = { "auto", "auto" },
+            IE11 = { "1240px", "auto" })
+    @NotYetImplemented({ FF24, IE11 })
     public void computedWidthOfHiddenElements() throws Exception {
         final String content = "<html><head><title>foo</title><script>\n"
             + "  function test() {\n"
@@ -1048,8 +1074,8 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(FF = { "underline", "none", "underline" },
-            IE = { "underline", "underline", "underline" })
+    @Alerts(DEFAULT = { "underline", "none", "underline" },
+            IE8 = { "underline", "underline", "underline" })
     public void changeInParentClassNodeReferencedByRule() throws Exception {
         final String html = "<html><head>\n"
             + "<script>\n"
@@ -1081,8 +1107,8 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(FF = { "200px,400px", "200,400", "200px,400px", "50%,25%", "100,100", "100px,100px" },
-            IE = { "200px,400px", "200,400", "200px,400px", "50%,25%", "100,100", "50%,25%" })
+    @Alerts(DEFAULT = { "200px,400px", "200,400", "200px,400px", "50%,25%", "100,100", "100px,100px" },
+            IE8 = { "200px,400px", "200,400", "200px,400px", "50%,25%", "100,100", "50%,25%" })
     public void widthAndHeightPercentagesAndPx() throws Exception {
         final String html = "<html><body onload='test()'>\n"
             + "<div id='d1' style='width:200px;height:400px'><div id='d2' style='width:50%;height:25%'></div></div>\n"
@@ -1108,8 +1134,8 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(FF = { "10em,20em", "160,320", "160px,320px", "50%,25%", "80,80", "80px,80px" },
-            IE = { "10em,20em", "160,320", "10em,20em", "50%,25%", "80,80", "50%,25%" })
+    @Alerts(DEFAULT = { "10em,20em", "160,320", "160px,320px", "50%,25%", "80,80", "80px,80px" },
+            IE8 = { "10em,20em", "160,320", "10em,20em", "50%,25%", "80,80", "50%,25%" })
     public void widthAndHeightPercentagesAndEm() throws Exception {
         final String html = "<html><body onload='test()'>\n"
             + "<div id='d1' style='width:10em;height:20em'><div id='d2' style='width:50%;height:25%'></div></div>\n"
@@ -1195,11 +1221,34 @@ public class ComputedCSSStyleDeclarationTest extends WebDriverTestCase {
     }
 
     /**
+     * @throws Exception if an error occurs
+     */
+    @Test
+    @Alerts(DEFAULT = { "auto", "auto" }, IE8 = { "-", "-" })
+    public void widthAndHeightDisconnected() throws Exception {
+        final String html = "<html>\n"
+            + "<head>\n"
+            + "  <script>\n"
+            + "    function test() {\n"
+            + "      var e = document.createElement('div');\n"
+            + "      var style = window.getComputedStyle ? window.getComputedStyle(e, null) : e.currentStyle;\n"
+            + "      alert(style ? style.width : '-');\n"
+            + "      alert(style ? style.height : '-');\n"
+            + "    }\n"
+            + "  </script>\n"
+            + "</head>\n"
+            + "<body onload='test()'>\n"
+            + "</body></html>";
+        loadPageWithAlerts2(html);
+    }
+
+    /**
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = { "", "rgb(0, 0, 255)" }, IE = "exception")
-    @NotYetImplemented(Browser.FF)
+    @Alerts(DEFAULT = { "", "rgb(0, 0, 255)" },
+            IE8 = "exception")
+    @NotYetImplemented({ FF, IE11 })
     public void getPropertyValue() throws Exception {
         final String html = "<html><head><title>First</title><script>\n"
             + "function doTest() {\n"

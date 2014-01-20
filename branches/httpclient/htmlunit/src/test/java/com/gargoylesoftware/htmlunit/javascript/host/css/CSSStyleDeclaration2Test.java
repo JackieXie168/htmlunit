@@ -15,10 +15,9 @@
 package com.gargoylesoftware.htmlunit.javascript.host.css;
 
 import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF17;
-import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE6;
-import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE7;
-import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE8;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF24;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.By;
@@ -34,6 +33,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  *
  * @version $Revision$
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class CSSStyleDeclaration2Test extends WebDriverTestCase {
@@ -110,18 +110,19 @@ public class CSSStyleDeclaration2Test extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @NotYetImplemented({ IE6, FF17 })
-    //TODO: This test fails with WebDriver with real FF3, but succeed if test is done outside WebDriver
-    @Alerts(FF = "success", IE = "success",
-            IE7 = "error: outlineWidth-error: outlineWidth-error: outlineWidth-error: outlineWidth-",
+    @Alerts(FF = "success",
             FF17 = "error: maxHeight-error: maxHeight-error: maxHeight-error: maxWidth-error: maxWidth-error: "
                     + "maxWidth-error: minHeight-error: minHeight-error: minHeight-error: minWidth-error: "
                     + "minWidth-error: minWidth-error: outlineWidth-error: outlineWidth-error: outlineWidth-error: "
-                    + "textIndent-error: textIndent-error: textIndent-error: verticalAlign-error: verticalAlign-error:"
-                    + " verticalAlign-",
-            IE6 = "error: maxHeight-error: maxHeight-error: maxHeight-error: maxHeight-error: maxWidth-error: "
-                + "maxWidth-error: maxWidth-error: maxWidth-error: minWidth-error: minWidth-error: minWidth-error: "
-                + "minWidth-error: outlineWidth-error: outlineWidth-error: outlineWidth-error: outlineWidth-")
+                    + "textIndent-error: textIndent-error: textIndent-error: verticalAlign-error: verticalAlign-error: "
+                    + "verticalAlign-",
+            FF24 = "error: maxHeight-error: maxHeight-error: maxHeight-error: maxWidth-error: maxWidth-error: "
+                    + "maxWidth-error: minHeight-error: minHeight-error: minHeight-error: minWidth-error: "
+                    + "minWidth-error: minWidth-error: outlineWidth-error: outlineWidth-error: outlineWidth-error: "
+                    + "textIndent-error: textIndent-error: textIndent-error: verticalAlign-error: verticalAlign-error: "
+                    + "verticalAlign-",
+            IE = "success")
+    @NotYetImplemented({ FF17, FF24 })
     public void width_like_properties() throws Exception {
         final String html
             = "<html><head><script>\n"
@@ -158,11 +159,9 @@ public class CSSStyleDeclaration2Test extends WebDriverTestCase {
     }
 
     /**
-     * Expected values are missing for IE7.
      * @throws Exception if the test fails
      */
     @Test
-    @NotYetImplemented({ IE7 })
     public void properties() throws Exception {
         final String expected = loadExpectation("CSSStyleDeclaration2Test.properties", ".txt");
 
@@ -186,17 +185,16 @@ public class CSSStyleDeclaration2Test extends WebDriverTestCase {
 
         final WebDriver driver = loadPage2(html);
 
-        final String actual = driver.findElement(By.id("myTextarea")).getAttribute("value");
+        String actual = driver.findElement(By.id("myTextarea")).getAttribute("value");
+        actual = StringUtils.replace(actual, "\r\n", "\n");
         assertEquals(expected, actual);
     }
 
     /**
      * Test types of properties.
-     * Expected values are missing for IE7 and IE8.
      * @throws Exception if the test fails
      */
     @Test
-    @NotYetImplemented({ IE7, IE8 })
     public void properties2() throws Exception {
         final String expected = loadExpectation("CSSStyleDeclaration2Test.properties2", ".txt");
 
@@ -220,7 +218,8 @@ public class CSSStyleDeclaration2Test extends WebDriverTestCase {
 
         final WebDriver driver = loadPage2(html);
 
-        final String actual = driver.findElement(By.id("myTextarea")).getAttribute("value");
+        String actual = driver.findElement(By.id("myTextarea")).getAttribute("value");
+        actual = StringUtils.replace(actual, "\r\n", "\n");
         assertEquals(expected, actual);
     }
 }

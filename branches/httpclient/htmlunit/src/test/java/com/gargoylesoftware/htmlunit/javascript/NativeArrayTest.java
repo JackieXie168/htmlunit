@@ -14,8 +14,10 @@
  */
 package com.gargoylesoftware.htmlunit.javascript;
 
-import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE;
 import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF17;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF24;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE8;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE11;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,6 +33,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  *
  * @version $Revision$
  * @author Marc Guillemot
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class NativeArrayTest extends WebDriverTestCase {
@@ -40,10 +43,11 @@ public class NativeArrayTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @NotYetImplemented({ IE, FF17 })
     @Alerts(DEFAULT = { "1<>5", "5<>2", "1<>2", "5<>1", "2<>1", "1<>1", "5<>9" },
-            FF17 = { "1<>5", "5<>2", "1<>2", "1<>9", "5<>1", "1<>1", "2<>1", "2<>9", "5<>9" },
-            IE = { "1<>9", "9<>5", "9<>2", "9<>1", "1<>5", "5<>1", "5<>2", "5<>1", "1<>1", "1<>2", "2<>1", "1<>1" })
+            FF = { "1<>5", "5<>2", "1<>2", "1<>9", "5<>1", "1<>1", "2<>1", "2<>9", "5<>9" },
+            IE = { "1<>9", "9<>5", "9<>2", "9<>1", "1<>5", "5<>1", "5<>2", "5<>1", "1<>1", "1<>2", "2<>1", "1<>1" },
+            IE11 = { "5<>1", "2<>5", "2<>1", "2<>5", "1<>5", "1<>2", "1<>1", "9<>5" })
+    @NotYetImplemented({ FF17, FF24, IE8, IE11 })
     public void sort() throws Exception {
         final String html
             = "<html><head><title>foo</title><script>\n"
@@ -83,7 +87,7 @@ public class NativeArrayTest extends WebDriverTestCase {
     @Test
     @Alerts(DEFAULT = { "every: function", "filter: function", "forEach: function", "indexOf: function",
             "lastIndexOf: function", "map: function", "reduce: function", "reduceRight: function", "some: function" },
-            IE = { "every: undefined", "filter: undefined", "forEach: undefined", "indexOf: undefined",
+            IE8 = { "every: undefined", "filter: undefined", "forEach: undefined", "indexOf: undefined",
             "lastIndexOf: undefined", "map: undefined", "reduce: undefined", "reduceRight: undefined",
             "some: undefined" })
     public void methods_different() throws Exception {
@@ -97,7 +101,8 @@ public class NativeArrayTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = "toSource: function", DEFAULT = "toSource: undefined")
+    @Alerts(DEFAULT = "toSource: undefined",
+            FF = "toSource: function")
     public void methods_toSource() throws Exception {
         final String[] methods = {"toSource"};
         final String html = NativeDateTest.createHTMLTestMethods("[]", methods);
@@ -131,14 +136,43 @@ public class NativeArrayTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = "function Array() {\n    [native code]\n}",
-            IE = "\nfunction Array() {\n    [native code]\n}\n",
-            CHROME = "function Array() { [native code] }")
+    @Alerts(CHROME = "function Array() { [native code] }",
+            FF = "function Array() {\n    [native code]\n}",
+            IE = "\nfunction Array() {\n    [native code]\n}\n")
     public void constructorToString() throws Exception {
         final String html
             = "<html><head><script>\n"
             + "alert([].constructor.toString());\n"
             + "</script></head><body>\n"
+            + "</body></html>";
+
+        loadPageWithAlerts2(html);
+    }
+
+    /**
+     * Test for "Comparison method violates its general contract!".
+     * @throws Exception if the test fails
+     */
+    @Test
+    public void comparisonMethodViolatesContract() throws Exception {
+        final String html
+            = "<html><head><title>foo</title><script>\n"
+            + "var results = [1, 1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, 1, -1, -1, 1,"
+            + " -1, -1, 1, -1, 1, -1, 1, 1, 1, 1, -1, -1, 1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, 1, -1,"
+            + " 1, -1, -1, 1, 1, -1, -1, 1, 1, 1, 1, 1, 1, -1, -1, 0, -1, -1, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0,"
+            + " 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 1, 1, 1, 1,"
+            + " 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];\n"
+            + "var index = 0;"
+            + "function test() {\n"
+            + "    var arr = new Array(37);\n"
+            + "    for (var x = 0; x < arr.length; x++) {\n"
+            + "        arr[x] = new Object();\n"
+            + "    }\n"
+            + "    arr.sort(function (a, b) {\n"
+            + "        return results[index++];\n"
+            + "    });\n"
+            + "}\n"
+            + "</script></head><body onload='test()'>\n"
             + "</body></html>";
 
         loadPageWithAlerts2(html);

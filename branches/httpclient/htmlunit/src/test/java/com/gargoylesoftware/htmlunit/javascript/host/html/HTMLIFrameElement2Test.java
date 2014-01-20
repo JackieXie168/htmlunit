@@ -14,7 +14,7 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host.html;
 
-import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE8;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,6 +31,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  *
  * @version $Revision$
  * @author Ronald Brill
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HTMLIFrameElement2Test extends WebDriverTestCase {
@@ -113,7 +114,8 @@ public class HTMLIFrameElement2Test extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = { "loaded", "foo" }, IE = { })
+    @Alerts(DEFAULT = { "loaded", "foo" },
+            IE8 = { })
     public void documentCreateElement_onLoad() throws Exception {
         final String html =
               "<html>\n"
@@ -146,7 +148,8 @@ public class HTMLIFrameElement2Test extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = { "loaded", "" }, IE = { })
+    @Alerts(DEFAULT = { "loaded", "" },
+            IE8 = { })
     public void documentCreateElement_onLoad_noSrc() throws Exception {
         final String html =
               "<html>\n"
@@ -176,7 +179,8 @@ public class HTMLIFrameElement2Test extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = { "createIFrame", "loaded", "foo" }, IE = { "createIFrame" })
+    @Alerts(DEFAULT = { "createIFrame", "loaded", "foo" },
+            IE8 = { "createIFrame" })
     public void documentCreateElement_onLoad2() throws Exception {
         final String html =
               "<html>\n"
@@ -210,7 +214,8 @@ public class HTMLIFrameElement2Test extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = { "createIFrame", "loaded", "" }, IE = { "createIFrame" })
+    @Alerts(DEFAULT = { "createIFrame", "loaded", "" },
+            IE8 = { "createIFrame" })
     public void documentCreateElement_onLoad2_noSrc() throws Exception {
         final String html =
               "<html>\n"
@@ -255,10 +260,47 @@ public class HTMLIFrameElement2Test extends WebDriverTestCase {
     }
 
     /**
+     * Test case for issue ##1544.
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = { "createIFrame", "loaded", "foo" }, IE = { "createIFrame" })
+    @Alerts({ "createIFrame", "loaded" })
+    @NotYetImplemented
+    public void documentCreateElement_iFrameInsideDiv() throws Exception {
+        final String html =
+                "<html>\n"
+              + "<head><script type='text/javascript'>\n"
+              + "  function createIFrame() {\n"
+              + "      alert('createIFrame');\n"
+              + "      var content = document.getElementById('content');\n"
+              + "      var newContent = document.createElement('div');\n"
+              + "      newContent.innerHTML = '<iframe name=\"iFrame\" src=\"" + URL_SECOND + "\"></iframe>';\n"
+              + "      content.appendChild(newContent);\n"
+              + "  }\n"
+              + "</script></head>\n"
+
+              + "  <body>\n"
+              + "    <div id='content'>content</div>"
+              + "    <a id='test' onclick='createIFrame();'>insert frame</a>"
+              + "  </body>\n"
+              + "</html>";
+        final String html2 = "<html><body><script>alert('loaded')</script></body></html>";
+        getMockWebConnection().setResponse(URL_SECOND, html2);
+
+        final WebDriver driver = loadPage2(html);
+
+        driver.findElement(By.id("test")).click();
+
+        assertEquals(getExpectedAlerts(), getCollectedAlerts(driver));
+        assertEquals(2, getMockWebConnection().getRequestCount());
+    }
+
+    /**
+     * @throws Exception if an error occurs
+     */
+    @Test
+    @Alerts(DEFAULT = { "createIFrame", "loaded", "foo" },
+            IE8 = { "createIFrame" })
     public void documentCreateElement_onLoad3() throws Exception {
         final String html =
               "<html>\n"
@@ -292,7 +334,8 @@ public class HTMLIFrameElement2Test extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = { "createIFrame", "loaded", "" }, IE = { "createIFrame" })
+    @Alerts(DEFAULT = { "createIFrame", "loaded", "" },
+            IE8 = { "createIFrame" })
     public void documentCreateElement_onLoad3_noSrc() throws Exception {
         final String html =
               "<html>\n"
@@ -503,7 +546,7 @@ public class HTMLIFrameElement2Test extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "fragment append done", "loaded" },
-            IE = "fragment append done")
+            IE8 = "fragment append done")
     public void documentDocumentFragmentCreateElement_onLoad() throws Exception {
         final String html =
               "<html>\n"
@@ -569,7 +612,7 @@ public class HTMLIFrameElement2Test extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "createIFrame", "fragment append done", "loaded" },
-            IE = { "createIFrame", "fragment append done" })
+            IE8 = { "createIFrame", "fragment append done" })
     public void documentDocumentFragmentCreateElement_onLoad2() throws Exception {
         final String html =
               "<html>\n"
@@ -637,7 +680,7 @@ public class HTMLIFrameElement2Test extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "createIFrame", "fragment append done", "loaded" },
-            IE = { "createIFrame", "fragment append done" })
+            IE8 = { "createIFrame", "fragment append done" })
     public void documentDocumentFragmentCreateElement_onLoad3() throws Exception {
         final String html =
               "<html>\n"
@@ -706,7 +749,7 @@ public class HTMLIFrameElement2Test extends WebDriverTestCase {
     @Test
     @Alerts(DEFAULT = { "left", "right", "bottom", "middle", "top", "wrong", "" },
             IE = { "left", "right", "bottom", "middle", "top", "", "" })
-    @NotYetImplemented(IE)
+    @NotYetImplemented(IE8)
     public void getAlign() throws Exception {
         final String html
             = "<html><body>\n"
@@ -733,7 +776,7 @@ public class HTMLIFrameElement2Test extends WebDriverTestCase {
     @Test
     @Alerts(DEFAULT = { "CenTer", "8", "foo", "left", "right", "bottom", "middle", "top" },
             IE = { "center", "error", "center", "error", "center", "left", "right", "bottom", "middle", "top" })
-    @NotYetImplemented(IE)
+    @NotYetImplemented(IE8)
     public void setAlign() throws Exception {
         final String html
             = "<html><body>\n"

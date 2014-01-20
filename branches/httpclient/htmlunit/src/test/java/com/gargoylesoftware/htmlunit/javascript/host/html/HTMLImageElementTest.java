@@ -15,6 +15,7 @@
 package com.gargoylesoftware.htmlunit.javascript.host.html;
 
 import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF17;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF24;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -43,6 +44,7 @@ import com.gargoylesoftware.htmlunit.util.NameValuePair;
  * @author <a href="mailto:george@murnock.com">George Murnock</a>
  * @author Marc Guillemot
  * @author Ronald Brill
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HTMLImageElementTest extends WebDriverTestCase {
@@ -51,7 +53,8 @@ public class HTMLImageElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "[object HTMLImageElement]", IE = "[object]")
+    @Alerts(DEFAULT = "[object HTMLImageElement]",
+            IE8 = "[object]")
     public void simpleScriptable() throws Exception {
         final String html = "<html><head>\n"
             + "<script>\n"
@@ -61,6 +64,26 @@ public class HTMLImageElementTest extends WebDriverTestCase {
             + "</script>\n"
             + "</head><body onload='test()'>\n"
             + "  <img id='myId'>\n"
+            + "</body></html>";
+
+        loadPageWithAlerts2(html);
+    }
+
+    /**
+     * @throws Exception if the test fails
+     */
+    @Test
+    @Alerts(DEFAULT = "[object HTMLImageElement]",
+            IE8 = "[object]")
+    public void simpleScriptable2() throws Exception {
+        final String html = "<html><head>\n"
+            + "<script>\n"
+            + "  function test() {\n"
+            + "    alert(document.getElementById('myId'));\n"
+            + "  }\n"
+            + "</script>\n"
+            + "</head><body onload='test()'>\n"
+            + "  <image id='myId'>\n"
             + "</body></html>";
 
         loadPageWithAlerts2(html);
@@ -208,15 +231,11 @@ public class HTMLImageElementTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = { "left", "right", "center", "justify", "bottom", "middle",
-                "top", "absbottom", "absmiddle", "baseline", "texttop", "wrong", "" },
-            FF10 = { "left", "right", "middle", "justify", "bottom", "middle",
-                "top", "absbottom", "absmiddle", "bottom", "texttop", "wrong", "" },
-            FF17 = { "left", "right", "middle", "justify", "bottom", "middle",
+    @Alerts(DEFAULT = { "left", "right", "middle", "justify", "bottom", "middle",
                     "top", "absbottom", "absmiddle", "bottom", "texttop", "wrong", "" },
             IE = { "left", "right", "center", "", "bottom", "middle",
                 "top", "absBottom", "absMiddle", "baseline", "textTop", "", "" })
-    @NotYetImplemented(FF17)
+    @NotYetImplemented({ FF17, FF24 })
     public void getAlign() throws Exception {
         final String html
             = "<html><body>\n"
@@ -247,16 +266,12 @@ public class HTMLImageElementTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(DEFAULT = { "CenTer", "8", "foo", "left", "right", "center", "justify",
-                "bottom", "middle", "top", "absbottom", "absmiddle", "baseline", "texttop" },
-            FF10 = { "CenTer", "8", "foo", "left", "right", "middle", "justify",
-                "bottom", "middle", "top", "absbottom", "absmiddle", "bottom", "texttop" },
-            FF17 = { "CenTer", "8", "foo", "left", "right", "middle", "justify",
+    @Alerts(DEFAULT = { "CenTer", "8", "foo", "left", "right", "middle", "justify",
                 "bottom", "middle", "top", "absbottom", "absmiddle", "bottom", "texttop" },
             IE = { "center", "error", "center", "error", "center", "left", "right",
                 "center", "error", "center", "bottom", "middle", "top", "absBottom",
                 "absMiddle", "baseline", "textTop" })
-    @NotYetImplemented(FF17)
+    @NotYetImplemented({ FF17, FF24 })
     public void setAlign() throws Exception {
         final String html
             = "<html><body>\n"
@@ -300,8 +315,9 @@ public class HTMLImageElementTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "number: 300", "number: 200", "number: 24", "number: 24", "number: 24", "number: 24" },
+            CHROME = { "number: 300", "number: 200", "number: 0", "number: 0", "number: 0", "number: 0" },
             IE = { "number: 300", "number: 200", "number: 28", "number: 30", "number: 1", "number: 1" },
-            CHROME = { "number: 300", "number: 200", "number: 0", "number: 0", "number: 0", "number: 0" })
+            IE11 = { "number: 300", "number: 200", "number: 28", "number: 30", "number: 28", "number: 30" })
     public void testWidthHeightWithoutSource() throws Exception {
         final String html = "<html><head>\n"
             + "<script>\n"
@@ -371,8 +387,8 @@ public class HTMLImageElementTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "number: 300", "number: 200", "number: 24", "number: 24", "number: 24", "number: 24" },
-            IE = { "number: 300", "number: 200", "number: 1", "number: 1", "number: 1", "number: 1" },
-            CHROME = { "number: 300", "number: 200", "number: 18", "number: 20", "number: 18", "number: 20" })
+            CHROME = { "number: 300", "number: 200", "number: 18", "number: 20", "number: 18", "number: 20" },
+            IE = { "number: 300", "number: 200", "number: 1", "number: 1", "number: 1", "number: 1" })
     public void testWidthHeightInvalidSource() throws Exception {
         getMockWebConnection().setDefaultResponse("");
 

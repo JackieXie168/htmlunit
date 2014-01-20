@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.gargoylesoftware.htmlunit.javascript.host.svg;
+package com.gargoylesoftware.htmlunit.javascript.host;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,40 +20,40 @@ import org.junit.runner.RunWith;
 import com.gargoylesoftware.htmlunit.BrowserRunner;
 import com.gargoylesoftware.htmlunit.BrowserRunner.Alerts;
 import com.gargoylesoftware.htmlunit.WebDriverTestCase;
-import com.gargoylesoftware.htmlunit.html.HtmlPageTest;
 
 /**
- * Tests for {@link SVGAngle}.
+ * Tests for {@link ClientRect}.
  *
  * @version $Revision$
- * @author Marc Guillemot
+ * @author Ahmed Ashour
  */
 @RunWith(BrowserRunner.class)
-public class SvgAngleTest extends WebDriverTestCase {
+public class ClientRectTest extends WebDriverTestCase {
 
     /**
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = { "[object SVGAngle]", "0", "1", "2", "3", "4" }, IE = "undefined")
-    public void simpleScriptable() throws Exception {
-        final String html = HtmlPageTest.STANDARDS_MODE_PREFIX_
-            + "<html><head>\n"
-            + "<script>\n"
+    @Alerts(DEFAULT = { "100", "400", "100", "450", "50", "0" },
+            IE8 = { "102", "402", "102", "452", "undefined", "undefined" })
+    public void width() throws Exception {
+        final String html = "<html><head><title>foo</title><script>\n"
             + "  function test() {\n"
-            + "    alert(window.SVGAngle);\n"
-            + "    if (window.SVGAngle) {\n"
-            + "      alert(SVGAngle.SVG_ANGLETYPE_UNKNOWN);\n"
-            + "      alert(SVGAngle.SVG_ANGLETYPE_UNSPECIFIED);\n"
-            + "      alert(SVGAngle.SVG_ANGLETYPE_DEG);\n"
-            + "      alert(SVGAngle.SVG_ANGLETYPE_RAD);\n"
-            + "      alert(SVGAngle.SVG_ANGLETYPE_GRAD);\n"
-            + "    }\n"
+            + "    try {\n"
+            + "    var d1 = document.getElementById('div1');\n"
+            + "    var pos = d1.getBoundingClientRect();\n"
+            + "    alert(pos.top);\n"
+            + "    alert(pos.left);\n"
+            + "    alert(pos.bottom);\n"
+            + "    alert(pos.right);\n"
+            + "    alert(pos.width);\n"
+            + "    alert(pos.height);\n"
+            + "    } catch (e) { alert('exception');}\n"
             + "  }\n"
-            + "</script>\n"
-            + "</head><body onload='test()'>\n"
+            + "</script></head><body onload='test()'>\n"
+            + "<div id='outer' style='position: absolute; left: 400px; top: 100px; width: 50px; height: 80px;'>"
+            + "<div id='div1'></div></div>"
             + "</body></html>";
-
         loadPageWithAlerts2(html);
     }
 }

@@ -17,6 +17,7 @@ package com.gargoylesoftware.htmlunit.javascript.host;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,21 +42,24 @@ import com.gargoylesoftware.htmlunit.html.HtmlTextArea;
  * @version $Revision$
  * @author Ahmed Ashour
  * @author Ronald Brill
+ * @author Frank Danek
  */
 @RunWith(Parameterized.class)
 public class ObjectsTest extends SimpleWebTestCase {
 
     private static List<String> IE8_;
     private static List<String> IE9_;
-    private static List<String> FF3_6_;
-    private static List<String> FF10_;
+    private static List<String> IE11_;
     private static List<String> FF17_;
+    private static List<String> FF24_;
+    private static List<String> CHROME_;
 
     private static List<String> IE8_SIMULATED_;
     private static List<String> IE9_SIMULATED_;
-    private static List<String> FF3_6_SIMULATED_;
-    private static List<String> FF10_SIMULATED_;
+    private static List<String> IE11_SIMULATED_;
     private static List<String> FF17_SIMULATED_;
+    private static List<String> FF24_SIMULATED_;
+    private static List<String> CHROME_SIMULATED_;
 
     private final String name_;
     private final BrowserVersion browserVersion_;
@@ -65,41 +69,49 @@ public class ObjectsTest extends SimpleWebTestCase {
      * @return list of all test parameters
      * @throws Exception If an error occurs
      */
-    @Parameters
+    @Parameters(name = "{index}: {0} - {1}")
     public static Collection<Object[]> data() throws Exception {
         IE8_ = getObjects(BrowserVersion.INTERNET_EXPLORER_8);
         IE9_ = getObjects(BrowserVersion.INTERNET_EXPLORER_9);
-        FF3_6_ = getObjects(BrowserVersion.FIREFOX_3_6);
-        FF10_ = getObjects(BrowserVersion.FIREFOX_10);
+        IE11_ = getObjects(BrowserVersion.INTERNET_EXPLORER_11);
         FF17_ = getObjects(BrowserVersion.FIREFOX_17);
-        Assert.assertEquals(IE8_.size(), IE9_.size());
-        Assert.assertEquals(IE8_.size(), FF3_6_.size());
-        Assert.assertEquals(IE8_.size(), FF10_.size());
+        FF24_ = getObjects(BrowserVersion.FIREFOX_24);
+        CHROME_ = getObjects(BrowserVersion.CHROME);
+//        Assert.assertEquals(IE8_.size(), IE9_.size());
+        Assert.assertEquals(IE8_.size(), IE11_.size());
         Assert.assertEquals(IE8_.size(), FF17_.size());
+        Assert.assertEquals(IE8_.size(), FF24_.size());
+        Assert.assertEquals(IE8_.size(), CHROME_.size());
         IE8_SIMULATED_ = getSimulatedObjects(BrowserVersion.INTERNET_EXPLORER_8);
         IE9_SIMULATED_ = getSimulatedObjects(BrowserVersion.INTERNET_EXPLORER_9);
-        FF3_6_SIMULATED_ = getSimulatedObjects(BrowserVersion.FIREFOX_3_6);
-        FF10_SIMULATED_ = getSimulatedObjects(BrowserVersion.FIREFOX_10);
+        IE11_SIMULATED_ = getSimulatedObjects(BrowserVersion.INTERNET_EXPLORER_11);
         FF17_SIMULATED_ = getSimulatedObjects(BrowserVersion.FIREFOX_17);
+        FF24_SIMULATED_ = getSimulatedObjects(BrowserVersion.FIREFOX_24);
+        CHROME_SIMULATED_ = getSimulatedObjects(BrowserVersion.CHROME);
         Assert.assertEquals(IE8_SIMULATED_.size(), IE9_SIMULATED_.size());
-        Assert.assertEquals(IE8_SIMULATED_.size(), FF3_6_SIMULATED_.size());
-        Assert.assertEquals(IE8_SIMULATED_.size(), FF10_SIMULATED_.size());
+        Assert.assertEquals(IE8_SIMULATED_.size(), IE11_SIMULATED_.size());
         Assert.assertEquals(IE8_SIMULATED_.size(), FF17_SIMULATED_.size());
+        Assert.assertEquals(IE8_SIMULATED_.size(), FF24_SIMULATED_.size());
+        Assert.assertEquals(IE8_SIMULATED_.size(), CHROME_SIMULATED_.size());
         final Collection<Object[]> list = new ArrayList<Object[]>();
         for (final String line : IE8_) {
             final String name = line.substring(0, line.indexOf(':'));
 //            list.add(new Object[] {name, BrowserVersion.INTERNET_EXPLORER_8});
 //            list.add(new Object[] {name, BrowserVersion.INTERNET_EXPLORER_9});
-            list.add(new Object[] {name, BrowserVersion.FIREFOX_3_6});
-//            list.add(new Object[] {name, BrowserVersion.FIREFOX_10});
-//            list.add(new Object[] {name, BrowserVersion.FIREFOX_17});
+//            list.add(new Object[] {name, BrowserVersion.INTERNET_EXPLORER_11});
+            list.add(new Object[] {name, BrowserVersion.FIREFOX_17});
+            list.add(new Object[] {name, BrowserVersion.FIREFOX_24});
+//            list.add(new Object[] {name, BrowserVersion.CHROME});
         }
         return list;
     }
 
     private static List<String> getObjects(final BrowserVersion browserVersion) throws Exception {
-        final URL url = ObjectsTest.class.getClassLoader().getResource(
-                "objects/objects." + browserVersion.getNickname() + ".txt");
+        final String fileName = "objects/objects." + browserVersion.getNickname() + ".txt";
+        final URL url = ObjectsTest.class.getClassLoader().getResource(fileName);
+        if (null == url) {
+            throw new FileNotFoundException(fileName);
+        }
         return FileUtils.readLines(new File(url.toURI()));
     }
 
@@ -136,17 +148,21 @@ public class ObjectsTest extends SimpleWebTestCase {
             realList = IE9_;
             simulatedList = IE9_SIMULATED_;
         }
-        else if (browserVersion_ == BrowserVersion.FIREFOX_3_6) {
-            realList = FF3_6_;
-            simulatedList = FF3_6_SIMULATED_;
-        }
-        else if (browserVersion_ == BrowserVersion.FIREFOX_10) {
-            realList = FF10_;
-            simulatedList = FF10_SIMULATED_;
+        else if (browserVersion_ == BrowserVersion.INTERNET_EXPLORER_11) {
+            realList = IE11_;
+            simulatedList = IE11_SIMULATED_;
         }
         else if (browserVersion_ == BrowserVersion.FIREFOX_17) {
             realList = FF17_;
             simulatedList = FF17_SIMULATED_;
+        }
+        else if (browserVersion_ == BrowserVersion.FIREFOX_24) {
+            realList = FF24_;
+            simulatedList = FF24_SIMULATED_;
+        }
+        else if (browserVersion_ == BrowserVersion.CHROME) {
+            realList = CHROME_;
+            simulatedList = CHROME_SIMULATED_;
         }
         else {
             fail("Unknown BrowserVersion " + browserVersion_);

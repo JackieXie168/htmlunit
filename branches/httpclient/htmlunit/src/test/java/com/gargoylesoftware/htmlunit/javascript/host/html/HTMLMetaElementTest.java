@@ -27,6 +27,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @version $Revision$
  * @author Ahmed Ashour
  * @author Ronald Brill
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HTMLMetaElementTest extends WebDriverTestCase {
@@ -35,8 +36,8 @@ public class HTMLMetaElementTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(IE = { "", "text/html; charset=utf-8", "Content-Type", "", "", "" },
-            FF = { "undefined", "text/html; charset=utf-8", "Content-Type", "", "", "undefined" })
+    @Alerts(FF = { "undefined", "text/html; charset=utf-8", "Content-Type", "", "", "undefined" },
+            IE = { "", "text/html; charset=utf-8", "Content-Type", "", "", "" })
     public void name() throws Exception {
         final String html =
             "<html>\n"

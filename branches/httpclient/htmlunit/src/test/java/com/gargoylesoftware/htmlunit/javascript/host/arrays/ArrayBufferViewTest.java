@@ -26,6 +26,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  *
  * @version $Revision$
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class ArrayBufferViewTest extends WebDriverTestCase {
@@ -34,7 +35,8 @@ public class ArrayBufferViewTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = "exception", FF3_6 = "exception", DEFAULT = { "18", "93", "42" })
+    @Alerts(DEFAULT = { "18", "93", "42" },
+            IE8 = "exception")
     public void set_int8() throws Exception {
         final String html
             = "<html><head><title>foo</title><script>\n"
@@ -59,7 +61,8 @@ public class ArrayBufferViewTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = "exception", FF3_6 = "exception", DEFAULT = { "3", "2", "3", "-1" })
+    @Alerts(DEFAULT = { "3", "2", "3", "-1" },
+            IE8 = "exception")
     public void subarray_int8() throws Exception {
         final String html
             = "<html><head><title>foo</title><script>\n"

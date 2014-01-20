@@ -14,7 +14,8 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host;
 
-import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF3_6;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.CHROME;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF;
 
 import java.util.List;
 
@@ -25,6 +26,7 @@ import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
 import com.gargoylesoftware.htmlunit.BrowserRunner;
 import com.gargoylesoftware.htmlunit.BrowserRunner.Alerts;
+import com.gargoylesoftware.htmlunit.BrowserRunner.BuggyWebDriver;
 import com.gargoylesoftware.htmlunit.BrowserRunner.NotYetImplemented;
 import com.gargoylesoftware.htmlunit.WebDriverTestCase;
 
@@ -34,6 +36,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @version $Revision$
  * @author Ahmed Ashour
  * @author Marc Guillemot
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class StorageTest extends WebDriverTestCase {
@@ -42,10 +45,8 @@ public class StorageTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE = { "undefined", "undefined", "undefined" }, IE8 = { "undefined", "[object]", "[object]" },
-            FF = { "[object StorageList]", "[object Storage]", "[object Storage]" },
-            FF17 = { "undefined", "[object Storage]", "[object Storage]" })
-    @NotYetImplemented(FF3_6)
+    @Alerts(DEFAULT = { "undefined", "[object Storage]", "[object Storage]" },
+            IE8 = { "undefined", "[object]", "[object]" })
     public void storage() throws Exception {
         final String html
             = "<html><head></head><body>\n"
@@ -77,8 +78,7 @@ public class StorageTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE8 = { "string", "1" },
-            FF = { "string", "1" })
+    @Alerts({ "string", "1" })
     public void localStorage() throws Exception {
         final String firstHtml
             = "<html><head></head><body>\n"
@@ -111,8 +111,7 @@ public class StorageTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(IE8 = { "0", "2", "there", "world", "1", "0" },
-            FF = { "0", "2", "there", "world", "1", "0" })
+    @Alerts({ "0", "2", "there", "world", "1", "0" })
     public void sessionStorage() throws Exception {
         final String html
             = "<html><head></head><body>\n"
@@ -140,8 +139,6 @@ public class StorageTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF3_6 = { "[object StorageObsolete]", "error" },
-            FF10 = { "[object StorageObsolete]", "error" })
     public void globalStorage() throws Exception {
         final String html
             = "<html><head></head><body>\n"
@@ -163,8 +160,14 @@ public class StorageTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "null", IE6 = { "exception", "exception" }, IE7 = { "exception", "exception" })
-    public void localStorageShouldNotBeShared() throws Exception {
+    @Alerts(DEFAULT = "I was here",
+            IE8 = "")
+    @BuggyWebDriver({ CHROME, FF })
+    // The way ChromeDriver and FFDriver start the real browsers clears the LocalStorage somehow.
+    // But when executed manually the LocalStorage is shared.
+    @NotYetImplemented
+    // TODO somehow persist the LocalStorage
+    public void localStorageShouldBeShared() throws Exception {
         final String html1 = "<html><body><script>\n"
             + "try {\n"
             + "  localStorage.clear();\n"
@@ -193,7 +196,7 @@ public class StorageTest extends WebDriverTestCase {
         }
         finally {
             if (!(driver2 instanceof HtmlUnitDriver)) {
-                driver2.quit();
+                shutDownAll();
             }
         }
     }

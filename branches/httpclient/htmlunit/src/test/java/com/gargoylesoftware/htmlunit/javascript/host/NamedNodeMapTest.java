@@ -20,6 +20,7 @@ import org.junit.runner.RunWith;
 import com.gargoylesoftware.htmlunit.BrowserRunner;
 import com.gargoylesoftware.htmlunit.BrowserRunner.Alerts;
 import com.gargoylesoftware.htmlunit.BrowserRunner.NotYetImplemented;
+import com.gargoylesoftware.htmlunit.javascript.host.xml.XMLDocumentTest;
 import com.gargoylesoftware.htmlunit.WebDriverTestCase;
 
 /**
@@ -29,6 +30,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @author Marc Guillemot
  * @author Daniel Gredler
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class NamedNodeMapTest extends WebDriverTestCase {
@@ -38,7 +40,9 @@ public class NamedNodeMapTest extends WebDriverTestCase {
      */
     @Test
     @NotYetImplemented()
-    @Alerts(FF = { "baz=blah", "foo=bar", "id=f", "name=f" }, IE = { "CORRECT THE EXPECTATION PLEASE!!!!" })
+    @Alerts(FF = { "baz=blah", "foo=bar", "id=f", "name=f" },
+            IE = { "CORRECT THE EXPECTATION PLEASE!!!!" },
+            IE11 = { "name=f", "id=f", "baz=blah", "foo=bar" })
     public void testAttributes() throws Exception {
         final String html =
               "<html>\n"
@@ -64,7 +68,8 @@ public class NamedNodeMapTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts({ "name", "f", "name", "f", "name", "f", "name", "f", "null" })
+    @Alerts(DEFAULT = { "name", "f", "name", "f", "name", "f", "name", "f", "null" },
+            IE8 = { "name", "f", "name", "f", "name", "f", "exception", "null" })
     public void testGetNamedItem_HTML() throws Exception {
         final String html =
               "<html>\n"
@@ -76,10 +81,14 @@ public class NamedNodeMapTest extends WebDriverTestCase {
             + "    alert(f.attributes.getNamedItem('name').nodeValue);\n"
             + "    alert(f.attributes.getNamedItem('NaMe').nodeName);\n"
             + "    alert(f.attributes.getNamedItem('nAmE').nodeValue);\n"
-            + "    alert(f.attributes.name.nodeName);\n"
-            + "    alert(f.attributes.name.nodeValue);\n"
-            + "    alert(f.attributes.NaMe.nodeName);\n"
-            + "    alert(f.attributes.nAmE.nodeValue);\n"
+            + "    try {\n"
+            + "      alert(f.attributes.name.nodeName);\n"
+            + "      alert(f.attributes.name.nodeValue);\n"
+            + "    } catch(e) { alert('exception'); }\n"
+            + "    try {\n"
+            + "      alert(f.attributes.NaMe.nodeName);\n"
+            + "      alert(f.attributes.nAmE.nodeValue);\n"
+            + "    } catch(e) { alert('exception'); }\n"
             + "    alert(f.attributes.getNamedItem('notExisting'));\n"
             + "  }\n"
             + "</script>\n"
@@ -96,27 +105,23 @@ public class NamedNodeMapTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts({ "name", "y", "name", "y", "null", "undefined", "null" })
+    @Alerts(DEFAULT = { "name", "y", "name", "y", "null", "undefined", "null" },
+            IE8 = { "name", "y", "exception", "null", "undefined", "null" })
     public void testGetNamedItem_XML() throws Exception {
         final String html = "<html><head><title>foo</title><script>\n"
             + "  function test() {\n"
-            + "    var doc = createXmlDocument();\n"
-            + "    doc.async = false;\n"
-            + "    doc.load('second.xml');\n"
+            + "    var doc = " + XMLDocumentTest.callLoadXMLDocumentFromFile("'second.xml'") + ";\n"
             + "    alert(doc.documentElement.attributes.getNamedItem('name').nodeName);\n"
             + "    alert(doc.documentElement.attributes.getNamedItem('name').nodeValue);\n"
-            + "    alert(doc.documentElement.attributes.name.nodeName);\n"
-            + "    alert(doc.documentElement.attributes.name.nodeValue);\n"
+            + "    try {\n"
+            + "      alert(doc.documentElement.attributes.name.nodeName);\n"
+            + "      alert(doc.documentElement.attributes.name.nodeValue);\n"
+            + "    } catch(e) { alert('exception'); }\n"
             + "    alert(doc.documentElement.attributes.getNamedItem('NaMe'));\n"
             + "    alert(doc.documentElement.attributes.NaMe);\n"
             + "    alert(doc.documentElement.attributes.getNamedItem('nonExistent'));\n"
             + "  }\n"
-            + "  function createXmlDocument() {\n"
-            + "    if (document.implementation && document.implementation.createDocument)\n"
-            + "      return document.implementation.createDocument('', '', null);\n"
-            + "    else if (window.ActiveXObject)\n"
-            + "      return new ActiveXObject('Microsoft.XMLDOM');\n"
-            + "  }\n"
+            + XMLDocumentTest.LOAD_XML_DOCUMENT_FROM_FILE_FUNCTION
             + "</script></head><body onload='test()'>\n"
             + "</body></html>";
 
@@ -130,7 +135,8 @@ public class NamedNodeMapTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(IE = { "[object]", "[object]", "[object]" }, FF = { "undefined", "undefined", "undefined" })
+    @Alerts(DEFAULT = { "undefined", "undefined", "undefined" },
+            IE8 = { "[object]", "[object]", "[object]" })
     public void unspecifiedAttributes() throws Exception {
         final String html =
               "<html>\n"
