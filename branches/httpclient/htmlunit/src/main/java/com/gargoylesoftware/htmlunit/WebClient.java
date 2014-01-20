@@ -1212,7 +1212,6 @@ public class WebClient implements Serializable {
      * @return the resultant {@link WebResponse}
      */
     private WebResponse loadWebResponseFromWebConnection(final WebRequest webRequest) throws IOException {
-
         URL url = webRequest.getUrl();
         final HttpMethod method = webRequest.getHttpMethod();
         final List<NameValuePair> parameters = webRequest.getRequestParameters();
