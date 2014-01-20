@@ -29,6 +29,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  *
  * @version $Revision$
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HtmlQuoteTest extends WebDriverTestCase {
@@ -37,7 +38,9 @@ public class HtmlQuoteTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = { "[object HTMLQuoteElement]", "[object HTMLQuoteElement]" }, IE = { "[object]", "[object]" })
+    @Alerts(DEFAULT = { "[object HTMLQuoteElement]", "[object HTMLQuoteElement]" },
+            IE = { "[object]", "[object]" },
+            IE11 = { "[object HTMLQuoteElement]", "[object HTMLBlockElement]" })
     public void simpleScriptable() throws Exception {
         final String html = "<html><head>\n"
             + "<script>\n"

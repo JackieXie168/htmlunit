@@ -33,6 +33,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadBase;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.By;
@@ -40,6 +41,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 
 import com.gargoylesoftware.htmlunit.BrowserRunner;
+import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.BrowserRunner.Alerts;
 import com.gargoylesoftware.htmlunit.WebDriverTestCase;
 
@@ -49,6 +51,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @version $Revision$
  * @author Ahmed Ashour
  * @author Ronald Brill
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HtmlFileInput2Test extends WebDriverTestCase {
@@ -232,17 +235,24 @@ public class HtmlFileInput2Test extends WebDriverTestCase {
         driver.findElement(By.name("myInput")).sendKeys(path);
         driver.findElement(By.id("mySubmit")).click();
 
-        if (getBrowserVersion().isIE()) {
+        String pageSource = driver.getPageSource();
+        // hack for selenium
+        int count = 0;
+        while (count < 100 && StringUtils.isEmpty(pageSource)) {
+            pageSource = driver.getPageSource();
+            count++;
+        }
+
+        if (getBrowserVersion().isIE() && BrowserVersion.INTERNET_EXPLORER_11 != getBrowserVersion()) {
             final Pattern pattern = Pattern
                 .compile("Content-Disposition: form-data; name=\"myInput\";"
                         + " filename=\".*test-classes[\\\\/]realm\\.properties\"");
-            final Matcher matcher = pattern.matcher(driver.getPageSource());
+            final Matcher matcher = pattern.matcher(pageSource);
             assertTrue(matcher.find());
             return;
         }
-
         // all other browsers
-        assertTrue(driver.getPageSource()
+        assertTrue(pageSource
                 .contains("Content-Disposition: form-data; name=\"myInput\"; filename=\"realm.properties\""));
     }
 
@@ -350,7 +360,7 @@ public class HtmlFileInput2Test extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "initial-initial", "initial-initial", "newDefault-newDefault", "newDefault-newDefault" },
-            IE = { "initial-initial", "initial-initial", "initial-newDefault", "initial-newDefault" })
+            IE8 = { "initial-initial", "initial-initial", "initial-newDefault", "initial-newDefault" })
     public void resetByClick() throws Exception {
         final String html = "<html><head><title>foo</title>\n"
             + "<script>\n"
@@ -383,7 +393,7 @@ public class HtmlFileInput2Test extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "initial-initial", "initial-initial", "newDefault-newDefault", "newDefault-newDefault" },
-            IE = { "initial-initial", "initial-initial", "initial-newDefault", "initial-newDefault" })
+            IE8 = { "initial-initial", "initial-initial", "initial-newDefault", "initial-newDefault" })
     public void resetByJS() throws Exception {
         final String html = "<html><head><title>foo</title>\n"
             + "<script>\n"

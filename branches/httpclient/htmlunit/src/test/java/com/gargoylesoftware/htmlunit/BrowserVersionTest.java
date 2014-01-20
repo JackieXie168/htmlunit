@@ -22,6 +22,7 @@ import org.junit.Test;
  * @version $Revision$
  * @author Ahmed Ashour
  * @author Marc Guillemot
+ * @author Frank Danek
  */
 public class BrowserVersionTest extends SimpleWebTestCase {
 
@@ -30,15 +31,11 @@ public class BrowserVersionTest extends SimpleWebTestCase {
      */
     @Test
     public void getBrowserVersionNumeric() {
-        assertEquals(3.6f, BrowserVersion.FIREFOX_3_6.getBrowserVersionNumeric());
-        assertEquals(10.0f, BrowserVersion.FIREFOX_10.getBrowserVersionNumeric());
-        assertEquals(17.0f, BrowserVersion.FIREFOX_17.getBrowserVersionNumeric());
-        assertEquals(6.0f, BrowserVersion.INTERNET_EXPLORER_6.getBrowserVersionNumeric());
-        assertEquals(7.0f, BrowserVersion.INTERNET_EXPLORER_7.getBrowserVersionNumeric());
+        assertEquals(24.0f, BrowserVersion.FIREFOX_24.getBrowserVersionNumeric());
         assertEquals(8.0f, BrowserVersion.INTERNET_EXPLORER_8.getBrowserVersionNumeric());
         assertEquals(9.0f, BrowserVersion.INTERNET_EXPLORER_9.getBrowserVersionNumeric());
-        assertEquals(16.0f, BrowserVersion.CHROME_16.getBrowserVersionNumeric());
-        assertEquals(29.0f, BrowserVersion.CHROME.getBrowserVersionNumeric());
+        assertEquals(11.0f, BrowserVersion.INTERNET_EXPLORER_11.getBrowserVersionNumeric());
+        assertEquals(31.0f, BrowserVersion.CHROME.getBrowserVersionNumeric());
     }
 
     /**
@@ -46,7 +43,7 @@ public class BrowserVersionTest extends SimpleWebTestCase {
      */
     @Test
     public void testClone() {
-        final BrowserVersion ff = BrowserVersion.FIREFOX_3_6;
+        final BrowserVersion ff = BrowserVersion.FIREFOX_24;
         final BrowserVersion clone = ff.clone();
 
         assertFalse(ff == clone);

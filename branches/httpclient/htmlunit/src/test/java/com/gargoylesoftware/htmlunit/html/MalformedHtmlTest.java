@@ -14,6 +14,8 @@
  */
 package com.gargoylesoftware.htmlunit.html;
 
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE8;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.By;
@@ -23,8 +25,6 @@ import com.gargoylesoftware.htmlunit.BrowserRunner;
 import com.gargoylesoftware.htmlunit.BrowserRunner.Alerts;
 import com.gargoylesoftware.htmlunit.BrowserRunner.NotYetImplemented;
 import com.gargoylesoftware.htmlunit.WebDriverTestCase;
-import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF3_6;
-import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE;
 
 /**
  * Set of tests for ill formed HTML code.
@@ -32,6 +32,7 @@ import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE;
  * @author Marc Guillemot
  * @author Sudhan Moghe
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class MalformedHtmlTest extends WebDriverTestCase {
@@ -161,6 +162,8 @@ public class MalformedHtmlTest extends WebDriverTestCase {
      */
     @Test
     @Alerts("12345")
+    @NotYetImplemented(IE8)
+    // Our HTML fixed done during parsing create an HTML different from the IE8 one
     public void testWrongHtml_TagBeforeHtml() throws Exception {
         final String html = "<div>\n"
             + "<html>\n"
@@ -183,8 +186,8 @@ public class MalformedHtmlTest extends WebDriverTestCase {
     * @throws Exception if an error occurs
     */
     @Test
-    @NotYetImplemented({ IE, FF3_6 })
-    @Alerts(FF3_6 = "1", IE = "0")
+    @Alerts(IE8 = "0")
+    @NotYetImplemented(IE8)
     public void missingSingleQuote() throws Exception {
         final String html = "<html><body>"
             + "Go to <a href='http://blah.com>blah</a> now."
@@ -198,8 +201,8 @@ public class MalformedHtmlTest extends WebDriverTestCase {
     * @throws Exception if an error occurs
     */
     @Test
-    @NotYetImplemented({ IE, FF3_6 })
-    @Alerts(FF3_6 = "1", IE = "0")
+    @Alerts(IE8 = "0")
+    @NotYetImplemented(IE8)
     public void missingDoubleQuote() throws Exception {
         final String html = "<html><body>"
             + "Go to <a href=\"http://blah.com>blah</a> now."

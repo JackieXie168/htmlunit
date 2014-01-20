@@ -14,12 +14,14 @@
  */
 package com.gargoylesoftware.htmlunit.libraries;
 
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF17;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF24;
 import static org.junit.Assert.assertNotNull;
 
-import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.By;
@@ -27,7 +29,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import com.gargoylesoftware.htmlunit.BrowserRunner;
-import com.gargoylesoftware.htmlunit.BrowserRunner.Browser;
 import com.gargoylesoftware.htmlunit.BrowserRunner.NotYetImplemented;
 import com.gargoylesoftware.htmlunit.WebDriverTestCase;
 
@@ -39,6 +40,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * </p>
  * @version $Revision$
  * @author Marc Guillemot
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class MochiKitTest extends WebDriverTestCase {
@@ -141,7 +143,7 @@ public class MochiKitTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @NotYetImplemented(Browser.FF17)
+    @NotYetImplemented({ FF17, FF24 })
     public void style() throws Exception {
         doTest("Style");
     }
@@ -155,12 +157,11 @@ public class MochiKitTest extends WebDriverTestCase {
     }
 
     private void doTest(final String testName) throws Exception {
-        final URL url = getClass().getClassLoader().getResource(BASE_FILE_PATH
-            + "/tests/test_MochiKit-" + testName + ".html");
+        final String url = "http://localhost:" + PORT + "/tests/test_MochiKit-" + testName + ".html";
         assertNotNull(url);
 
         final WebDriver driver = getWebDriver();
-        driver.get(url.toExternalForm());
+        driver.get(url);
 
         // make single test results visible
         driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
@@ -182,5 +183,14 @@ public class MochiKitTest extends WebDriverTestCase {
     private String loadExpectation(final String testName) throws Exception {
         final String resourcePrefix = "/" + getLibraryDir() + "/test-" + testName;
         return loadExpectation(resourcePrefix, ".expected.txt");
+    }
+
+    /**
+     * Performs pre-test initialization.
+     * @throws Exception if an error occurs
+     */
+    @Before
+    public void setUp() throws Exception {
+        startWebServer("src/test/resources/libraries/MochiKit/1.4.1", null, null);
     }
 }

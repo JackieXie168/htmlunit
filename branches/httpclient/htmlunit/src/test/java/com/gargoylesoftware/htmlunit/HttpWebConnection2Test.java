@@ -34,6 +34,7 @@ import com.gargoylesoftware.htmlunit.util.NameValuePair;
  * @version $Revision$
  * @author Marc Guillemot
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HttpWebConnection2Test extends WebDriverTestCase {
@@ -62,7 +63,8 @@ public class HttpWebConnection2Test extends WebDriverTestCase {
         assertEquals(null, lastRequest.getProxyHost());
         assertEquals(null, lastRequest.getRequestBody());
         assertEquals(getDefaultUrl() + "foo", lastRequest.getUrl());
-        final String expectedHeaders = "Connection: keep-alive\n"
+        final String expectedHeaders = ""
+            + "Connection: keep-alive\n"
             + "Content-Length: 48\n"
             + "Content-Type: application/x-www-form-urlencoded\n"
             + "Host: localhost:" + PORT + "\n"
@@ -104,6 +106,10 @@ public class HttpWebConnection2Test extends WebDriverTestCase {
             sb.append(": ");
             if (caseInsensitiveHeaders.contains(headerNameLower)) {
                 sb.append(headerEntry.getValue().toLowerCase(Locale.ENGLISH));
+            }
+            else if ("user-agent".equals(headerNameLower)) {
+                // ignore the 64bit difference
+                sb.append(headerEntry.getValue().replace("WOW64; ", ""));
             }
             else {
                 sb.append(headerEntry.getValue());

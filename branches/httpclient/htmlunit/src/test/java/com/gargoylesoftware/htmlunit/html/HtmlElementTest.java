@@ -39,6 +39,7 @@ import com.gargoylesoftware.htmlunit.SimpleWebTestCase;
  * @author Daniel Gredler
  * @author Ahmed Ashour
  * @author Sudhan Moghe
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HtmlElementTest extends SimpleWebTestCase {
@@ -902,7 +903,7 @@ public class HtmlElementTest extends SimpleWebTestCase {
         final NodeList divs = body.getElementsByTagName("div");
         assertEquals(3, divs.getLength());
 
-        final HtmlDivision newDiv = new HtmlDivision(null, HtmlDivision.TAG_NAME, page, null);
+        final HtmlDivision newDiv = new HtmlDivision(HtmlDivision.TAG_NAME, page, null);
         body.appendChild(newDiv);
         assertEquals(4, divs.getLength());
     }
@@ -1239,14 +1240,12 @@ public class HtmlElementTest extends SimpleWebTestCase {
 
         final HtmlPage page = loadPage(html);
 
-        final String htmlDiv1XML = "<div id=\"div1\" onclick=\"alert('hello')\">" + LINE_SEPARATOR
-            + "  click me" + LINE_SEPARATOR
-            + "</div>" + LINE_SEPARATOR;
+        final String htmlDiv1XML = "<div id=\"div1\" onclick=\"alert('hello')\">\r\n  click me"
+                + "\r\n</div>\r\n";
         assertEquals(htmlDiv1XML, page.getElementById("div1").asXml());
 
-        final String htmlDiv2XML = "<div id=\"div2\" onclick=\"alert(&quot;hello again&quot;)\">" + LINE_SEPARATOR
-            + "  click me again" + LINE_SEPARATOR
-            + "</div>" + LINE_SEPARATOR;
+        final String htmlDiv2XML = "<div id=\"div2\" onclick=\"alert(&quot;hello again&quot;)\">\r\n  click me again"
+                + "\r\n</div>\r\n";
         assertEquals(htmlDiv2XML, page.getElementById("div2").asXml());
     }
 

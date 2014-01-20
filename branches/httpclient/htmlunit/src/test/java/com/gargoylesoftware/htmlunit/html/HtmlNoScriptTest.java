@@ -29,6 +29,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @version $Revision$
  * @author Ahmed Ashour
  * @author Marc Guillemot
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HtmlNoScriptTest extends WebDriverTestCase {
@@ -60,7 +61,8 @@ public class HtmlNoScriptTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = { "1", "[object Text]" }, IE = { "0", "null" })
+    @Alerts(DEFAULT = { "1", "[object Text]" },
+            IE8 = { "0", "null" })
     public void testChildNodes() throws Exception {
         final String html
             = "<html><head><title>foo</title>\n"

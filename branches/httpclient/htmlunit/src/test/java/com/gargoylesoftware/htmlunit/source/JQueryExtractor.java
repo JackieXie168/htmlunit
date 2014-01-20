@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -34,8 +35,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.gargoylesoftware.htmlunit.BrowserRunner.Browser;
+import com.gargoylesoftware.htmlunit.BrowserRunner.NotYetImplemented;
+import com.gargoylesoftware.htmlunit.libraries.JQuery182Test;
 
 /**
  * Extracts the needed expectation from the real browsers output, this is done by waiting the browser to finish
@@ -54,6 +58,7 @@ import com.gargoylesoftware.htmlunit.BrowserRunner.Browser;
  * @version $Revision$
  * @author Ahmed Ashour
  * @author Marc Guillemot
+ * @author Ronald Brill
  */
 public final class JQueryExtractor {
 
@@ -66,8 +71,9 @@ public final class JQueryExtractor {
      * @throws Exception s
      */
     public static void main(final String[] args) throws Exception {
+        final String version = "1.8.2";
         final File expectationsDir =
-                new File("src/test/resources/libraries/jQuery/1.8.2/expectations");
+                new File("src/test/resources/libraries/jQuery/" + version + "/expectations");
         generateTestCases(expectationsDir);
     }
 
@@ -86,8 +92,9 @@ public final class JQueryExtractor {
         String line;
         while ((line = reader.readLine()) != null) {
             line = line.trim();
-            if (line.startsWith("" + testNumber + '.') && line.endsWith("Rerun")) {
-                line = line.substring(0, line.length() - 5);
+            final int endPos = line.indexOf("Rerun");
+            if (line.startsWith("" + testNumber + '.') && endPos > -1) {
+                line = line.substring(0, endPos);
                 writer.write(line + "\n");
                 testNumber++;
             }
@@ -109,9 +116,9 @@ public final class JQueryExtractor {
     /**
      * Generates the java code of the test cases.
      * @param dir the directory which holds the expectations
-     * @throws IOException if an error occurs.
+     * @throws Exception if an error occurs.
      */
-    public static void generateTestCases(final File dir) throws IOException {
+    public static void generateTestCases(final File dir) throws Exception {
         final Browser[] browsers = Browser.values();
         // main browsers regardless of version e.g. "FF"
         final List<String> mainNames = new ArrayList<String>();
@@ -200,9 +207,46 @@ public final class JQueryExtractor {
                     System.out.print(browserName + " = \"" + expectation + '"');
                     first = false;
                 }
-
             }
             System.out.println(")");
+
+            final String methodName = test.getName().replaceAll("\\W",  "_");
+            try {
+                final Method method = JQuery182Test.class.getMethod(methodName);
+                final NotYetImplemented notYetImplemented = method.getAnnotation(NotYetImplemented.class);
+                if (null != notYetImplemented) {
+                    final Browser[] notYetImplementedBrowsers = notYetImplemented.value();
+                    if (notYetImplementedBrowsers.length > 0) {
+                        final List<String> browserNames = new ArrayList<String>(notYetImplementedBrowsers.length);
+                        for (Browser browser : notYetImplementedBrowsers) {
+                            browserNames.add(browser.name());
+                        }
+                        Collections.sort(browserNames);
+
+                        // TODO dirty hack
+                        if (browserNames.size() == 3 && browserNames.contains("CHROME")
+                                && browserNames.contains("FF")
+                                && browserNames.contains("IE")) {
+                            System.out.println("    @NotYetImplemented");
+                        }
+                        else {
+                            System.out.print("    @NotYetImplemented(");
+                            if (browserNames.size() > 1) {
+                                System.out.print("{ ");
+                            }
+                            System.out.print(StringUtils.join(browserNames, ", "));
+                            if (browserNames.size() > 1) {
+                                System.out.print(" }");
+                            }
+                            System.out.println(")");
+                        }
+                    }
+                }
+            }
+            catch (final NoSuchMethodException e) {
+                // ignore
+            }
+
             System.out.println("    public void " + test.getName().replaceAll("\\W",  "_") + "() throws Exception {");
             System.out.println("        runTest(\"" + test.getName().replace("\"",  "\\\"") + "\");");
             System.out.println("    }");
@@ -229,108 +273,108 @@ public final class JQueryExtractor {
 
         return tests;
     }
-}
 
-class Expectations implements Iterable<Expectation> {
-    static Expectations readExpectations(final File file) throws IOException {
-        final Expectations expectations = new Expectations();
-        final List<String> lines = FileUtils.readLines(file);
-        for (int i = 0; i < lines.size(); ++i) {
-            expectations.add(new Expectation(i + 1, lines.get(i)));
+    static class Expectations implements Iterable<Expectation> {
+        static Expectations readExpectations(final File file) throws IOException {
+            final Expectations expectations = new Expectations();
+            final List<String> lines = FileUtils.readLines(file);
+            for (int i = 0; i < lines.size(); ++i) {
+                expectations.add(new Expectation(i + 1, lines.get(i)));
+            }
+
+            return expectations;
         }
 
-        return expectations;
-    }
+        private final Map<String, Expectation> expectations_ = new HashMap<String, Expectation>();
 
-    private final Map<String, Expectation> expectations_ = new HashMap<String, Expectation>();
-
-    public Expectation getExpectation(final Test test) {
-        return expectations_.get(test.getName());
-    }
-
-    private void add(final Expectation expectation) {
-        expectations_.put(expectation.getTestName(), expectation);
-    }
-
-    @Override
-    public Iterator<Expectation> iterator() {
-        return expectations_.values().iterator();
-    }
-}
-
-class Expectation {
-
-    private static final Pattern pattern_ = Pattern.compile("(\\d+\\. ?)?(.+)\\((\\d+, \\d+, \\d+)\\)");
-    private final int line_;
-    private final String testName_;
-    private final String testResult_;
-
-    public Expectation(final int line, final String string) {
-        line_ = line;
-        final Matcher matcher = pattern_.matcher(string);
-        if (!matcher.matches()) {
-            throw new RuntimeException("Invalid line " + line + ": " + string);
-        }
-        final String testNumber = matcher.group(1);
-        if (testNumber != null && !testNumber.trim().equals(line + ".")) {
-            throw new RuntimeException("Invalid test number for line " + line + ": " + string);
+        public Expectation getExpectation(final Test test) {
+            return expectations_.get(test.getName());
         }
 
-        testName_ = matcher.group(2).trim();
-        testResult_ = matcher.group(3);
-    }
+        private void add(final Expectation expectation) {
+            expectations_.put(expectation.getTestName(), expectation);
+        }
 
-    public int getLine() {
-        return line_;
-    }
-
-    public String getTestName() {
-        return testName_;
-    }
-
-    public String getTestResult() {
-        return testResult_;
-    }
-}
-
-class Test implements Comparable<Test> {
-    private final List<Integer> lines_ = new ArrayList<Integer>();
-    private final String name_;
-
-    public Test(final String name) {
-        name_ = name;
-    }
-
-    public String getName() {
-        return name_;
-    }
-
-    void addLine(final int line) {
-        if (!lines_.contains(line)) {
-            lines_.add(line);
-            Collections.sort(lines_);
+        @Override
+        public Iterator<Expectation> iterator() {
+            return expectations_.values().iterator();
         }
     }
 
-    @Override
-    public int compareTo(final Test o) {
-        int diff = lines_.get(0) - o.lines_.get(0);
-        if (diff == 0) {
-            diff = lines_.size() - o.lines_.size();
-            if (diff == 0) {
-                diff = name_.compareTo(o.name_);
+    static class Expectation {
+
+        private static final Pattern pattern_ = Pattern.compile("(\\d+\\. ?)?(.+)\\((\\d+, \\d+, \\d+)\\)");
+        private final int line_;
+        private final String testName_;
+        private final String testResult_;
+
+        public Expectation(final int line, final String string) {
+            line_ = line;
+            final Matcher matcher = pattern_.matcher(string);
+            if (!matcher.matches()) {
+                throw new RuntimeException("Invalid line " + line + ": " + string);
+            }
+            final String testNumber = matcher.group(1);
+            if (testNumber != null && !testNumber.trim().equals(line + ".")) {
+                throw new RuntimeException("Invalid test number for line " + line + ": " + string);
+            }
+
+            testName_ = matcher.group(2).trim();
+            testResult_ = matcher.group(3);
+        }
+
+        public int getLine() {
+            return line_;
+        }
+
+        public String getTestName() {
+            return testName_;
+        }
+
+        public String getTestResult() {
+            return testResult_;
+        }
+    }
+
+    static class Test implements Comparable<Test> {
+        private final List<Integer> lines_ = new ArrayList<Integer>();
+        private final String name_;
+
+        public Test(final String name) {
+            name_ = name;
+        }
+
+        public String getName() {
+            return name_;
+        }
+
+        void addLine(final int line) {
+            if (!lines_.contains(line)) {
+                lines_.add(line);
+                Collections.sort(lines_);
             }
         }
-        return diff;
-    }
 
-    @Override
-    public int hashCode() {
-        return name_.hashCode();
-    }
+        @Override
+        public int compareTo(final Test o) {
+            int diff = lines_.get(0) - o.lines_.get(0);
+            if (diff == 0) {
+                diff = lines_.size() - o.lines_.size();
+                if (diff == 0) {
+                    diff = name_.compareTo(o.name_);
+                }
+            }
+            return diff;
+        }
 
-    @Override
-    public boolean equals(final Object obj) {
-        return (obj instanceof Test) && name_.equals(((Test) obj).name_);
+        @Override
+        public int hashCode() {
+            return name_.hashCode();
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            return (obj instanceof Test) && name_.equals(((Test) obj).name_);
+        }
     }
 }

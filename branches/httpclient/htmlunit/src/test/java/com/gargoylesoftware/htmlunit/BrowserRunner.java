@@ -45,7 +45,7 @@ import org.junit.runners.model.Statement;
  * public class SomeTest extends WebTestCase {
  *
  *    &#064;Test
- *    &#064;Browsers({Browser.FF17})
+ *    &#064;Browsers({ Browser.FF17 })
  *    public void test() {
  *       //your test case that succeeds with only Firefox 17
  *    }
@@ -53,6 +53,7 @@ import org.junit.runners.model.Statement;
  * </pre>
  * @version $Revision$
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 public class BrowserRunner extends Suite {
 
@@ -69,20 +70,11 @@ public class BrowserRunner extends Suite {
 
         if (BrowserVersionClassRunner.containsTestMethods(klass)) {
             final List<String> browsers = WebDriverTestCase.getBrowsersProperties();
-            if (browsers.contains("hu") || browsers.contains("hu-ff3.6")) {
-                runners_.add(new BrowserVersionClassRunner(klass, BrowserVersion.FIREFOX_3_6, false));
-            }
-            if (/* browsers.contains("hu") ||*/ browsers.contains("hu-ff10")) {
-                runners_.add(new BrowserVersionClassRunner(klass, BrowserVersion.FIREFOX_10, false));
-            }
-            if (browsers.contains("hu") || browsers.contains("hu-ff17")) {
+            if (/*browsers.contains("hu") ||*/ browsers.contains("hu-ff17")) {
                 runners_.add(new BrowserVersionClassRunner(klass, BrowserVersion.FIREFOX_17, false));
             }
-            if (/*browsers.contains("hu") ||*/ browsers.contains("hu-ie6")) {
-                runners_.add(new BrowserVersionClassRunner(klass, BrowserVersion.INTERNET_EXPLORER_6, false));
-            }
-            if (/*browsers.contains("hu") ||*/ browsers.contains("hu-ie7")) {
-                runners_.add(new BrowserVersionClassRunner(klass, BrowserVersion.INTERNET_EXPLORER_7, false));
+            if (browsers.contains("hu") || browsers.contains("hu-ff24")) {
+                runners_.add(new BrowserVersionClassRunner(klass, BrowserVersion.FIREFOX_24, false));
             }
             if (browsers.contains("hu") || browsers.contains("hu-ie8")) {
                 runners_.add(new BrowserVersionClassRunner(klass, BrowserVersion.INTERNET_EXPLORER_8, false));
@@ -90,31 +82,28 @@ public class BrowserRunner extends Suite {
             if (/*browsers.contains("hu") ||*/ browsers.contains("hu-ie9")) {
                 runners_.add(new BrowserVersionClassRunner(klass, BrowserVersion.INTERNET_EXPLORER_9, false));
             }
+            if (/*browsers.contains("hu") ||*/ browsers.contains("hu-ie11")) {
+                runners_.add(new BrowserVersionClassRunner(klass, BrowserVersion.INTERNET_EXPLORER_11, false));
+            }
             if (/*browsers.contains("hu") || */browsers.contains("hu-chrome")) {
                 runners_.add(new BrowserVersionClassRunner(klass, BrowserVersion.CHROME, false));
             }
 
             if (WebDriverTestCase.class.isAssignableFrom(klass)) {
-                if (browsers.contains("ff3.6")) {
-                    runners_.add(new BrowserVersionClassRunner(klass, BrowserVersion.FIREFOX_3_6, true));
-                }
-                if (browsers.contains("ff10")) {
-                    runners_.add(new BrowserVersionClassRunner(klass, BrowserVersion.FIREFOX_10, true));
-                }
                 if (browsers.contains("ff17")) {
                     runners_.add(new BrowserVersionClassRunner(klass, BrowserVersion.FIREFOX_17, true));
                 }
-                if (browsers.contains("ie6")) {
-                    runners_.add(new BrowserVersionClassRunner(klass, BrowserVersion.INTERNET_EXPLORER_6, true));
-                }
-                if (browsers.contains("ie7")) {
-                    runners_.add(new BrowserVersionClassRunner(klass, BrowserVersion.INTERNET_EXPLORER_7, true));
+                if (browsers.contains("ff24")) {
+                    runners_.add(new BrowserVersionClassRunner(klass, BrowserVersion.FIREFOX_24, true));
                 }
                 if (browsers.contains("ie8")) {
                     runners_.add(new BrowserVersionClassRunner(klass, BrowserVersion.INTERNET_EXPLORER_8, true));
                 }
                 if (browsers.contains("ie9")) {
                     runners_.add(new BrowserVersionClassRunner(klass, BrowserVersion.INTERNET_EXPLORER_9, true));
+                }
+                if (browsers.contains("ie11")) {
+                    runners_.add(new BrowserVersionClassRunner(klass, BrowserVersion.INTERNET_EXPLORER_11, true));
                 }
                 if (browsers.contains("chrome")) {
                     runners_.add(new BrowserVersionClassRunner(klass, BrowserVersion.CHROME, true));
@@ -174,29 +163,23 @@ public class BrowserRunner extends Suite {
         /** All versions of Internet Explorer. */
         IE,
 
-        /** Internet Explorer 6. */
-        IE6,
-
-        /** Internet Explorer 7. */
-        IE7,
-
         /** Internet Explorer 8. */
         IE8,
 
         /** Internet Explorer 9. */
         IE9,
 
+        /** Internet Explorer 11. */
+        IE11,
+
         /** All versions of Firefox. */
         FF,
 
-        /** Firefox 3.6. */
-        FF3_6,
-
-        /** Firefox 10. */
-        FF10,
-
         /** Firefox 17. */
         FF17,
+
+        /** Firefox 24. */
+        FF24,
 
         /**
          * Not Browser-specific, it will run only once. Don't use this with other Browsers.
@@ -236,40 +219,34 @@ public class BrowserRunner extends Suite {
     public static @interface Alerts {
 
         /** Alerts that is used for all browsers (if defined, the other values are ignored). */
-        String[] value() default {EMPTY_DEFAULT };
+        String[] value() default { EMPTY_DEFAULT };
 
         /** Alerts for any Internet Explorer, it can be overridden by specific IE version. */
-        String[] IE() default {EMPTY_DEFAULT };
-
-        /** Alerts for Internet Explorer 6. If not defined, {@link #IE()} is used. */
-        String[] IE6() default {EMPTY_DEFAULT };
-
-        /** Alerts for Internet Explorer 7. If not defined, {@link #IE()} is used. */
-        String[] IE7() default {EMPTY_DEFAULT };
+        String[] IE() default { EMPTY_DEFAULT };
 
         /** Alerts for Internet Explorer 8. If not defined, {@link #IE()} is used. */
-        String[] IE8() default {EMPTY_DEFAULT };
+        String[] IE8() default { EMPTY_DEFAULT };
 
         /** Alerts for Internet Explorer 9. If not defined, {@link #IE()} is used. */
-        String[] IE9() default {EMPTY_DEFAULT };
+        String[] IE9() default { EMPTY_DEFAULT };
+
+        /** Alerts for Internet Explorer 11. If not defined, {@link #IE()} is used. */
+        String[] IE11() default { EMPTY_DEFAULT };
 
         /** Alerts for any Firefox, it can be overridden by specific FF version. */
-        String[] FF() default {EMPTY_DEFAULT };
-
-        /** Alerts for Firefox 3.6. If not defined, {@link #FF()} is used. */
-        String[] FF3_6() default {EMPTY_DEFAULT };
-
-        /** Alerts for Firefox 10. If not defined, {@link #FF()} is used. */
-        String[] FF10() default {EMPTY_DEFAULT };
+        String[] FF() default { EMPTY_DEFAULT };
 
         /** Alerts for Firefox 17. If not defined, {@link #FF()} is used. */
-        String[] FF17() default {EMPTY_DEFAULT };
+        String[] FF17() default { EMPTY_DEFAULT };
+
+        /** Alerts for Firefox 24. If not defined, {@link #FF()} is used. */
+        String[] FF24() default { EMPTY_DEFAULT };
 
         /** Alerts for latest Chrome. */
-        String[] CHROME() default{EMPTY_DEFAULT };
+        String[] CHROME() default { EMPTY_DEFAULT };
 
         /** The default alerts, if nothing more specific is defined. */
-        String[] DEFAULT() default{EMPTY_DEFAULT };
+        String[] DEFAULT() default { EMPTY_DEFAULT };
     }
 
     /**
@@ -291,7 +268,7 @@ public class BrowserRunner extends Suite {
     }
 
     /**
-     * Indicates that the test runs manually in a real browser but not when using WebDriver to driver the browser.
+     * Indicates that the test runs manually in a real browser but not when using WebDriver to drive the browser.
      * @see Browser
      */
     @Retention(RetentionPolicy.RUNTIME)

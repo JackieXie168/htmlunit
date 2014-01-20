@@ -14,22 +14,32 @@
  */
 package com.gargoylesoftware.htmlunit.libraries;
 
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.After;
-import org.junit.Before;
+import org.eclipse.jetty.server.Server;
+import org.junit.AfterClass;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.htmlunit.HtmlUnitDriver;
+import org.openqa.selenium.htmlunit.HtmlUnitWebElement;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.WebServerTestCase;
+import com.gargoylesoftware.htmlunit.WebDriverTestCase;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 /**
  * Base class for tests for compatibility with <a href="http://prototype.conio.net/">Prototype</a>.
@@ -38,12 +48,13 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
  * @author Daniel Gredler
  * @author Ahmed Ashour
  * @author Marc Guillemot
+ * @author Ronald Brill
  */
-public abstract class PrototypeTestBase extends WebServerTestCase {
+public abstract class PrototypeTestBase extends WebDriverTestCase {
 
     private static final Log LOG = LogFactory.getLog(PrototypeTestBase.class);
-
-    private WebClient webClient_;
+    /** The server. */
+    protected static Server SERVER_;
 
     /**
      * Gets the prototype tested version.
@@ -52,20 +63,62 @@ public abstract class PrototypeTestBase extends WebServerTestCase {
     protected abstract String getVersion();
 
     /**
+     * Helper, because the element was different for the
+     * different versions.
+     * @param driver the WebDriver
+     * @return the WebElement
+     */
+    protected boolean testFinished(final WebDriver driver) {
+        final List<WebElement> status = driver.findElements(By.cssSelector("div.logsummary"));
+        for (WebElement webElement : status) {
+            if (!webElement.getText().contains("errors")) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Runs the specified test.
      * @param filename the test file to run
      * @throws Exception if the test fails
      */
     protected void test(final String filename) throws Exception {
-        webClient_ = getWebClient();
-        final HtmlPage page =
-            webClient_.getPage("http://localhost:" + PORT + "/test/unit/" + filename);
+        final WebDriver driver = getWebDriver();
+        if (!(driver instanceof HtmlUnitDriver)) {
+            try {
+                driver.manage().window().setSize(new Dimension(1272, 768));
+            }
+            catch (final WebDriverException e) {
+                // ChromeDriver version 0.5 (Mar 26, 2013) does not support the setSize command
+                LOG.warn(e.getMessage(), e);
+            }
+        }
+        driver.get(getBaseUrl() + filename);
 
-        webClient_.waitForBackgroundJavaScript(25000);
+        // wait
+        final long runTime = 60 * DEFAULT_WAIT_TIME;
+        final long endTime = System.currentTimeMillis() + runTime;
+
+        while (!testFinished(driver)) {
+            Thread.sleep(100);
+
+            if (System.currentTimeMillis() > endTime) {
+                fail("Test '" + filename + "' runs too long (longer than " + runTime / 1000 + "s)");
+            }
+        }
 
         String expected = getExpectations(getBrowserVersion(), filename);
-        final HtmlElement testlog = page.getHtmlElementById("testlog");
-        String actual = testlog.asText();
+        WebElement testlog = driver.findElement(By.id("testlog"));
+        String actual = getText(testlog);
+
+        try {
+            testlog = driver.findElement(By.id("testlog_2"));
+            actual = actual + "\n" + getText(testlog);
+        }
+        catch (final NoSuchElementException e) {
+            // ignore
+        }
 
         // ignore Info lines
         expected = expected.replaceAll("Info:.*", "Info: -- skipped for comparison --");
@@ -79,7 +132,7 @@ public abstract class PrototypeTestBase extends WebServerTestCase {
         if (System.getProperty(PROPERTY_GENERATE_TESTPAGES) != null && !expected.equals(actual)) {
             final File tmpDir = new File(System.getProperty("java.io.tmpdir"));
             final File f = new File(tmpDir, "prototype" + getVersion() + "_result_" + filename);
-            FileUtils.writeStringToFile(f, page.asXml(), "UTF-8");
+            FileUtils.writeStringToFile(f, driver.getPageSource(), "UTF-8");
             LOG.info("Test result for " + filename + " written to: " + f.getAbsolutePath());
         }
 
@@ -116,24 +169,31 @@ public abstract class PrototypeTestBase extends WebServerTestCase {
         return FileUtils.readFileToString(expectationsFile, "UTF-8");
     }
 
-    /**
-     * Performs pre-test initialization.
-     * @throws Exception if an error occurs
-     */
-    @Before
-    public void setUp() throws Exception {
-        startWebServer("src/test/resources/libraries/prototype/" + getVersion());
+    private String getText(final WebElement webElement) throws Exception {
+        // Hack for the buggy asText method in seleniums htmlunit code
+        if (webElement instanceof HtmlUnitWebElement) {
+            final Method method = HtmlUnitWebElement.class.getDeclaredMethod("getElement", (Class<?>[]) null);
+            method.setAccessible(true);
+            final HtmlElement htmlElement = (HtmlElement) method.invoke(webElement);
+            String text = htmlElement.asText();
+            text = text.replace('\t', ' ');
+            return text;
+        }
+        return webElement.getText();
     }
 
     /**
-     * Performs post-test deconstruction.
-     * Ensures everything stops in the WebClient.
      * @throws Exception if an error occurs
      */
-    @After
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-        webClient_.closeAllWindows();
+    @AfterClass
+    public static void zzz_stopServer() throws Exception {
+        SERVER_.stop();
+    }
+
+    /**
+     * @return the resource base url
+     */
+    protected String getBaseUrl() {
+        return "http://localhost:" + PORT + "/";
     }
 }

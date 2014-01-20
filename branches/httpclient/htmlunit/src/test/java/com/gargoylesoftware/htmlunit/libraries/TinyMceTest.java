@@ -14,14 +14,14 @@
  */
 package com.gargoylesoftware.htmlunit.libraries;
 
-import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE8;
 import static org.junit.Assert.assertNotNull;
 
-import java.net.URL;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.By;
@@ -29,6 +29,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import com.gargoylesoftware.htmlunit.BrowserRunner;
+import com.gargoylesoftware.htmlunit.BrowserRunner.Alerts;
 import com.gargoylesoftware.htmlunit.BrowserRunner.NotYetImplemented;
 import com.gargoylesoftware.htmlunit.WebDriverTestCase;
 
@@ -42,6 +43,8 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @version $Revision$
  * @author Daniel Gredler
  * @author Marc Guillemot
+ * @author Frank Danek
+ * @author Ronald Brill
  */
 @RunWith(BrowserRunner.class)
 public class TinyMceTest extends WebDriverTestCase {
@@ -50,26 +53,32 @@ public class TinyMceTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @NotYetImplemented(IE)
+    @Alerts(DEFAULT = { "348", "0" },
+            IE11 = { "348", "13" })
+    @NotYetImplemented(IE8)
+    // TODO [IE11]XML tinymce 3.2.7 is not compatible with IE11
     public void api() throws Exception {
-        test("api", 348, 0);
+        test("api", Integer.parseInt(getExpectedAlerts()[0]), Integer.parseInt(getExpectedAlerts()[1]));
     }
 
     /**
      * @throws Exception if an error occurs
      */
     @Test
+    @Alerts(DEFAULT = { "89", "0" },
+            IE11 = { "89", "4" })
     @NotYetImplemented
+    // TODO [IE11]XML tinymce 3.2.7 is not compatible with IE11
     public void basic() throws Exception {
-        test("basic", 89, 0);
+        test("basic", Integer.parseInt(getExpectedAlerts()[0]), Integer.parseInt(getExpectedAlerts()[1]));
     }
 
     private void test(final String fileName, final int expectedTotal, final int expectedFailed) throws Exception {
-        final URL url = getClass().getClassLoader().getResource("libraries/tinymce/3.2.7/tests/" + fileName + ".html");
+        final String url = "http://localhost:" + PORT + "/tests/" + fileName + ".html";
         assertNotNull(url);
 
         final WebDriver driver = getWebDriver();
-        driver.get(url.toExternalForm());
+        driver.get(url);
 
         driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
         final WebElement result = driver.findElement(By.id("testresult"));
@@ -91,4 +100,12 @@ public class TinyMceTest extends WebDriverTestCase {
         Assert.assertEquals(msg.toString(), expectedFailed, failed);
     }
 
+    /**
+     * Performs pre-test initialization.
+     * @throws Exception if an error occurs
+     */
+    @Before
+    public void setUp() throws Exception {
+        startWebServer("src/test/resources/libraries/tinymce/3.2.7", null, null);
+    }
 }

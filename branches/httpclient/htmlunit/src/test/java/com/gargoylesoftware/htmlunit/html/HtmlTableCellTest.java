@@ -29,6 +29,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @version $Revision$
  * @author <a href="mailto:mbowler@GargoyleSoftware.com">Mike Bowler</a>
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HtmlTableCellTest extends WebDriverTestCase {
@@ -38,7 +39,8 @@ public class HtmlTableCellTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "[object HTMLTableCellElement]", "[object HTMLTableCellElement]" },
-            IE = { "[object]", "[object]" })
+            IE = { "[object]", "[object]" },
+            IE11 = { "[object HTMLTableDataCellElement]", "[object HTMLTableHeaderCellElement]" })
     public void simpleScriptable() throws Exception {
         final String html = "<html><head>\n"
             + "<script>\n"

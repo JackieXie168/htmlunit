@@ -14,10 +14,10 @@
  */
 package com.gargoylesoftware.htmlunit.libraries;
 
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE8;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,7 +36,6 @@ import org.openqa.selenium.WebElement;
 
 import com.gargoylesoftware.htmlunit.BrowserRunner;
 import com.gargoylesoftware.htmlunit.BrowserRunner.Alerts;
-import com.gargoylesoftware.htmlunit.BrowserRunner.Browser;
 import com.gargoylesoftware.htmlunit.BrowserRunner.NotYetImplemented;
 import com.gargoylesoftware.htmlunit.WebDriverTestCase;
 
@@ -46,12 +46,12 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @author Rob Di Marco
  * @author Daniel Gredler
  * @author Marc Guillemot
+ * @author Frank Danek
+ * @author Ronald Brill
  */
 @RunWith(BrowserRunner.class)
 public class YuiTest extends WebDriverTestCase {
     private static final Log LOG = LogFactory.getLog(YuiTest.class);
-
-    private static final String BASE_FILE_PATH = "libraries/yui/2.3.0/tests/";
 
     /**
      * @throws Exception if an error occurs
@@ -89,7 +89,7 @@ public class YuiTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @NotYetImplemented(Browser.IE8)
+    @NotYetImplemented(IE8)
     public void calendar() throws Exception {
         doTest("calendar.html", "btnRun");
     }
@@ -98,7 +98,7 @@ public class YuiTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @NotYetImplemented(Browser.IE8)
+    @NotYetImplemented(IE8)
     public void colorPicker() throws Exception {
         doTest("colorpicker.html");
     }
@@ -111,8 +111,6 @@ public class YuiTest extends WebDriverTestCase {
     public void config() throws Exception {
         // Test currently commented out as there are problems with the YUI test.
         // A bug has been filed against YUI regarding the problems with the test.
-        // See http://sourceforge.net/tracker/index.php?func=detail&aid=1788014&group_id=165715&atid=836476
-        // for more details.
         fail("YUI test has a bug that causes this to fail.");
         //doTest("config.html");
     }
@@ -129,9 +127,9 @@ public class YuiTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @NotYetImplemented(Browser.IE8)
+    @NotYetImplemented(IE8)
     public void dom() throws Exception {
-        doTest("dom.html");
+        doTest("dom.html", Arrays.asList(getExpectedAlerts()));
     }
 
     /**
@@ -139,7 +137,7 @@ public class YuiTest extends WebDriverTestCase {
      */
     @Test
     @Alerts(IE8 = { "test_startDrag", "test_dragOver", "test_containerScroll" })
-    @NotYetImplemented(Browser.IE8)
+    @NotYetImplemented(IE8)
     public void dragDrop() throws Exception {
         doTest("dragdrop.html", Arrays.asList(getExpectedAlerts()));
     }
@@ -156,9 +154,12 @@ public class YuiTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
+    @Alerts(DEFAULT = "test_createlink",
+            FF17 = { "test_createlink", "test_regex" },
+            IE11 = { "test_bold", "test_createlink" })
     @NotYetImplemented
     public void editor() throws Exception {
-        doTest("editor.html", Arrays.asList("test_createlink"));
+        doTest("editor.html", Arrays.asList(getExpectedAlerts()));
     }
 
     /**
@@ -174,9 +175,10 @@ public class YuiTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
+    @Alerts(DEFAULT = "test_page_modules")
     public void yuiLoaderConfig() throws Exception {
         // The "test_page_modules" test fails in FF, too, so it's OK.
-        doTest("yuiloader_config.html", Arrays.asList("test_page_modules"));
+        doTest("yuiloader_config.html", Arrays.asList(getExpectedAlerts()));
     }
 
     /**
@@ -191,8 +193,8 @@ public class YuiTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @Alerts(IE8 = "testConstructor", FF = { "testConstructor", "testProperties" })
-    @NotYetImplemented(Browser.FF)
+    @Alerts(DEFAULT = "testConstructor",
+            FF24 = { "testConstructor", "test_regex" })
     public void module() throws Exception {
         doTest("module.html", Arrays.asList(getExpectedAlerts()));
     }
@@ -201,7 +203,7 @@ public class YuiTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @NotYetImplemented(Browser.IE8)
+    @NotYetImplemented(IE8)
     public void imageLoader() throws Exception {
         doTest("imageloader.html");
     }
@@ -210,7 +212,7 @@ public class YuiTest extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
-    @NotYetImplemented(Browser.IE8)
+    @NotYetImplemented(IE8)
     public void element() throws Exception {
         doTest("element.html");
     }
@@ -230,11 +232,12 @@ public class YuiTest extends WebDriverTestCase {
     private void doTest(final String fileName, final List<String> knownFailingTests,
             final String buttonToPush, final long timeToWait) throws Exception {
 
-        final URL url = getClass().getClassLoader().getResource(BASE_FILE_PATH + fileName);
+        // final URL url = getClass().getClassLoader().getResource("tests/" + fileName);
+        final String url = "http://localhost:" + PORT + "/tests/" + fileName;
         assertNotNull(url);
 
         final WebDriver driver = getWebDriver();
-        driver.get(url.toString());
+        driver.get(url);
 
         if (buttonToPush != null) {
             driver.findElement(By.id(buttonToPush)).click();
@@ -272,5 +275,14 @@ public class YuiTest extends WebDriverTestCase {
                                 knownFailingTests.contains(testName));
             }
         }
+    }
+
+    /**
+     * Performs pre-test initialization.
+     * @throws Exception if an error occurs
+     */
+    @Before
+    public void setUp() throws Exception {
+        startWebServer("src/test/resources/libraries/yui/2.3.0", null, null);
     }
 }

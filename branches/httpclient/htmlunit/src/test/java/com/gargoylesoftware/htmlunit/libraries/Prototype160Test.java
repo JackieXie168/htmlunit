@@ -15,31 +15,71 @@
 package com.gargoylesoftware.htmlunit.libraries;
 
 import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF;
-import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE11;
 
+import java.util.List;
+
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
 import com.gargoylesoftware.htmlunit.BrowserRunner;
 import com.gargoylesoftware.htmlunit.BrowserRunner.NotYetImplemented;
+import com.gargoylesoftware.htmlunit.WebServerTestCase;
 
 /**
  * Tests for compatibility with version 1.6.0 of
- * <a href="http://prototype.conio.net/">Prototype JavaScript library</a>.
+ * <a href="http://www.prototypejs.org/">Prototype JavaScript library</a>.
  *
  * @version $Revision$
  * @author Ahmed Ashour
  * @author Marc Guillemot
+ * @author Ronald Brill
  */
 @RunWith(BrowserRunner.class)
 public class Prototype160Test extends PrototypeTestBase {
 
     /**
+     * @throws Exception if an error occurs
+     */
+    @BeforeClass
+    public static void aaa_startSesrver() throws Exception {
+        SERVER_ = WebServerTestCase.createWebServer("src/test/resources/libraries/prototype/1.6.0/", null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected String getVersion() {
+        return "1.6.0";
+    }
+
+    /**
+     * @return the resource base url
+     */
+    protected String getBaseUrl() {
+        return "http://localhost:" + PORT + "/test/unit/";
+    }
+
+    @Override
+    protected boolean testFinished(final WebDriver driver) {
+        final List<WebElement> status = driver.findElements(By.cssSelector("div#logsummary"));
+        for (WebElement webElement : status) {
+            if (!webElement.getText().contains("errors")) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * @throws Exception if test fails
-     * For IE: 2 assertions pass whereas they shouldn't in testResponders
      */
     @Test
-    @NotYetImplemented(IE)
     public void ajax() throws Exception {
         test("ajax.html");
     }
@@ -99,6 +139,7 @@ public class Prototype160Test extends PrototypeTestBase {
      * @throws Exception if test fails
      */
     @Test
+    @NotYetImplemented(IE11)
     public void event() throws Exception {
         test("event.html");
     }
@@ -107,7 +148,7 @@ public class Prototype160Test extends PrototypeTestBase {
      * @throws Exception if test fails
      */
     @Test
-    @NotYetImplemented(IE)
+    @NotYetImplemented({ FF, IE11 })
     public void form() throws Exception {
         test("form.html");
     }
@@ -162,21 +203,12 @@ public class Prototype160Test extends PrototypeTestBase {
     }
 
     /**
-     * Depends on {@link com.gargoylesoftware.htmlunit.javascript.regexp.HtmlUnitRegExpProxyTest#test()}.
-     * 1 expected failure is because the server port is other than 4711
+     * 1 expected failure is because the server port is other than 4711.
      * @throws Exception if test fails
      */
     @Test
-    @NotYetImplemented(FF)
+    @NotYetImplemented({ FF, IE11 })
     public void unitTests() throws Exception {
         test("unit_tests.html");
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected String getVersion() {
-        return "1.6.0";
     }
 }

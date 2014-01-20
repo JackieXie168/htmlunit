@@ -19,6 +19,7 @@ import static org.junit.Assert.assertNotNull;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -39,6 +40,7 @@ import com.gargoylesoftware.htmlunit.BrowserRunner.Alerts;
  * @version $Revision$
  * @author Daniel Gredler
  * @author Marc Guillemot
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class MooTools121Test extends WebDriverTestCase {
@@ -46,8 +48,17 @@ public class MooTools121Test extends WebDriverTestCase {
     /**
      * @throws Exception if an error occurs
      */
-    @Alerts(FF17 = "should return the function bound to an object with multiple arguments",
-            CHROME = "should return the function bound to an object with multiple arguments")
+    @Alerts(DEFAULT = { "364", "0", "0" },
+            CHROME = { "364", "1", "0",
+                    "should return the function bound to an object with multiple arguments" },
+            FF17 = { "364", "1", "0",
+                    "should return the function bound to an object with multiple arguments" },
+            FF24 = { "364", "2", "0",
+                    "should return true if the string constains the string and separator otherwise false",
+                    "should return the function bound to an object with multiple arguments" },
+            IE11 = { "364", "2", "0",
+                    "should return the function bound to an object with multiple arguments",
+                    "should return a CSS string representing the Element's styles" })
     @Test
     public void mooTools() throws Exception {
         final String resource = "libraries/mootools/1.2.1/Specs/index.html";
@@ -69,10 +80,10 @@ public class MooTools121Test extends WebDriverTestCase {
             failures.add(elt.getText());
         }
         FileUtils.writeStringToFile(new File("/tmp/mootols.html"), driver.getPageSource());
-        assertEquals(getExpectedAlerts(), failures);
+        assertEquals(Arrays.copyOfRange(getExpectedAlerts(), 3, getExpectedAlerts().length), failures);
 
-        assertEquals("364", driver.findElement(By.id("total_examples")).getText());
-        assertEquals(String.valueOf(getExpectedAlerts().length), driver.findElement(By.id("total_failures")).getText());
-        assertEquals("0", driver.findElement(By.id("total_errors")).getText());
+        assertEquals(getExpectedAlerts()[0], driver.findElement(By.id("total_examples")).getText());
+        assertEquals(getExpectedAlerts()[1], driver.findElement(By.id("total_failures")).getText());
+        assertEquals(getExpectedAlerts()[2], driver.findElement(By.id("total_errors")).getText());
     }
 }

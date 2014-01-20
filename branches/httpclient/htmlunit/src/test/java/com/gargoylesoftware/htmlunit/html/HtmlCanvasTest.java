@@ -28,6 +28,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  *
  * @version $Revision$
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HtmlCanvasTest extends WebDriverTestCase {
@@ -36,7 +37,8 @@ public class HtmlCanvasTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "[object HTMLCanvasElement]", IE = "[object]")
+    @Alerts(DEFAULT = "[object HTMLCanvasElement]",
+            IE8 = "[object]")
     public void simpleScriptable() throws Exception {
         final String html = "<html><head>\n"
             + "<script>\n"
@@ -51,7 +53,7 @@ public class HtmlCanvasTest extends WebDriverTestCase {
         final WebDriver driver = loadPageWithAlerts2(html);
         if (driver instanceof HtmlUnitDriver) {
             final HtmlPage page = (HtmlPage) getWebWindowOf((HtmlUnitDriver) driver).getEnclosedPage();
-            if (getBrowserVersion().isFirefox()) {
+            if (getBrowserVersion().isFirefox() || "IE11".equals(getBrowserVersion().getNickname())) {
                 assertTrue(HtmlCanvas.class.isInstance(page.getHtmlElementById("myId")));
             }
             else {

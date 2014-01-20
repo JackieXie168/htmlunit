@@ -42,7 +42,8 @@ import org.apache.http.ProtocolVersion;
 import org.apache.http.StatusLine;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.AbstractHttpClient;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.message.BasicStatusLine;
 import org.apache.log4j.Level;
@@ -227,7 +228,7 @@ public class HttpWebConnectionTest extends WebServerTestCase {
         final WebConnection defaultConnection = client.getWebConnection();
         Assert.assertTrue(
                 "HttpWebConnection should be the default",
-                HttpWebConnection2.class.isInstance(defaultConnection));
+                HttpWebConnection.class.isInstance(defaultConnection));
         Assert.assertTrue("Response should be valid HTML", HtmlPage.class.isInstance(page));
     }
 
@@ -241,11 +242,11 @@ public class HttpWebConnectionTest extends WebServerTestCase {
 
         final WebClient webClient = getWebClient();
         final boolean[] tabCalled = {false};
-        final WebConnection myWebConnection = new HttpWebConnection2(webClient) {
+        final WebConnection myWebConnection = new HttpWebConnection(webClient) {
             @Override
-            protected HttpClientBuilder createHttpClient() {
+            protected AbstractHttpClient createHttpClient() {
                 tabCalled[0] = true;
-                return HttpClientBuilder.create();
+                return  new DefaultHttpClient();
             }
         };
 

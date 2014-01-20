@@ -75,40 +75,42 @@ import com.gargoylesoftware.htmlunit.util.NameValuePair;
  * "test.properties" in the HtmlUnit root directory.
  * Sample:
  * <pre>
-   browsers=hu,ff17,ie9
-   ff3.6.bin=c:\\location_to_firefox.exe                [Windows]
+   browsers=hu,ff17,ff24,ie9
+   ie.bin=C:\\path\\to\\32bit\\IEDriverServer.exe       [Windows]
    ff17.bin=/usr/bin/firefox                            [Unix-like]
+   ff24.bin=/usr/bin/firefox                            [Unix-like]
    chrome.bin=/path/to/chromedriver                     [Unix-like]
  * </pre>
- * The file should contain four properties: "browsers", "ff3.6.bin", "ff17.bin", and "chrome.bin".
+ * The file should contain four properties: "browsers", "ie.bin", "ff17.bin", and "chrome.bin".
  * <ul>
  *   <li>browsers: is a comma separated list contains any combination of "hu" (for HtmlUnit with all browser versions),
- *   "hu-ie6", "hu-ie7", "hu-ie8", "hu-ie9", "hu-ff3.6", "hu-ff17",
- *   "ff3.6", "ff17", "ie6", "ie7", "ie8", "ie9", "chrome", which will be used to driver real browsers,
+ *   "hu-ie8", "hu-ie9", "hu-ff17, "hu-ff24",
+ *   "ff17", ff24", "ie8", "ie9", "chrome", which will be used to driver real browsers,
  *   note that you can't define more than one IE as there is no standard way
  *   to have multiple IEs on the same machine</li>
- *   <li>ff3.6.bin: is the location of the FF3.6 binary, in Windows use double back-slashes</li>
+ *   <li>ie.bin: is the location of the IEDriverServer binary (see
+ *   <a href="http://code.google.com/p/selenium/downloads/list">IEDriverServer downloads</a></li>
  *   <li>ff17.bin: is the location of the FF17 binary, in Windows use double back-slashes</li>
+ *   <li>ff24.bin: is the location of the FF24 binary, in Windows use double back-slashes</li>
  *   <li>chrome.bin: is the location of the ChromeDriver binary (see
- *   <a href="http://code.google.com/p/chromedriver/downloads/list">Chrome Driver downloads</a></li>
+ *   <a href="http://chromedriver.storage.googleapis.com/index.html">Chrome Driver downloads</a></li>
  * </ul>
  * </p>
- * <p>For IE, please download <a href="http://code.google.com/p/selenium/downloads/list">IEDriverServer.exe</a>
- * and add it to the path.</p>
  *
  * @version $Revision$
  * @author Marc Guillemot
  * @author Ahmed Ashour
  * @author Ronald Brill
+ * @author Frank Danek
  */
 public abstract class WebDriverTestCase extends WebTestCase {
 
     private static final Log LOG = LogFactory.getLog(WebDriverTestCase.class);
 
     private static List<String> BROWSERS_PROPERTIES_;
-    private static String FF3_6_BIN_;
-    private static String FF10_BIN_;
+    private static String IE_BIN_;
     private static String FF17_BIN_;
+    private static String FF24_BIN_;
     private static String CHROME_BIN_;
 
     /** The driver cache. */
@@ -144,9 +146,9 @@ public abstract class WebDriverTestCase extends WebTestCase {
                     BROWSERS_PROPERTIES_
                         = Arrays.asList(properties.getProperty("browsers", "hu")
                             .replaceAll(" ", "").toLowerCase().split(","));
-                    FF3_6_BIN_ = properties.getProperty("ff3.6.bin");
-                    FF10_BIN_ = properties.getProperty("ff10.bin");
+                    IE_BIN_ = properties.getProperty("ie.bin");
                     FF17_BIN_ = properties.getProperty("ff17.bin");
+                    FF24_BIN_ = properties.getProperty("ff24.bin");
                     CHROME_BIN_ = properties.getProperty("chrome.bin");
                 }
             }
@@ -227,10 +229,16 @@ public abstract class WebDriverTestCase extends WebTestCase {
     protected WebDriver buildWebDriver() throws IOException {
         if (useRealBrowser_) {
             if (getBrowserVersion().isIE()) {
+                if (null != IE_BIN_) {
+                    System.setProperty("webdriver.ie.driver", IE_BIN_);
+                }
                 return new InternetExplorerDriver();
             }
-            if (BrowserVersion.CHROME.equals(getBrowserVersion())) {
+            if (BrowserVersion.CHROME == getBrowserVersion()) {
                 if (CHROME_SERVICE_ == null) {
+                    if (CHROME_BIN_ == null) {
+                        throw new IllegalStateException("\"chrome.bin\" property is not specified!");
+                    }
                     CHROME_SERVICE_ = new ChromeDriverService.Builder()
                         .usingDriverExecutable(new File(CHROME_BIN_))
                         .usingAnyFreePort()
@@ -244,14 +252,11 @@ public abstract class WebDriverTestCase extends WebTestCase {
             }
 
             String ffBinary = null;
-            if (getBrowserVersion() == BrowserVersion.FIREFOX_3_6) {
-                ffBinary = FF3_6_BIN_;
-            }
-            else if (getBrowserVersion() == BrowserVersion.FIREFOX_10) {
-                ffBinary = FF10_BIN_;
-            }
-            else if (getBrowserVersion() == BrowserVersion.FIREFOX_17) {
+            if (BrowserVersion.FIREFOX_17 == getBrowserVersion()) {
                 ffBinary = FF17_BIN_;
+            }
+            if (BrowserVersion.FIREFOX_24 == getBrowserVersion()) {
+                ffBinary = FF24_BIN_;
             }
             if (ffBinary != null) {
                 return new FirefoxDriver(new FirefoxBinary(new File(ffBinary)), new FirefoxProfile());
@@ -482,10 +487,10 @@ public abstract class WebDriverTestCase extends WebTestCase {
                 webRequest.setAdditionalHeader(headerName, headerValue);
             }
 
-            if ("PUT".equals(request.getMethod()) && request.getContentLength() > 0) {
+            if (requestParameters.isEmpty() && request.getContentLength() > 0) {
                 final byte[] buffer = new byte[request.getContentLength()];
-                request.getInputStream().readLine(buffer, 0, buffer.length);
-                webRequest.setRequestBody(new String(buffer));
+                request.getInputStream().read(buffer, 0, buffer.length);
+                webRequest.setRequestBody(new String(buffer, webRequest.getCharset()));
             }
             else {
                 webRequest.setRequestParameters(requestParameters);
@@ -603,7 +608,7 @@ public abstract class WebDriverTestCase extends WebTestCase {
      * @throws Exception if something goes wrong
      */
     protected final WebDriver loadPageWithAlerts2(final String html, final URL url) throws Exception {
-        return loadPageWithAlerts2(html, url, DEFAULT_WAIT_TIME);
+        return loadPageWithAlerts2(html, url, DEFAULT_WAIT_TIME * 1000);
     }
 
     /**

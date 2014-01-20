@@ -72,6 +72,7 @@ import com.gargoylesoftware.htmlunit.util.NameValuePair;
  * @author <a href="mailto:cse@dynabean.de">Christian Sell</a>
  * @author Marc Guillemot
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HtmlPageTest extends SimpleWebTestCase {
@@ -1781,14 +1782,14 @@ public class HtmlPageTest extends SimpleWebTestCase {
         final NodeList divs = page.getElementsByTagName("div");
         assertEquals(3, divs.getLength());
 
-        final HtmlDivision newDiv = new HtmlDivision(null, HtmlDivision.TAG_NAME, page, null);
+        final HtmlDivision newDiv = new HtmlDivision(HtmlDivision.TAG_NAME, page, null);
         page.getBody().appendChild(newDiv);
         assertEquals(4, divs.getLength());
     }
 
     /**
      * HtmlPage.getReadyState() should give the same information than the document element.
-     * @see <a href="http://sf.net/tracker/index.php?func=detail&aid=1592733&group_id=47038&atid=448266">1592733</a>
+     * @see <a href="http://sourceforge.net/p/htmlunit/bugs/402/">402</a>
      * @exception Exception If the test fails
      */
     @Test

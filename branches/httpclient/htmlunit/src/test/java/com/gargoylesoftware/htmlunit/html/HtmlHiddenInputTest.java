@@ -30,6 +30,7 @@ import com.gargoylesoftware.htmlunit.BrowserRunner.Alerts;
  * @version $Revision$
  * @author Marc Guillemot
  * @author Ronald Brill
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HtmlHiddenInputTest extends WebDriverTestCase {
@@ -123,7 +124,7 @@ public class HtmlHiddenInputTest extends WebDriverTestCase {
     @Test
     @Alerts(DEFAULT = { "initial-initial", "initial-initial", "newValue-newValue", "newValue-newValue",
                 "newDefault-newDefault", "newDefault-newDefault" },
-            IE = { "initial-initial", "initial-initial", "newValue-initial", "newValue-initial",
+            IE8 = { "initial-initial", "initial-initial", "newValue-initial", "newValue-initial",
                 "newValue-newDefault", "newValue-newDefault" })
     public void resetByClick() throws Exception {
         final String html = "<html><head><title>foo</title>\n"
@@ -164,7 +165,7 @@ public class HtmlHiddenInputTest extends WebDriverTestCase {
     @Test
     @Alerts(DEFAULT = { "initial-initial", "initial-initial", "newValue-newValue", "newValue-newValue",
                 "newDefault-newDefault", "newDefault-newDefault" },
-            IE = { "initial-initial", "initial-initial", "newValue-initial", "newValue-initial",
+            IE8 = { "initial-initial", "initial-initial", "newValue-initial", "newValue-initial",
                 "newValue-newDefault", "newValue-newDefault" })
     public void resetByJS() throws Exception {
         final String html = "<html><head><title>foo</title>\n"

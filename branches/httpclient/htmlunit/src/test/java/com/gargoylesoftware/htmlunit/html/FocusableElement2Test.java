@@ -14,6 +14,8 @@
  */
 package com.gargoylesoftware.htmlunit.html;
 
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF24;
+
 import java.util.Arrays;
 
 import org.junit.Test;
@@ -25,6 +27,7 @@ import com.gargoylesoftware.htmlunit.BrowserRunner;
 import com.gargoylesoftware.htmlunit.BrowserRunner.Alerts;
 import com.gargoylesoftware.htmlunit.BrowserRunner.Browser;
 import com.gargoylesoftware.htmlunit.BrowserRunner.BuggyWebDriver;
+import com.gargoylesoftware.htmlunit.BrowserRunner.NotYetImplemented;
 import com.gargoylesoftware.htmlunit.WebDriverTestCase;
 
 /**
@@ -189,6 +192,10 @@ public class FocusableElement2Test extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
+    @Alerts(DEFAULT = "done\nfocus",
+            FF17 = "done",
+            IE8 = "done")
+    @NotYetImplemented(FF24)
     public void focusOnNonFocusableElementShouldNotTriggerDocumentFocus() throws Exception {
         final String html = "<html><head>\n"
                 + "<script>\n"
@@ -216,8 +223,8 @@ public class FocusableElement2Test extends WebDriverTestCase {
                 + "</script>\n"
                 + "</body></html>";
 
-        final WebDriver driver = loadPageWithAlerts2(html);
-        assertEquals("done", driver.findElement(By.id("log")).getAttribute("value").trim());
+        final WebDriver driver = loadPage2(html);
+        assertEquals(getExpectedAlerts()[0], driver.findElement(By.id("log")).getAttribute("value").trim());
     }
 
     /**

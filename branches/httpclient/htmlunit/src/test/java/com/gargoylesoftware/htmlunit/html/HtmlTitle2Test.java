@@ -28,6 +28,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  *
  * @version $Revision$
  * @author Marc Guillemot
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HtmlTitle2Test extends WebDriverTestCase {
@@ -36,7 +37,8 @@ public class HtmlTitle2Test extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(FF = "[object HTMLTitleElement]", IE = "[object]")
+    @Alerts(DEFAULT = "[object HTMLTitleElement]",
+            IE8 = "[object]")
     public void simpleScriptable() throws Exception {
         final String html = "<html><head><title id='myId'>foo</title>\n"
             + "<script>\n"

@@ -97,8 +97,7 @@ public class WebClient4Test extends WebServerTestCase {
             client.getPage("http://localhost:" + PORT + RedirectServlet307.URL);
         }
         catch (final Exception e) {
-            assertTrue(e.getCause().getMessage(),
-                    e.getCause().getMessage().contains("Circular redirect"));
+            assertTrue(e.getMessage(), e.getMessage().contains("Too much redirect"));
         }
     }
 

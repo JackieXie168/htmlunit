@@ -48,6 +48,7 @@ import com.gargoylesoftware.htmlunit.BrowserRunner.Tries;
  *
  * @version $Revision$
  * @author Ahmed Ashour
+ * @author Frank Danek
  */
 class BrowserVersionClassRunner extends BlockJUnit4ClassRunner {
 
@@ -70,26 +71,20 @@ class BrowserVersionClassRunner extends BlockJUnit4ClassRunner {
                 expectedAlerts = alerts.value();
             }
             else {
-                if (browserVersion_ == BrowserVersion.INTERNET_EXPLORER_6) {
-                    expectedAlerts = firstDefined(alerts.IE6(), alerts.IE(), alerts.DEFAULT());
-                }
-                else if (browserVersion_ == BrowserVersion.INTERNET_EXPLORER_7) {
-                    expectedAlerts = firstDefined(alerts.IE7(), alerts.IE(), alerts.DEFAULT());
-                }
-                else if (browserVersion_ == BrowserVersion.INTERNET_EXPLORER_8) {
+                if (browserVersion_ == BrowserVersion.INTERNET_EXPLORER_8) {
                     expectedAlerts = firstDefined(alerts.IE8(), alerts.IE(), alerts.DEFAULT());
                 }
                 else if (browserVersion_ == BrowserVersion.INTERNET_EXPLORER_9) {
                     expectedAlerts = firstDefined(alerts.IE9(), alerts.IE(), alerts.DEFAULT());
                 }
-                else if (browserVersion_ == BrowserVersion.FIREFOX_3_6) {
-                    expectedAlerts = firstDefined(alerts.FF3_6(), alerts.FF(), alerts.DEFAULT());
-                }
-                else if (browserVersion_ == BrowserVersion.FIREFOX_10) {
-                    expectedAlerts = firstDefined(alerts.FF10(), alerts.FF(), alerts.DEFAULT());
+                else if (browserVersion_ == BrowserVersion.INTERNET_EXPLORER_11) {
+                    expectedAlerts = firstDefined(alerts.IE11(), alerts.IE(), alerts.DEFAULT());
                 }
                 else if (browserVersion_ == BrowserVersion.FIREFOX_17) {
                     expectedAlerts = firstDefined(alerts.FF17(), alerts.FF(), alerts.DEFAULT());
+                }
+                else if (browserVersion_ == BrowserVersion.FIREFOX_24) {
+                    expectedAlerts = firstDefined(alerts.FF24(), alerts.FF(), alerts.DEFAULT());
                 }
                 else if (browserVersion_ == BrowserVersion.CHROME) {
                     expectedAlerts = firstDefined(alerts.CHROME(), alerts.DEFAULT());
@@ -232,18 +227,6 @@ class BrowserVersionClassRunner extends BlockJUnit4ClassRunner {
                     }
                     break;
 
-                case IE6:
-                    if (browserVersion_ == BrowserVersion.INTERNET_EXPLORER_6) {
-                        return true;
-                    }
-                    break;
-
-                case IE7:
-                    if (browserVersion_ == BrowserVersion.INTERNET_EXPLORER_7) {
-                        return true;
-                    }
-                    break;
-
                 case IE8:
                     if (browserVersion_ == BrowserVersion.INTERNET_EXPLORER_8) {
                         return true;
@@ -256,26 +239,26 @@ class BrowserVersionClassRunner extends BlockJUnit4ClassRunner {
                     }
                     break;
 
+                case IE11:
+                    if (browserVersion_ == BrowserVersion.INTERNET_EXPLORER_11) {
+                        return true;
+                    }
+                    break;
+
                 case FF:
                     if (browserVersion_.isFirefox()) {
                         return true;
                     }
                     break;
 
-                case FF3_6:
-                    if (browserVersion_ == BrowserVersion.FIREFOX_3_6) {
-                        return true;
-                    }
-                    break;
-
-                case FF10:
-                    if (browserVersion_ == BrowserVersion.FIREFOX_10) {
-                        return true;
-                    }
-                    break;
-
                 case FF17:
                     if (browserVersion_ == BrowserVersion.FIREFOX_17) {
+                        return true;
+                    }
+                    break;
+
+                case FF24:
+                    if (browserVersion_ == BrowserVersion.FIREFOX_24) {
                         return true;
                     }
                     break;

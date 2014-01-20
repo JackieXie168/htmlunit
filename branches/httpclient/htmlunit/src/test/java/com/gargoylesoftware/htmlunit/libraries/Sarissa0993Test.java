@@ -36,6 +36,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.gargoylesoftware.htmlunit.BrowserRunner;
+import com.gargoylesoftware.htmlunit.BrowserRunner.Alerts;
 import com.gargoylesoftware.htmlunit.BrowserRunner.Browsers;
 import com.gargoylesoftware.htmlunit.WebDriverTestCase;
 
@@ -45,6 +46,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @version $Revision$
  * @author Ahmed Ashour
  * @author Marc Guillemot
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class Sarissa0993Test extends WebDriverTestCase {
@@ -53,6 +55,9 @@ public class Sarissa0993Test extends WebDriverTestCase {
      * @throws Exception if an error occurs
      */
     @Test
+    @Alerts(DEFAULT = { "", "", "", "", "", "", "++++F+++" },
+            IE11 = { "+++++++++++F++++++", "", "", "", "FFF", "FF", "FFFFFFFF" })
+    // TODO [IE11]XML sarissa 0.9.9.3 is not compatible with IE11's new XML stuff
     public void sarissa() throws Exception {
         startWebServer("src/test/resources/libraries/sarissa/0.9.9.3", null, null);
         final String url = "http://localhost:" + PORT + "/test/testsarissa.html";
@@ -67,13 +72,31 @@ public class Sarissa0993Test extends WebDriverTestCase {
             driver.switchTo().alert().dismiss();
         }
 
-        verify(driver, "SarissaTestCase");
-        verify(driver, "XmlHttpRequestTestCase");
-        verify(driver, "XMLSerializerTestCase");
-        verify(driver, "DOMParserTestCase");
-        verify(driver, "XMLDocumentTestCase");
-        verify(driver, "XMLElementTestCase");
-        verify(driver, "XSLTProcessorTestCase", "++++F+++");
+        verify(driver, "SarissaTestCase", getExpectedAlerts()[0]);
+        verify(driver, "XmlHttpRequestTestCase", getExpectedAlerts()[1]);
+        verify(driver, "XMLSerializerTestCase", getExpectedAlerts()[2]);
+        verify(driver, "DOMParserTestCase", getExpectedAlerts()[3]);
+        verify(driver, "XMLDocumentTestCase", getExpectedAlerts()[4]);
+        verify(driver, "XMLElementTestCase", getExpectedAlerts()[5]);
+        verify(driver, "XSLTProcessorTestCase", getExpectedAlerts()[6]);
+    }
+
+    /**
+     * @param expectedResult empty for successful test or in the form of "+++F+++"
+     * for failing tests (see the results in a real browser)
+     */
+    private void verify(final WebDriver driver, final String testName, final String expectedResult) throws Exception {
+        if ("".equals(expectedResult)) {
+            verify(driver, testName);
+        }
+        else {
+            final WebElement div =
+                driver.findElement(By.xpath("//div[@class='placeholder' and a[@name='#" + testName + "']]"));
+
+            String text = div.getText();
+            text = text.substring(0, text.indexOf(String.valueOf(expectedResult.length()))).trim();
+            assertEquals(testName + " Results\n" + expectedResult, text);
+        }
     }
 
     private void verify(final WebDriver driver, final String testName) throws Exception {
@@ -82,20 +105,6 @@ public class Sarissa0993Test extends WebDriverTestCase {
         assertEquals(1, divList.size());
         final WebElement div = divList.get(0);
         assertEquals("OK!", div.getText());
-    }
-
-    /**
-     * This is used in case a failing test is expected to happen.
-     *
-     * @param expectedResult in the form of "+++F+++" (see the results in a real browser)
-     */
-    private void verify(final WebDriver driver, final String testName, final String expectedResult) throws Exception {
-        final WebElement div =
-            driver.findElement(By.xpath("//div[@class='placeholder' and a[@name='#" + testName + "']]"));
-
-        String text = div.getText();
-        text = text.substring(0, text.indexOf(String.valueOf(expectedResult.length()))).trim();
-        assertEquals(testName + " Results\n" + expectedResult, text);
     }
 
     /**

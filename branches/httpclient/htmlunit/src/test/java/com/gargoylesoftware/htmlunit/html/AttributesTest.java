@@ -16,6 +16,7 @@ package com.gargoylesoftware.htmlunit.html;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
@@ -41,6 +42,8 @@ import com.gargoylesoftware.htmlunit.WebClient;
  * @author Christian Sell
  * @author Marc Guillemot
  * @author Ahmed Ashour
+ * @author Ronald Brill
+ * @author Frank Danek
  */
 public class AttributesTest extends TestCase {
 
@@ -73,48 +76,76 @@ public class AttributesTest extends TestCase {
         final TestSuite suite = new TestSuite();
         final String[] classesToTest = {
             "HtmlAbbreviated", "HtmlAcronym",
-            "HtmlAddress", "HtmlAnchor", "HtmlApplet", "HtmlArea",
-            "HtmlAudio", "HtmlBackgroundSound",
-            "HtmlBase", "HtmlBaseFont", "HtmlBidirectionalOverride",
-            "HtmlBig", "HtmlBlink",
-            "HtmlBlockQuote", "HtmlBody", "HtmlBold", "HtmlBreak", "HtmlButton",
-            "HtmlButtonInput", "HtmlCanvas", "HtmlCaption", "HtmlCenter",
-            "HtmlCheckBoxInput", "HtmlCitation", "HtmlCode",
+            "HtmlAnchor", "HtmlAddress", "HtmlApplet", "HtmlArea",
+            "HtmlArticle", "HtmlAside", "HtmlAudio",
+            "HtmlBackgroundSound", "HtmlBase", "HtmlBaseFont",
+            "HtmlBidirectionalOverride", "HtmlBig", "HtmlBlink",
+            "HtmlBlockQuote", "HtmlBody", "HtmlBold",
+            "HtmlBreak", "HtmlButton", "HtmlCanvas", "HtmlCaption",
+            "HtmlCenter", "HtmlCitation", "HtmlCode",
+            "HtmlDataList",
             "HtmlDefinition", "HtmlDefinitionDescription",
-            "HtmlDefinitionList", "HtmlDefinitionTerm",
-            "HtmlDeletedText", "HtmlDirectory", "HtmlDivision", /*"HtmlElement", */
-            "HtmlEmbed", "HtmlEmphasis", "HtmlExample",
-            "HtmlFieldSet", "HtmlFileInput", "HtmlFont", "HtmlForm",
-            "HtmlFrame", "HtmlFrameSet", "HtmlHead", "HtmlHeading1",
-            "HtmlHeading2", "HtmlHeading3", "HtmlHeading4", "HtmlHeading5",
-            "HtmlHeading6", "HtmlHiddenInput", "HtmlHorizontalRule",
-            "HtmlHtml", "HtmlImage", "HtmlImageInput", "HtmlInlineFrame",
+            "HtmlDeletedText", "HtmlDirectory",
+            "HtmlDivision", "HtmlDefinitionList",
+            "HtmlDefinitionTerm", "HtmlEmbed",
+            "HtmlEmphasis",
+            "HtmlFieldSet", "HtmlFigureCaption", "HtmlFigure",
+            "HtmlFont", "HtmlForm", "HtmlFooter",
+            "HtmlFrame", "HtmlFrameSet",
+            "HtmlHead", "HtmlHeader",
+            "HtmlHeading1", "HtmlHeading2", "HtmlHeading3",
+            "HtmlHeading4", "HtmlHeading5", "HtmlHeading6",
+            "HtmlHorizontalRule", "HtmlHtml", "HtmlInlineFrame",
             "HtmlInlineQuotation",
-            "HtmlInsertedText", "HtmlIsIndex", "HtmlItalic",
-            "HtmlKeyboard", "HtmlLabel",
-            "HtmlLegend", "HtmlLink", "HtmlListing", "HtmlListItem", "HtmlMap",
-            "HtmlMarquee",
-            "HtmlMenu", "HtmlMeta", "HtmlMultiColumn",
-            "HtmlNoBreak", "HtmlNoEmbed", "HtmlNoFrames", "HtmlNoScript",
-            "HtmlObject", "HtmlOption", "HtmlOptionGroup", "HtmlOrderedList",
-            /*"HtmlPage",*/ "HtmlParagraph", "HtmlParameter", "HtmlPasswordInput",
-            "HtmlPlainText",
-            "HtmlPreformattedText", "HtmlRadioButtonInput", "HtmlResetInput",
-            "HtmlS", "HtmlSample", "HtmlScript", "HtmlSelect", "HtmlSmall",
-            "HtmlSpacer", "HtmlSpan", "HtmlSource", "HtmlStrike",
-            "HtmlStrong", "HtmlStyle", "HtmlSubmitInput",
+            "HtmlImage", "HtmlImage", "HtmlInsertedText", "HtmlIsIndex",
+            "HtmlItalic", "HtmlKeyboard", "HtmlLabel",
+            "HtmlLegend", "HtmlListing", "HtmlListItem",
+            "HtmlLink",
+            "HtmlKeygen",
+            "HtmlMap", "HtmlMark", "HtmlMarquee",
+            "HtmlMenu", "HtmlMeta", "HtmlMeter", "HtmlMultiColumn",
+            "HtmlNav", "HtmlNextId",
+            "HtmlNoBreak", "HtmlNoEmbed", "HtmlNoFrames",
+            "HtmlNoScript", "HtmlObject", "HtmlOrderedList",
+            "HtmlOptionGroup", "HtmlOption", "HtmlOutput",
+            "HtmlParagraph",
+            "HtmlParameter", "HtmlPlainText", "HtmlPreformattedText",
+            "HtmlProgress",
+            "HtmlRp", "HtmlRt", "HtmlRuby",
+            "HtmlS", "HtmlSample",
+            "HtmlScript", "HtmlSection", "HtmlSelect", "HtmlSmall",
+            "HtmlSource", "HtmlSpan",
+            "HtmlStrike", "HtmlStrong", "HtmlStyle",
             "HtmlSubscript", "HtmlSuperscript",
-            "HtmlTable", "HtmlTableBody", /*"HtmlTableCell",*/ "HtmlTableColumn",
-            "HtmlTableColumnGroup", "HtmlTableDataCell",
-            "HtmlTableFooter", "HtmlTableHeader", "HtmlTableHeaderCell",
-            "HtmlTableRow", "HtmlTeletype", "HtmlTextArea", "HtmlTextInput",
-            "HtmlTitle", "HtmlUnderlined", "HtmlUnorderedList",
-            "HtmlVariable", "HtmlVideo", "HtmlWordBreak"
+            "HtmlTable", "HtmlTableColumn", "HtmlTableColumnGroup",
+            "HtmlTableBody", "HtmlTableDataCell", "HtmlTableHeaderCell",
+            "HtmlTableRow", "HtmlTextArea", "HtmlTableFooter",
+            "HtmlTableHeader", "HtmlTeletype",
+            "HtmlTime", "HtmlTitle",
+            "HtmlUnderlined", "HtmlUnorderedList",
+            "HtmlVariable", "HtmlVideo",
+            "HtmlWordBreak", "HtmlExample"
         };
+
+        final HashSet<String> supportedTags = new HashSet<String>(DefaultElementFactory.SUPPORTED_TAGS_);
 
         for (final String testClass : classesToTest) {
             final Class<?> clazz = Class.forName("com.gargoylesoftware.htmlunit.html." + testClass);
             addTestsForClass(clazz, page, suite);
+
+            String tag = (String) clazz.getField("TAG_NAME").get(null);
+            supportedTags.remove(tag);
+            try {
+                tag = (String) clazz.getField("TAG_NAME2").get(null);
+                supportedTags.remove(tag);
+            }
+            catch (final NoSuchFieldException e) {
+                // ignore
+            }
+        }
+
+        if (!supportedTags.isEmpty()) {
+            throw new RuntimeException("Missing tag class(es) " + supportedTags.toString());
         }
         return suite;
     }

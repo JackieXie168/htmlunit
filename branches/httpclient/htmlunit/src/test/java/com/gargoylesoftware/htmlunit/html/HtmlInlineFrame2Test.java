@@ -16,7 +16,6 @@ package com.gargoylesoftware.htmlunit.html;
 
 import java.net.URL;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.By;
@@ -37,6 +36,7 @@ import com.gargoylesoftware.htmlunit.WebDriverTestCase;
  * @author Marc Guillemot
  * @author Daniel Gredler
  * @author Ronald Brill
+ * @author Frank Danek
  */
 @RunWith(BrowserRunner.class)
 public class HtmlInlineFrame2Test extends WebDriverTestCase {
@@ -45,7 +45,8 @@ public class HtmlInlineFrame2Test extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = "[object HTMLIFrameElement]", IE = "[object]")
+    @Alerts(DEFAULT = "[object HTMLIFrameElement]",
+            IE8 = "[object]")
     public void simpleScriptable() throws Exception {
         final String html = "<html><head>\n"
             + "<script>\n"
@@ -71,7 +72,7 @@ public class HtmlInlineFrame2Test extends WebDriverTestCase {
      */
     @Test
     @Alerts(DEFAULT = { "1", "[object HTMLIFrameElement]", "null" },
-            IE = { "2", "[object]", "[object]" })
+            IE8 = { "2", "[object]", "[object]" })
     public void selfClosingIFrame() throws Exception {
         final String html = "<html><head>\n"
             + "<script>\n"
@@ -142,22 +143,6 @@ public class HtmlInlineFrame2Test extends WebDriverTestCase {
         // top frame
         assertEquals("Top Page", driver.getTitle());
         assertEquals("Body of top frame", driver.findElement(By.id("content")).getText());
-
-        // start REMOVE ME
-        // because of the return value change done for
-        // com.gargoylesoftware.htmlunit.html.BaseFrameElement.getEnclosedWindow()
-        // this test does not work with the current selenium driver
-        // this hack is only to inform us, if selenium uses the latest htmlunit
-        // then we can remove this
-        try {
-            driver.switchTo().frame("id-left");
-            Assert.fail("Switching the frame seems to work now in selenium. Please remove this code.");
-        }
-        catch (final NoSuchMethodError e) {
-            // expected, no chance to implement the test without this
-            return;
-        }
-        // end REMOVE ME
 
         // left frame
         driver.switchTo().frame("id-left");

@@ -14,17 +14,22 @@
  */
 package com.gargoylesoftware.htmlunit.libraries;
 
-import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE8;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE11;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.gargoylesoftware.htmlunit.BrowserRunner;
+import com.gargoylesoftware.htmlunit.WebServerTestCase;
+import com.gargoylesoftware.htmlunit.BrowserRunner.Browser;
 import com.gargoylesoftware.htmlunit.BrowserRunner.NotYetImplemented;
 
 /**
  * Tests for compatibility with version 1.7.1 of
- * <a href="http://http://www.prototypejs.org/">Prototype JavaScript library</a>.
+ * <a href="http://www.prototypejs.org/">Prototype JavaScript library</a>.
  *
  * @version $Revision$
  * @author Ronald Brill
@@ -33,11 +38,25 @@ import com.gargoylesoftware.htmlunit.BrowserRunner.NotYetImplemented;
 public class Prototype171Test extends PrototypeTestBase {
 
     /**
+     * @throws Exception if an error occurs
+     */
+    @BeforeClass
+    public static void aaa_startSesrver() throws Exception {
+        SERVER_ = WebServerTestCase.createWebServer("src/test/resources/libraries/prototype/1.7.1/test/unit/", null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected String getVersion() {
+        return "1.7.1";
+    }
+
+    /**
      * @throws Exception if test fails
-     * For IE: 2 assertions pass whereas they shouldn't in testResponders
      */
     @Test
-    @NotYetImplemented
     public void ajax() throws Exception {
         test("ajax_test.html");
     }
@@ -46,6 +65,7 @@ public class Prototype171Test extends PrototypeTestBase {
      * @throws Exception if test fails
      */
     @Test
+    @NotYetImplemented(IE8)
     public void array() throws Exception {
         test("array_test.html");
     }
@@ -130,7 +150,7 @@ public class Prototype171Test extends PrototypeTestBase {
      * @throws Exception if test fails
      */
     @Test
-    @NotYetImplemented(IE)
+    @NotYetImplemented({ FF, IE11 })
     public void form() throws Exception {
         test("form_test.html");
     }
@@ -229,7 +249,7 @@ public class Prototype171Test extends PrototypeTestBase {
      * @throws Exception if test fails
      */
     @Test
-    @NotYetImplemented
+    @NotYetImplemented(Browser.IE8)
     public void selector() throws Exception {
         test("selector_test.html");
     }
@@ -243,21 +263,11 @@ public class Prototype171Test extends PrototypeTestBase {
     }
 
     /**
-     * Depends on {@link com.gargoylesoftware.htmlunit.javascript.regexp.HtmlUnitRegExpProxyTest#test()}.
-     * 1 expected failure is because the server port is other than 4711
+     * 1 expected failure is because the server port is other than 4711.
      * @throws Exception if test fails
      */
     @Test
-    @NotYetImplemented
     public void unitTests() throws Exception {
         test("unittest_test.html");
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected String getVersion() {
-        return "1.7.1";
     }
 }
