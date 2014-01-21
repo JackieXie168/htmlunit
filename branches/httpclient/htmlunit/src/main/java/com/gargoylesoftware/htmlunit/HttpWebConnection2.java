@@ -377,6 +377,7 @@ public class HttpWebConnection2 implements WebConnection {
             final AuthScope authScope = new AuthScope(requestUrl.getHost(), requestUrl.getPort());
             // updating our client to keep the credentials for the next request
             credentialsProvider.setCredentials(authScope, requestCredentials);
+            httpContext_.removeAttribute(HttpClientContext.TARGET_AUTH_STATE);
         }
         httpContext_.removeAttribute(HttpClientContext.CREDS_PROVIDER);
         httpClient.setDefaultCredentialsProvider(credentialsProvider);
@@ -797,9 +798,9 @@ public class HttpWebConnection2 implements WebConnection {
     }
 
     //TODO: should we really do this?
-    public void clearCredentials() {
-        httpContext_.removeAttribute(HttpClientContext.TARGET_AUTH_STATE);
-    }
+//    public void clearCredentials() {
+//        httpContext_.removeAttribute(HttpClientContext.TARGET_AUTH_STATE);
+//    }
 }
 
 /**
