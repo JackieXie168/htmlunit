@@ -322,7 +322,7 @@ public class HttpWebConnection2 implements WebConnection {
                     }
                     else {
                         builder.addTextBody(pair.getName(), pair.getValue(),
-                                ContentType.create(webRequest.getCharset()));
+                                ContentType.create("text/plain", webRequest.getCharset()));
                     }
                 }
                 method.setEntity(builder.build());
