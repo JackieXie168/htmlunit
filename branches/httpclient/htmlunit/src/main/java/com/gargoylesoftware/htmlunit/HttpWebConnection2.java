@@ -172,8 +172,7 @@ public class HttpWebConnection2 implements WebConnection {
             catch (final SSLPeerUnverifiedException s) {
                 // Try to use only SSLv3 instead
                 if (webClient_.getOptions().isUseInsecureSSL()) {
-                    // TODO: asashour
-                    // HtmlUnitSSLSocketFactory.setUseSSL3Only(getHttpClient().getParams(), true);
+                    HtmlUnitSSLConnectionSocketFactory.setUseSSL3Only(httpContext_, true);
                     httpResponse = builder.build().execute(hostConfiguration, httpMethod);
                 }
                 else {

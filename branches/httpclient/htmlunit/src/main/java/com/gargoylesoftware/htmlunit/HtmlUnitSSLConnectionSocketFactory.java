@@ -61,6 +61,10 @@ import org.apache.http.protocol.HttpContext;
 final class HtmlUnitSSLConnectionSocketFactory extends SSLConnectionSocketFactory {
     private static final String SSL3ONLY = "htmlunit.SSL3Only";
 
+    static void setUseSSL3Only(final HttpContext parameters, final boolean ssl3Only) {
+        parameters.setAttribute(SSL3ONLY, ssl3Only);
+    }
+
     static boolean isUseSSL3Only(final HttpContext context) {
         return "TRUE".equalsIgnoreCase((String) context.getAttribute(SSL3ONLY));
     }
@@ -104,14 +108,18 @@ final class HtmlUnitSSLConnectionSocketFactory extends SSLConnectionSocketFactor
      * {@inheritDoc}
      */
     @Override
-    public Socket createSocket(final HttpContext context) throws IOException {
+    public Socket createLayeredSocket(
+            final Socket socket,
+            final String target,
+            final int port,
+            final HttpContext context) throws IOException {
         if (SocksSocketFactory.getSocksProxy(context) != null) {
             // we create the socket in connectSocket has we need to know the destination to open the underlying request
             return null;
         }
-        final Socket socket = super.createSocket(context);
-        configureSocket((SSLSocket) socket, context);
-        return socket;
+        final Socket sslsock = super.createLayeredSocket(socket, target, port, context);
+        configureSocket((SSLSocket) sslsock, context);
+        return sslsock;
     }
 
     private void configureSocket(final SSLSocket sslSocket, final HttpContext context) {
