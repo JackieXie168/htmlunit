@@ -113,7 +113,7 @@ final class HtmlUnitSSLConnectionSocketFactory extends SSLConnectionSocketFactor
             final String target,
             final int port,
             final HttpContext context) throws IOException {
-        if (SocksSocketFactory.getSocksProxy(context) != null) {
+        if (SocksConnectionSocketFactory.getSocksProxy(context) != null) {
             // we create the socket in connectSocket has we need to know the destination to open the underlying request
             return null;
         }
@@ -135,7 +135,7 @@ final class HtmlUnitSSLConnectionSocketFactory extends SSLConnectionSocketFactor
             final InetSocketAddress remoteAddress,
             final InetSocketAddress localAddress,
             final HttpContext context) throws IOException {
-        final HttpHost socksProxy = SocksSocketFactory.getSocksProxy(context);
+        final HttpHost socksProxy = SocksConnectionSocketFactory.getSocksProxy(context);
         if (socksProxy != null) {
             final Socket underlying = SocksSocketFactory.createSocketWithSocksProxy(socksProxy);
             underlying.setReuseAddress(true);

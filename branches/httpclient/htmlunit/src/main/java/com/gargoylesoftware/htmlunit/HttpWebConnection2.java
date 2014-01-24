@@ -152,6 +152,8 @@ public class HttpWebConnection2 implements WebConnection {
         final URL url = request.getUrl();
         final HttpClientBuilder builder = reconfigureHttpClientIfNeeded(getHttpClientBuilder());
 
+        HtmlUnitHttpClientBuilder.configureConnectionManager(builder);
+
         HttpUriRequest httpMethod = null;
         try {
             try {
@@ -613,6 +615,7 @@ public class HttpWebConnection2 implements WebConnection {
             }
         });
         configureTimeout(builder, webClient_.getOptions().getTimeout());
+        builder.setMaxConnPerRoute(6);
         return builder;
     }
 
