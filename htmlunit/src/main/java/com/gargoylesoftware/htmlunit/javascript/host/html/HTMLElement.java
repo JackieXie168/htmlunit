@@ -68,7 +68,6 @@ import net.sourceforge.htmlunit.corejs.javascript.ScriptableObject;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.cyberneko.html.HTMLElements;
 import org.w3c.css.sac.CSSException;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
@@ -83,7 +82,6 @@ import com.gargoylesoftware.htmlunit.html.DomDocumentFragment;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.DomNode;
 import com.gargoylesoftware.htmlunit.html.DomText;
-import com.gargoylesoftware.htmlunit.html.HTMLParser;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlArea;
 import com.gargoylesoftware.htmlunit.html.HtmlArticle;
@@ -135,6 +133,7 @@ import com.gargoylesoftware.htmlunit.javascript.host.css.CSSStyleDeclaration;
 import com.gargoylesoftware.htmlunit.javascript.host.css.ComputedCSSStyleDeclaration;
 import com.gargoylesoftware.htmlunit.javascript.host.dom.DOMStringMap;
 import com.gargoylesoftware.htmlunit.javascript.host.dom.DOMTokenList;
+import com.gargoylesoftware.htmlunit.parser.HTMLParser;
 
 /**
  * The JavaScript object "HTMLElement" which is the base class for all HTML
@@ -1055,15 +1054,16 @@ public class HTMLElement extends Element implements ScriptableWithFallbackGetter
                 if (getBrowserVersion().hasFeature(JS_OUTER_THROW_EXCEPTION_WHEN_CLOSES)
                     && node instanceof DomElement) {
                     final String parentName = parent.getNodeName().toUpperCase(Locale.ENGLISH);
-                    final short[] closes = HTMLElements.getElement(node.getNodeName()).closes;
-                    if (closes != null) {
-                        for (final short close : closes) {
-                            if (HTMLElements.getElement(close).name.equals(parentName)) {
-                                throw Context.reportRuntimeError("outerHTML can not set '" + value
-                                    + "' while its parent is " + domNode.getParentNode());
-                            }
-                        }
-                    }
+// TODO parser
+//                    final short[] closes = HTMLElements.getElement(node.getNodeName()).closes;
+//                    if (closes != null) {
+//                        for (final short close : closes) {
+//                            if (HTMLElements.getElement(close).name.equals(parentName)) {
+//                                throw Context.reportRuntimeError("outerHTML can not set '" + value
+//                                    + "' while its parent is " + domNode.getParentNode());
+//                            }
+//                        }
+//                    }
                 }
 
                 return super.appendChild(node);
