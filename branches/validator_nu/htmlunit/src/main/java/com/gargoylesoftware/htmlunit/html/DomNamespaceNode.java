@@ -20,6 +20,7 @@ import com.gargoylesoftware.htmlunit.SgmlPage;
 import com.gargoylesoftware.htmlunit.WebAssert;
 import com.gargoylesoftware.htmlunit.html.xpath.XPathUtils;
 import com.gargoylesoftware.htmlunit.javascript.host.Document;
+import com.gargoylesoftware.htmlunit.parser.HTMLParser;
 
 /**
  * Intermediate base class for DOM Nodes that have namespaces. That includes HtmlElement and HtmlAttr.

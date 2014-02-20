@@ -1800,11 +1800,13 @@ public abstract class DomNode implements Cloneable, Serializable, Node {
     }
 
     /**
+     * <span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span><br/>
+     *
      * Helper for a common call sequence.
      * @param feature the feature to check
      * @return <code>true</code> if the currently emulated browser has this feature.
      */
-    protected boolean hasFeature(final BrowserVersionFeatures feature) {
+    public boolean hasFeature(final BrowserVersionFeatures feature) {
         return getPage().getWebClient().getBrowserVersion().hasFeature(feature);
     }
 

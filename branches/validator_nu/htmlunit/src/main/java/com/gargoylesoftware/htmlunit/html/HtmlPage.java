@@ -83,7 +83,6 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.WebWindow;
-import com.gargoylesoftware.htmlunit.html.HTMLParser.HtmlUnitDOMBuilder;
 import com.gargoylesoftware.htmlunit.html.impl.SelectableTextInput;
 import com.gargoylesoftware.htmlunit.html.impl.SimpleRange;
 import com.gargoylesoftware.htmlunit.javascript.JavaScriptEngine;
@@ -95,6 +94,7 @@ import com.gargoylesoftware.htmlunit.javascript.host.Event;
 import com.gargoylesoftware.htmlunit.javascript.host.Node;
 import com.gargoylesoftware.htmlunit.javascript.host.Window;
 import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLDocument;
+import com.gargoylesoftware.htmlunit.parser.HTMLParser;
 import com.gargoylesoftware.htmlunit.protocol.javascript.JavaScriptURLConnection;
 
 /**
@@ -142,7 +142,7 @@ public class HtmlPage extends SgmlPage {
 
     private static final Log LOG = LogFactory.getLog(HtmlPage.class);
 
-    private HtmlUnitDOMBuilder builder_;
+    // private HtmlUnitDOMBuilder builder_;
     private String originalCharset_;
     private Map<String, SortedSet<DomElement>> idMap_ = new HashMap<String, SortedSet<DomElement>>();
     private Map<String, SortedSet<DomElement>> nameMap_ = new HashMap<String, SortedSet<DomElement>>();
@@ -2343,24 +2343,28 @@ public class HtmlPage extends SgmlPage {
      * @param string the HTML code to write in place
      */
     public void writeInParsedStream(final String string) {
-        builder_.pushInputString(string);
+// TODO parser
+//        builder_.pushInputString(string);
     }
 
-    /**
-     * Sets the builder to allow page to send content from document.write(ln) calls.
-     * @param htmlUnitDOMBuilder the builder
-     */
-    void setBuilder(final HtmlUnitDOMBuilder htmlUnitDOMBuilder) {
-        builder_ = htmlUnitDOMBuilder;
-    }
-
-    /**
-     * Returns the current builder.
-     * @return the current builder
-     */
-    HtmlUnitDOMBuilder getBuilder() {
-        return builder_;
-    }
+//    /**
+//     * Sets the builder to allow page to send content from document.write(ln) calls.
+//     * @param htmlUnitDOMBuilder the builder
+//     */
+//    void setBuilder(final HtmlUnitDOMBuilder htmlUnitDOMBuilder) {
+//// TODO parser
+////        builder_ = htmlUnitDOMBuilder;
+//    }
+//
+//    /**
+//     * Returns the current builder.
+//     * @return the current builder
+//     */
+//    HtmlUnitDOMBuilder getBuilder() {
+//        return null;
+//// TODO parser
+////        return builder_;
+//    }
 
     /**
      * <p><span style="color:red">INTERNAL API - SUBJECT TO CHANGE AT ANY TIME - USE AT YOUR OWN RISK.</span></p>
