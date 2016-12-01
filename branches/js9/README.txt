@@ -1,0 +1,18 @@
+This project is a Nashorn fork to suit HtmlUnit need.
+
+It is currently based on Nashorn code from http://hg.openjdk.java.net/jdk9/dev/nashorn/
+as of 1 December 2016
+
+- Global is the mandatory 'this' or 'top level' object in Nashorn, and it is with a one-to-one relation with Window.
+HtmlUnit uses window, and Nashorn calls Global.
+- ScriptConext is one per WebWindow.
+- The entry point of dynamic linking is DynamicLinker (specially .relink()).
+
+
+Main customizations:
+- Function.arguments should always exist (can be detected by arguments.callee.arguments):
+  fixed in Global.allocateArguments() and FunctionNode.needsArguments()
+- Handle return statements outside function:
+  fixed in Parser.returnStatement()
+- When setting property of another Global, don't use the current one
+  fixed in SetMethodCreator.createGlobalPropertySetter 
