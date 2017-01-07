@@ -44,10 +44,9 @@ import static com.gargoylesoftware.js.nashorn.internal.lookup.Lookup.MH;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
+
 import com.gargoylesoftware.js.nashorn.internal.objects.annotations.Attribute;
-import com.gargoylesoftware.js.nashorn.internal.objects.annotations.Constructor;
 import com.gargoylesoftware.js.nashorn.internal.objects.annotations.Function;
-import com.gargoylesoftware.js.nashorn.internal.objects.annotations.Property;
 import com.gargoylesoftware.js.nashorn.internal.objects.annotations.ScriptClass;
 import com.gargoylesoftware.js.nashorn.internal.objects.annotations.Where;
 import com.gargoylesoftware.js.nashorn.internal.runtime.JSType;

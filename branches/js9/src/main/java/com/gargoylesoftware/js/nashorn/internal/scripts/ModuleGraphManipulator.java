@@ -38,7 +38,6 @@
 package com.gargoylesoftware.js.nashorn.internal.scripts;
 
 import java.lang.reflect.Module;
-import com.gargoylesoftware.js.nashorn.api.scripting.JSObject;
 
 /**
  * Nashorn's StructureLoader and ScriptLoader instances load

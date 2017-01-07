@@ -37,11 +37,10 @@
 
 package com.gargoylesoftware.js.nashorn.internal.objects;
 
-import com.gargoylesoftware.js.nashorn.internal.runtime.Undefined;
-
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.gargoylesoftware.js.nashorn.internal.runtime.Undefined;
 
 /**
  * <p>A linked hash map used by the ES6 Map and Set objects. As required by the ECMA specification for these objects,

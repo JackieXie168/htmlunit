@@ -100,19 +100,17 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Executable;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Module;
 import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+
 import com.gargoylesoftware.js.dynalink.CallSiteDescriptor;
 import com.gargoylesoftware.js.dynalink.SecureLookupSupplier;
 import com.gargoylesoftware.js.dynalink.internal.AccessControlContextFactory;
 import com.gargoylesoftware.js.dynalink.linker.support.Lookup;
-import jdk.internal.reflect.CallerSensitive;
 
 
 /**

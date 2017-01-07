@@ -47,10 +47,10 @@ import static com.gargoylesoftware.js.nashorn.internal.runtime.arrays.ArrayIndex
 import static com.gargoylesoftware.js.nashorn.internal.runtime.arrays.ArrayIndex.isValidArrayIndex;
 
 import java.util.List;
+
 import com.gargoylesoftware.js.nashorn.internal.codegen.types.Type;
 import com.gargoylesoftware.js.nashorn.internal.ir.Symbol;
 import com.gargoylesoftware.js.nashorn.internal.runtime.Context;
-import com.gargoylesoftware.js.nashorn.internal.runtime.JSType;
 import com.gargoylesoftware.js.nashorn.internal.runtime.PropertyMap;
 import com.gargoylesoftware.js.nashorn.internal.runtime.ScriptObject;
 import com.gargoylesoftware.js.nashorn.internal.runtime.arrays.ArrayIndex;
