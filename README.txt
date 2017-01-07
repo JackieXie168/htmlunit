@@ -1,7 +1,7 @@
 This project is a Nashorn fork to suit HtmlUnit need.
 
 It is currently based on Nashorn code from http://hg.openjdk.java.net/jdk9/dev/nashorn/
-as of 1 December 2016
+as of 7 January 2017
 
 - Global is the mandatory 'this' or 'top level' object in Nashorn, and it is with a one-to-one relation with Window.
 HtmlUnit uses window, and Nashorn calls Global.

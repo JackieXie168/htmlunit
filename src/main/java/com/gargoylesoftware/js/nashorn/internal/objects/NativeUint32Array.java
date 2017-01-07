@@ -44,17 +44,14 @@ import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
-import com.gargoylesoftware.js.nashorn.internal.codegen.types.Type;
+
 import com.gargoylesoftware.js.nashorn.internal.objects.annotations.Attribute;
-import com.gargoylesoftware.js.nashorn.internal.objects.annotations.Constructor;
 import com.gargoylesoftware.js.nashorn.internal.objects.annotations.Function;
-import com.gargoylesoftware.js.nashorn.internal.objects.annotations.Property;
 import com.gargoylesoftware.js.nashorn.internal.objects.annotations.ScriptClass;
 import com.gargoylesoftware.js.nashorn.internal.objects.annotations.Where;
 import com.gargoylesoftware.js.nashorn.internal.runtime.JSType;
 import com.gargoylesoftware.js.nashorn.internal.runtime.PropertyMap;
 import com.gargoylesoftware.js.nashorn.internal.runtime.ScriptObject;
-import com.gargoylesoftware.js.nashorn.internal.runtime.UnwarrantedOptimismException;
 import com.gargoylesoftware.js.nashorn.internal.runtime.arrays.ArrayData;
 import com.gargoylesoftware.js.nashorn.internal.runtime.arrays.TypedArrayData;
 

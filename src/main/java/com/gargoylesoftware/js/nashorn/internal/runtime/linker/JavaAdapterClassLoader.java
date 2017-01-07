@@ -37,8 +37,6 @@
 
 package com.gargoylesoftware.js.nashorn.internal.runtime.linker;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.lang.reflect.Module;
 import java.security.AccessControlContext;
 import java.security.AccessController;
@@ -49,7 +47,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Set;
+
 import com.gargoylesoftware.js.dynalink.beans.StaticClass;
 import com.gargoylesoftware.js.nashorn.internal.codegen.DumpBytecode;
 import com.gargoylesoftware.js.nashorn.internal.runtime.Context;

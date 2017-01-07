@@ -36,13 +36,14 @@
  */
 package com.gargoylesoftware.js.nashorn.api.tree;
 
+import static com.gargoylesoftware.js.nashorn.api.tree.ExportEntryTreeImpl.createExportList;
+import static com.gargoylesoftware.js.nashorn.api.tree.ImportEntryTreeImpl.createImportList;
+
 import java.util.List;
-import java.util.stream.Collectors;
+
 import com.gargoylesoftware.js.nashorn.internal.ir.FunctionNode;
 import com.gargoylesoftware.js.nashorn.internal.ir.IdentNode;
 import com.gargoylesoftware.js.nashorn.internal.ir.Module;
-import static com.gargoylesoftware.js.nashorn.api.tree.ExportEntryTreeImpl.createExportList;
-import static com.gargoylesoftware.js.nashorn.api.tree.ImportEntryTreeImpl.createImportList;
 
 final class ModuleTreeImpl extends TreeImpl implements ModuleTree {
 

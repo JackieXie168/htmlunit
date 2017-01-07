@@ -41,21 +41,15 @@ import static com.gargoylesoftware.js.nashorn.internal.runtime.ScriptRuntime.UND
 
 import java.awt.Desktop;
 import java.awt.GraphicsEnvironment;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.IOException;
-import java.io.UncheckedIOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.UncheckedIOException;
 import java.net.URI;
-import java.util.concurrent.Callable;
 import java.util.function.Consumer;
-import java.util.function.Function;
-import jdk.internal.jline.console.completer.Completer;
-import jdk.internal.jline.console.UserInterruptException;
-import com.gargoylesoftware.js.nashorn.api.scripting.NashornException;
+
 import com.gargoylesoftware.js.nashorn.internal.objects.Global;
 import com.gargoylesoftware.js.nashorn.internal.objects.NativeJava;
 import com.gargoylesoftware.js.nashorn.internal.runtime.Context;
@@ -63,10 +57,11 @@ import com.gargoylesoftware.js.nashorn.internal.runtime.NativeJavaPackage;
 import com.gargoylesoftware.js.nashorn.internal.runtime.Property;
 import com.gargoylesoftware.js.nashorn.internal.runtime.ScriptEnvironment;
 import com.gargoylesoftware.js.nashorn.internal.runtime.ScriptFunction;
-import com.gargoylesoftware.js.nashorn.internal.runtime.ScriptingFunctions;
 import com.gargoylesoftware.js.nashorn.internal.runtime.ScriptObject;
-import com.gargoylesoftware.js.nashorn.internal.runtime.ScriptRuntime;
+import com.gargoylesoftware.js.nashorn.internal.runtime.ScriptingFunctions;
 import com.gargoylesoftware.js.nashorn.tools.Shell;
+
+import jdk.internal.jline.console.UserInterruptException;
 
 /**
  * Interactive command line Shell for Nashorn.
