@@ -64,7 +64,7 @@ public class CodeUpdater {
         final List<String> originalLines = FileUtils.readLines(originalFile);
         final List<String> localLines = FileUtils.readLines(localFile);
 
-        while (!isCodeStart(originalLines.get(0))) {
+        while (!originalLines.isEmpty() && !isCodeStart(originalLines.get(0))) {
             originalLines.remove(0);
         }
         for (int i = 0; i < localLines.size(); i++) {

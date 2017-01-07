@@ -37,16 +37,15 @@
 
 package com.gargoylesoftware.js.nashorn.internal.tools.nasgen;
 
+import static com.gargoylesoftware.js.nashorn.internal.tools.nasgen.StringConstants.OBJ_ANNO_PKG;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import org.objectweb.asm.Type;
-import com.gargoylesoftware.js.nashorn.internal.tools.nasgen.MemberInfo.Kind;
 
-import static com.gargoylesoftware.js.nashorn.internal.tools.nasgen.StringConstants.OBJ_ANNO_PKG;
-import static com.gargoylesoftware.js.nashorn.internal.tools.nasgen.StringConstants.RUNTIME_PKG;
+import com.gargoylesoftware.js.nashorn.internal.tools.nasgen.MemberInfo.Kind;
 
 /**
  * All annotation information from a class that is annotated with

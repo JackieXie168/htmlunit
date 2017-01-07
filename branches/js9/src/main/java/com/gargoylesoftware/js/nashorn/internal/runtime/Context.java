@@ -37,7 +37,6 @@
 
 package com.gargoylesoftware.js.nashorn.internal.runtime;
 
-import static org.objectweb.asm.Opcodes.V1_7;
 import static com.gargoylesoftware.js.nashorn.internal.codegen.CompilerConstants.CONSTANTS;
 import static com.gargoylesoftware.js.nashorn.internal.codegen.CompilerConstants.CREATE_PROGRAM_FUNCTION;
 import static com.gargoylesoftware.js.nashorn.internal.codegen.CompilerConstants.SOURCE;
@@ -46,22 +45,23 @@ import static com.gargoylesoftware.js.nashorn.internal.runtime.CodeStore.newCode
 import static com.gargoylesoftware.js.nashorn.internal.runtime.ECMAErrors.typeError;
 import static com.gargoylesoftware.js.nashorn.internal.runtime.ScriptRuntime.UNDEFINED;
 import static com.gargoylesoftware.js.nashorn.internal.runtime.Source.sourceFor;
+import static org.objectweb.asm.Opcodes.V1_7;
 
 import java.io.File;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
-import java.io.UncheckedIOException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.invoke.SwitchPoint;
-import java.lang.ref.ReferenceQueue;
-import java.lang.ref.SoftReference;
 import java.lang.module.Configuration;
 import java.lang.module.ModuleDescriptor;
 import java.lang.module.ModuleFinder;
+import java.lang.module.ModuleReader;
 import java.lang.module.ModuleReference;
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.SoftReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Layer;
 import java.lang.reflect.Modifier;
@@ -81,7 +81,6 @@ import java.security.PrivilegedExceptionAction;
 import java.security.ProtectionDomain;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -97,12 +96,15 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import javax.script.ScriptEngine;
-import com.gargoylesoftware.js.dynalink.DynamicLinker;
+
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.util.CheckClassAdapter;
+
+import com.gargoylesoftware.js.dynalink.DynamicLinker;
 import com.gargoylesoftware.js.nashorn.api.scripting.ClassFilter;
 import com.gargoylesoftware.js.nashorn.api.scripting.ScriptObjectMirror;
 import com.gargoylesoftware.js.nashorn.internal.WeakValueCache;
@@ -122,6 +124,7 @@ import com.gargoylesoftware.js.nashorn.internal.runtime.logging.Loggable;
 import com.gargoylesoftware.js.nashorn.internal.runtime.logging.Logger;
 import com.gargoylesoftware.js.nashorn.internal.runtime.options.LoggingOption.LoggerInfo;
 import com.gargoylesoftware.js.nashorn.internal.runtime.options.Options;
+
 import jdk.internal.misc.Unsafe;
 
 /**
@@ -1361,10 +1364,12 @@ public final class Context {
     static Module createModuleTrusted(final Layer parent, final ModuleDescriptor descriptor, final ClassLoader loader) {
         final String mn = descriptor.name();
 
-        final ModuleReference mref = new ModuleReference(descriptor, null, () -> {
-            IOException ioe = new IOException("<dynamic module>");
-            throw new UncheckedIOException(ioe);
-        });
+        final ModuleReference mref = new ModuleReference(descriptor, null) {
+            @Override
+            public ModuleReader open() {
+                throw new UnsupportedOperationException();
+            }
+        };
 
         final ModuleFinder finder = new ModuleFinder() {
             @Override
