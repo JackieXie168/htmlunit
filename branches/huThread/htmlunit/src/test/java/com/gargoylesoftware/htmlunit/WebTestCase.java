@@ -14,6 +14,7 @@
  */
 package com.gargoylesoftware.htmlunit;
 
+import static org.junit.Assume.*;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -42,6 +43,7 @@ import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -637,6 +639,11 @@ public abstract class WebTestCase {
         Locale.setDefault(SAVE_LOCALE);
     }
 
+    @Before
+    public void before() {
+        assumeTrue(this instanceof WebDriverTestCase);
+    }
+
     /**
      * Generates an HTML file that can be loaded and understood as a test.
      * @throws IOException in case of problem
@@ -767,7 +774,7 @@ public abstract class WebTestCase {
      * Gets the active JavaScript threads.
      * @return the threads
      */
-    protected List<Thread> getJavaScriptThreads() {
+    protected static List<Thread> getJavaScriptThreads() {
         final Thread[] threads = new Thread[Thread.activeCount() + 10];
         Thread.enumerate(threads);
         final List<Thread> jsThreads = new ArrayList<>();

@@ -619,7 +619,7 @@ public class HTMLImageElementTest extends WebDriverTestCase {
             + "</body></html>";
         final WebDriver driver = getWebDriver();
         if (driver instanceof HtmlUnitDriver) {
-            ((HtmlUnitDriver) driver).setDownloadImages(true);
+//            ((HtmlUnitDriver) driver).setDownloadImages(true);
         }
 
         loadPageWithAlerts2(html);
