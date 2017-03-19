@@ -688,11 +688,12 @@ public abstract class WebTestCase {
      * @return the modified html
      */
     protected static String getModifiedContent(final String html) {
+        return html;
         // replace alert(x) by a storage in top scope
         // Convert to string here due to: http://code.google.com/p/webdriver/issues/detail?id=209
-        return StringUtils.replace(html, "alert(",
-                "(function(t){var x = top.__huCatchedAlerts; x = x ? x : []; "
-                + "top.__huCatchedAlerts = x; x.push(String(t))})(");
+//        return StringUtils.replace(html, "alert(",
+//                "(function(t){var x = top.__huCatchedAlerts; x = x ? x : []; "
+//                + "top.__huCatchedAlerts = x; x.push(String(t))})(");
     }
 
     /**
