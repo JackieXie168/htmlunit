@@ -44,6 +44,11 @@ import com.gargoylesoftware.htmlunit.html.HtmlPageTest;
 @RunWith(BrowserRunner.class)
 public class Window2Test extends WebDriverTestCase {
 
+    @Override
+    protected boolean supportsWebDriver() {
+        return false;
+    }
+
     /**
      * @throws Exception if the test fails
      */
