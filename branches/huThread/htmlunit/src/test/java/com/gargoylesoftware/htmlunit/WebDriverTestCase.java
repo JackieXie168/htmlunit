@@ -1096,17 +1096,6 @@ public abstract class WebDriverTestCase extends WebTestCase {
             //	          }
             //	          webClient_ = null;
             List<Thread> jsThreads = getJavaScriptThreads();
-            int waitCount = 0;
-            while (jsThreads.size() > 0 && waitCount < 10) {
-                try {
-                    waitCount++;
-                    Thread.sleep(100);
-                }
-                catch (final InterruptedException e) {
-                    // ignore
-                }
-                jsThreads = getJavaScriptThreads();
-            }
             assertEquals("There are still " + jsThreads.size()
             + " JS threads running after the test", 0, jsThreads.size());
         }
