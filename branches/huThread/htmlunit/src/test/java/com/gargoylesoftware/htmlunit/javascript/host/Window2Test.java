@@ -46,7 +46,7 @@ public class Window2Test extends WebDriverTestCase {
 
     @Override
     protected boolean supportsWebDriver() {
-        return false;
+        return true;
     }
 
     /**
@@ -527,6 +527,7 @@ public class Window2Test extends WebDriverTestCase {
         loadPageWithAlerts2(html);
 
         // for unknown reason, the selenium driven browser is in an invalid state after this test
+        releaseResources();
         shutDownAll();
     }
 
@@ -561,6 +562,7 @@ public class Window2Test extends WebDriverTestCase {
         loadPageWithAlerts2(html);
 
         // for unknown reason, the selenium driven browser is in an invalid state after this test
+        releaseResources();
         shutDownAll();
     }
 
@@ -595,6 +597,7 @@ public class Window2Test extends WebDriverTestCase {
         loadPageWithAlerts2(html);
 
         // for unknown reason, the selenium driven browser is in an invalid state after this test
+        releaseResources();
         shutDownAll();
     }
 
@@ -637,6 +640,7 @@ public class Window2Test extends WebDriverTestCase {
 
         loadPageWithAlerts2(html);
         // for some reason, the selenium driven browser is in an invalid state after this test
+        releaseResources();
         shutDownAll();
     }
 

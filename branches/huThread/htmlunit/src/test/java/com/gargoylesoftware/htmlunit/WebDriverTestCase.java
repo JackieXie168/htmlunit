@@ -435,7 +435,6 @@ public abstract class WebDriverTestCase extends WebTestCase {
                     final FirefoxOptions options = new FirefoxOptions();
                     options.setBinary(FF45_BIN_);
                     return new FirefoxDriver(options);
-
                 }
                 return new FirefoxDriver();
             }
