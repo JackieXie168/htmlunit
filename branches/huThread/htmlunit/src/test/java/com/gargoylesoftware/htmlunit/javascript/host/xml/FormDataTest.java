@@ -368,7 +368,7 @@ public class FormDataTest extends WebDriverTestCase {
 
             driver.findElement(By.id("testBtn")).click();
 
-            final List<String> alerts = getCollectedAlerts(driver);
+            final List<String> alerts = getCollectedAlerts(driver, 1);
             return alerts.get(0);
         }
         finally {
@@ -424,7 +424,7 @@ public class FormDataTest extends WebDriverTestCase {
         final Map<String, Class<? extends Servlet>> servlets = new HashMap<>();
         servlets.put("/test2", PostServlet.class);
         final WebDriver driver = loadPage2(html, servlets);
-        final String alerts = getCollectedAlerts(driver).get(0);
+        final String alerts = getCollectedAlerts(driver, 1).get(0);
         for (String expected : getExpectedAlerts()) {
             assertTrue(expected + " not found", alerts.contains(expected));
         }
