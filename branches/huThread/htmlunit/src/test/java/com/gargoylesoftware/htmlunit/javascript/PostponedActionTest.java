@@ -18,6 +18,7 @@ import java.net.URL;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.openqa.selenium.WebDriver;
 
 import com.gargoylesoftware.htmlunit.BrowserRunner;
 import com.gargoylesoftware.htmlunit.BrowserRunner.Alerts;
@@ -44,15 +45,15 @@ public class PostponedActionTest extends WebDriverTestCase {
         final String html = "<html>\n"
             + "<head><title>First Page</title>\n"
             + "<script>\n"
-            + "  function test() {\n"
-            + "    alert('before');\n"
-            + "    var iframe2 = document.createElement('iframe');\n"
-            + "    iframe2.src = 'frame2.html';\n"
-            + "    document.body.appendChild(iframe2);\n"
-            + "    var iframe3 = document.createElement('iframe');\n"
-            + "    document.body.appendChild(iframe3);\n"
-            + "    iframe3.src = 'frame3.html';\n"
-            + "    alert('after');\n"
+            + "function test() {\n"
+            + "  alert('before');\n"
+            + "  var iframe2 = document.createElement('iframe');\n"
+            + "  iframe2.src = 'frame2.html';\n"
+            + "  document.body.appendChild(iframe2);\n"
+            + "  var iframe3 = document.createElement('iframe');\n"
+            + "  document.body.appendChild(iframe3);\n"
+            + "  iframe3.src = 'frame3.html';\n"
+            + "  alert('after');\n"
             + "}\n"
             + "</script>\n"
             + "</head>\n"
@@ -80,12 +81,12 @@ public class PostponedActionTest extends WebDriverTestCase {
         final String firstContent = "<html>\n"
             + "<head><title>First Page</title>\n"
             + "<script>\n"
-            + "  function test() {\n"
-            + "    alert('before');\n"
-            + "    var iframe = document.createElement('iframe');\n"
-            + "    document.body.appendChild(iframe);\n"
-            + "    iframe.contentWindow.location.replace('" + URL_SECOND + "');\n"
-            + "    alert('after');\n"
+            + "function test() {\n"
+            + "  alert('before');\n"
+            + "  var iframe = document.createElement('iframe');\n"
+            + "  document.body.appendChild(iframe);\n"
+            + "  iframe.contentWindow.location.replace('" + URL_SECOND + "');\n"
+            + "  alert('after');\n"
             + "}\n"
             + "</script>\n"
             + "</head>\n"
@@ -113,17 +114,17 @@ public class PostponedActionTest extends WebDriverTestCase {
         final String html = "<html>\n"
                 + "<head><title>First Page</title>\n"
                 + "<script>\n"
-                + "  function test() {\n"
-                + "    alert('before');\n"
-                + "    var iframe = document.createElement('iframe');\n"
-                + "    iframe.src = 'iframe.html';\n"
-                + "    document.body.appendChild(iframe);\n"
-                + "    alert('after');\n"
+                + "function test() {\n"
+                + "  alert('before');\n"
+                + "  var iframe = document.createElement('iframe');\n"
+                + "  iframe.src = 'iframe.html';\n"
+                + "  document.body.appendChild(iframe);\n"
+                + "  alert('after');\n"
                 + "}\n"
-                + "  function timeout() {\n"
-                + "    alert('setting timeout');\n"
-                + "    window.setTimeout(function() {test()}, 400);\n"
-                + "    window.setTimeout(function() {alert('simpleAlert')}, 500);\n"
+                + "function timeout() {\n"
+                + "  alert('setting timeout');\n"
+                + "  window.setTimeout(function() {test()}, 400);\n"
+                + "  window.setTimeout(function() {alert('simpleAlert')}, 500);\n"
                 + "}\n"
                 + "</script>\n"
                 + "</head>\n"
@@ -136,6 +137,14 @@ public class PostponedActionTest extends WebDriverTestCase {
         final MockWebConnection conn = getMockWebConnection();
         conn.setResponse(new URL(getDefaultUrl(), "iframe.html"), secondContent);
 
-        loadPageWithAlerts2(html);
+        final WebDriver driver = loadPage2(html);
+        final String[] alerts = getExpectedAlerts();
+        verifyAlerts(driver, alerts[0]);
+        Thread.sleep(400);
+        verifyAlerts(driver, alerts[1], alerts[2]);
+        Thread.sleep(100);
+        verifyAlerts(driver, alerts[3]);
+        Thread.sleep(100);
+        verifyAlerts(driver, alerts[4]);
     }
 }
