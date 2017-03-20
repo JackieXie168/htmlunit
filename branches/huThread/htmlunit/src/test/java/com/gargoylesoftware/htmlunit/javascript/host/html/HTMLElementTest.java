@@ -50,6 +50,11 @@ import com.gargoylesoftware.htmlunit.html.HtmlPageTest;
 @RunWith(BrowserRunner.class)
 public class HTMLElementTest extends WebDriverTestCase {
 
+    @Override
+    protected boolean supportsWebDriver() {
+        return true;
+    }
+
     /**
      * @throws Exception if the test fails
      */
@@ -381,12 +386,17 @@ public class HTMLElementTest extends WebDriverTestCase {
             + "  </form>\n"
             + "</body></html>";
 
+        final String[] expectedAlerts = getExpectedAlerts();
+
         final WebDriver webDriver = loadPage2(html);
 
         webDriver.findElement(By.id("login")).click();
+
+        verifyAlerts(webDriver, expectedAlerts[0], expectedAlerts[1]);
+
         webDriver.findElement(By.id("password")).click();
 
-        verifyAlerts(webDriver, getExpectedAlerts());
+        verifyAlerts(webDriver, expectedAlerts[2], expectedAlerts[3]);
     }
 
     /**
@@ -421,9 +431,9 @@ public class HTMLElementTest extends WebDriverTestCase {
 
         final WebDriver webDriver = loadPage2(html);
 
-        webDriver.findElement(By.id("login")).click();
-
         verifyAlerts(webDriver, getExpectedAlerts());
+
+        webDriver.findElement(By.id("login")).click();
     }
 
     /**
@@ -456,9 +466,9 @@ public class HTMLElementTest extends WebDriverTestCase {
 
         final WebDriver webDriver = loadPage2(html);
 
-        webDriver.findElement(By.id("login")).click();
-
         verifyAlerts(webDriver, getExpectedAlerts());
+
+        webDriver.findElement(By.id("login")).click();
     }
 
     /**
@@ -491,9 +501,9 @@ public class HTMLElementTest extends WebDriverTestCase {
 
         final WebDriver webDriver = loadPage2(html);
 
-        webDriver.findElement(By.id("login")).click();
-
         verifyAlerts(webDriver, getExpectedAlerts());
+
+        webDriver.findElement(By.id("login")).click();
     }
 
     /**
@@ -519,12 +529,15 @@ public class HTMLElementTest extends WebDriverTestCase {
             + "  </form>\n"
             + "</body></html>";
 
+        final String[] expectedAlerts = getExpectedAlerts();
+
         final WebDriver webDriver = loadPage2(html);
 
         webDriver.findElement(By.id("login")).click();
-        webDriver.findElement(By.id("password")).click();
+        verifyAlerts(webDriver, expectedAlerts[0], expectedAlerts[1]);
 
-        verifyAlerts(webDriver, getExpectedAlerts());
+        webDriver.findElement(By.id("password")).click();
+        verifyAlerts(webDriver, expectedAlerts[2]);
     }
 
     /**
@@ -553,9 +566,12 @@ public class HTMLElementTest extends WebDriverTestCase {
 
         final WebDriver webDriver = loadPage2(html);
 
+        final String[] expectedAlerts = getExpectedAlerts();
+        verifyAlerts(webDriver, expectedAlerts[0], expectedAlerts[1]);
+
         webDriver.findElement(By.id("login")).click();
 
-        verifyAlerts(webDriver, getExpectedAlerts());
+        verifyAlerts(webDriver, expectedAlerts[2]);
     }
 
     /**
