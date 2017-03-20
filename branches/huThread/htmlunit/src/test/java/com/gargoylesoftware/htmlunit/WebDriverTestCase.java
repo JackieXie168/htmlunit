@@ -394,7 +394,7 @@ public abstract class WebDriverTestCase extends WebTestCase {
      * @return whether to run with driver, or ignore it for now.
      */
     protected boolean supportsWebDriver() {
-        return false;
+        return true;
     }
 
     /**
