@@ -56,6 +56,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.NoSuchSessionException;
 import org.openqa.selenium.NoSuchWindowException;
 import org.openqa.selenium.WebDriver;
@@ -881,20 +882,7 @@ public abstract class WebDriverTestCase extends WebTestCase {
             throws Exception {
         List<String> actualAlerts = null;
 
-        try {
-            // gets the collected alerts, waiting a bit if necessary
-            actualAlerts = getCollectedAlerts(driver, expectedAlerts.length);
-
-            final long maxWait = System.currentTimeMillis() + maxWaitTime;
-            while (actualAlerts.size() < expectedAlerts.length && System.currentTimeMillis() < maxWait) {
-                Thread.sleep(30);
-                actualAlerts = getCollectedAlerts(driver);
-            }
-        }
-        catch (final WebDriverException e) {
-            shutDownRealBrowsers();
-            throw e;
-        }
+        actualAlerts = getCollectedAlerts(maxWaitTime, driver, expectedAlerts.length);
 
         assertEquals(expectedAlerts, actualAlerts);
         if (!ignoreExpectationsLength()) {
@@ -997,11 +985,33 @@ public abstract class WebDriverTestCase extends WebTestCase {
      * @throws Exception in case of problem
      */
     protected List<String> getCollectedAlerts(final WebDriver driver, final int alertsLength) throws Exception {
+        return getCollectedAlerts(DEFAULT_WAIT_TIME, driver, alertsLength);
+    }
+
+    /**
+     * Gets the alerts collected by the driver.
+     * Note: it currently works only if no new page has been loaded in the window
+     * @param maxWaitTime the maximum time to wait to get the alerts (in millis)
+     * @param driver the driver
+     * @param alertsLength the expected length of Alerts
+     * @return the collected alerts
+     * @throws Exception in case of problem
+     */
+    protected List<String> getCollectedAlerts(final long maxWaitTime, final WebDriver driver, final int alertsLength) throws Exception {
         final List<String> collectedAlerts = new ArrayList<>();
+        final long maxWait = System.currentTimeMillis() + maxWaitTime;
+
         for (int i = 0; i < alertsLength; i++) {
-            final Alert alert = driver.switchTo().alert();
-            collectedAlerts.add(alert.getText());
-            alert.accept();
+            while (collectedAlerts.size() < alertsLength && System.currentTimeMillis() < maxWait) {
+                try {
+                    final Alert alert = driver.switchTo().alert();
+                    collectedAlerts.add(alert.getText());
+                    alert.accept();
+                }
+                catch (final NoAlertPresentException e) {
+                    Thread.sleep(10);
+                }
+            }
         }
 
         //	      // do not throw an exception if we ask for collected alerts for non html pages
