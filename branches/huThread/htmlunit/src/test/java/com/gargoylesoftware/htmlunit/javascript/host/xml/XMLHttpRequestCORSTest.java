@@ -308,6 +308,7 @@ public class XMLHttpRequestCORSTest extends WebDriverTestCase {
     public void preflight() throws Exception {
         doPreflightTestAllowedMethods("POST, GET, OPTIONS", "text/plain");
 
+        releaseResources();
         shutDownAll();
     }
 
@@ -321,6 +322,7 @@ public class XMLHttpRequestCORSTest extends WebDriverTestCase {
     public void preflight_contentTypeWithCharset() throws Exception {
         doPreflightTestAllowedMethods("POST, GET, OPTIONS", "text/plain;charset=utf-8");
 
+        releaseResources();
         shutDownAll();
     }
 
@@ -334,6 +336,7 @@ public class XMLHttpRequestCORSTest extends WebDriverTestCase {
     public void preflightUrlEncoded() throws Exception {
         doPreflightTestAllowedMethods("POST, GET, OPTIONS", "application/x-www-form-urlencoded");
 
+        releaseResources();
         shutDownAll();
     }
 
@@ -347,6 +350,7 @@ public class XMLHttpRequestCORSTest extends WebDriverTestCase {
     public void preflightUrlEncoded_contentTypeWithCharset() throws Exception {
         doPreflightTestAllowedMethods("POST, GET, OPTIONS", "application/x-www-form-urlencoded;charset=utf-8");
 
+        releaseResources();
         shutDownAll();
     }
 
@@ -360,6 +364,7 @@ public class XMLHttpRequestCORSTest extends WebDriverTestCase {
     public void preflightMultipart() throws Exception {
         doPreflightTestAllowedMethods("POST, GET, OPTIONS", "multipart/form-data");
 
+        releaseResources();
         shutDownAll();
     }
 
@@ -373,6 +378,7 @@ public class XMLHttpRequestCORSTest extends WebDriverTestCase {
     public void preflightMultipart_contentTypeWithCharset() throws Exception {
         doPreflightTestAllowedMethods("POST, GET, OPTIONS", "multipart/form-data;charset=utf-8");
 
+        releaseResources();
         shutDownAll();
     }
 
@@ -388,6 +394,7 @@ public class XMLHttpRequestCORSTest extends WebDriverTestCase {
     public void preflight_incorrect_methods() throws Exception {
         doPreflightTestAllowedMethods(null, "text/plain");
 
+        releaseResources();
         shutDownAll();
     }
 
