@@ -18,7 +18,6 @@ import java.net.URL;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.openqa.selenium.WebDriver;
 
 import com.gargoylesoftware.htmlunit.BrowserRunner;
 import com.gargoylesoftware.htmlunit.BrowserRunner.Alerts;
@@ -96,11 +95,9 @@ public class PostponedActionTest extends WebDriverTestCase {
         final String secondContent
             = "<script>alert('second.html');</script>";
 
-        final MockWebConnection conn = getMockWebConnection();
-        conn.setResponse(URL_FIRST, firstContent);
-        conn.setResponse(URL_SECOND, secondContent);
+        getMockWebConnection().setResponse(URL_SECOND, secondContent);
 
-        loadPageWithAlerts2(URL_FIRST);
+        loadPageWithAlerts2(firstContent);
     }
 
     /**
@@ -137,14 +134,6 @@ public class PostponedActionTest extends WebDriverTestCase {
         final MockWebConnection conn = getMockWebConnection();
         conn.setResponse(new URL(getDefaultUrl(), "iframe.html"), secondContent);
 
-        final WebDriver driver = loadPage2(html);
-        final String[] alerts = getExpectedAlerts();
-        verifyAlerts(driver, alerts[0]);
-        Thread.sleep(400);
-        verifyAlerts(driver, alerts[1], alerts[2]);
-        Thread.sleep(100);
-        verifyAlerts(driver, alerts[3]);
-        Thread.sleep(100);
-        verifyAlerts(driver, alerts[4]);
+        loadPageWithAlerts2(html);
     }
 }
