@@ -139,6 +139,7 @@ public class History2Test extends WebDriverTestCase {
                 + "</body></html>";
 
         final String[] expectedAlerts = getExpectedAlerts();
+        int i = 0;
         final WebDriver driver = loadPage2(html);
         assertEquals("a", ((JavascriptExecutor) driver).executeScript("return window.name"));
 
@@ -148,31 +149,40 @@ public class History2Test extends WebDriverTestCase {
         assertEquals("a", ((JavascriptExecutor) driver).executeScript("return window.name"));
         assertEquals(start + 1, ((JavascriptExecutor) driver).executeScript("return window.history.length"));
         assertEquals(URL_FIRST + "bar.html", driver.getCurrentUrl());
+
         driver.findElement(By.id("myId2")).click();
         assertEquals("a", ((JavascriptExecutor) driver).executeScript("return window.name"));
         assertEquals(start + 2, ((JavascriptExecutor) driver).executeScript("return window.history.length"));
         assertEquals(URL_FIRST + "bar2.html", driver.getCurrentUrl());
+
         driver.navigate().back();
+        verifyAlerts(driver, expectedAlerts[i++], expectedAlerts[i++], expectedAlerts[i++], expectedAlerts[i++]);
         assertEquals("a", ((JavascriptExecutor) driver).executeScript("return window.name"));
         assertEquals(start + 2, ((JavascriptExecutor) driver).executeScript("return window.history.length"));
         assertEquals(URL_FIRST + "bar.html", driver.getCurrentUrl());
+
         driver.navigate().back();
+        verifyAlerts(driver, expectedAlerts[i++], expectedAlerts[i++], expectedAlerts[i++], expectedAlerts[i++]);
         assertEquals("a", ((JavascriptExecutor) driver).executeScript("return window.name"));
         assertEquals(start + 2, ((JavascriptExecutor) driver).executeScript("return window.history.length"));
         assertEquals(URL_FIRST.toString(), driver.getCurrentUrl());
+
         driver.navigate().forward();
+        verifyAlerts(driver, expectedAlerts[i++], expectedAlerts[i++], expectedAlerts[i++], expectedAlerts[i++]);
         assertEquals("a", ((JavascriptExecutor) driver).executeScript("return window.name"));
         assertEquals(start + 2, ((JavascriptExecutor) driver).executeScript("return window.history.length"));
         assertEquals(URL_FIRST + "bar.html", driver.getCurrentUrl());
+
         driver.navigate().forward();
+        verifyAlerts(driver, expectedAlerts[i++], expectedAlerts[i++], expectedAlerts[i++], expectedAlerts[i++]);
         assertEquals("a", ((JavascriptExecutor) driver).executeScript("return window.name"));
         assertEquals(start + 2, ((JavascriptExecutor) driver).executeScript("return window.history.length"));
         assertEquals(URL_FIRST + "bar2.html", driver.getCurrentUrl());
 
         assertEquals(1, getMockWebConnection().getRequestCount());
-        verifyAlerts(driver, expectedAlerts);
 
         // because we have changed the window name
+        releaseResources();
         shutDownAll();
     }
 
@@ -235,6 +245,7 @@ public class History2Test extends WebDriverTestCase {
                 + "</body></html>";
 
         final String[] expectedAlerts = getExpectedAlerts();
+        int i = 0;
         final WebDriver driver = loadPage2(html);
         assertEquals("a", ((JavascriptExecutor) driver).executeScript("return window.name"));
 
@@ -245,32 +256,45 @@ public class History2Test extends WebDriverTestCase {
             assertEquals("a", ((JavascriptExecutor) driver).executeScript("return window.name"));
             assertEquals(start + 1, ((JavascriptExecutor) driver).executeScript("return window.history.length"));
             assertEquals(URL_FIRST + "bar.html", driver.getCurrentUrl());
+
             driver.findElement(By.id("myId2")).click();
             assertEquals("a", ((JavascriptExecutor) driver).executeScript("return window.name"));
             assertEquals(start + 2, ((JavascriptExecutor) driver).executeScript("return window.history.length"));
             assertEquals(URL_FIRST + "bar2.html", driver.getCurrentUrl());
+
             driver.navigate().back();
+            verifyAlerts(driver, expectedAlerts[i++], expectedAlerts[i++], expectedAlerts[i++], expectedAlerts[i++],
+                    expectedAlerts[i++], expectedAlerts[i++]);
             assertEquals("a", ((JavascriptExecutor) driver).executeScript("return window.name"));
             assertEquals(start + 2, ((JavascriptExecutor) driver).executeScript("return window.history.length"));
             assertEquals(URL_FIRST + "bar.html", driver.getCurrentUrl());
+
             driver.navigate().back();
+            verifyAlerts(driver, expectedAlerts[i++], expectedAlerts[i++], expectedAlerts[i++], expectedAlerts[i++],
+                    expectedAlerts[i++], expectedAlerts[i++]);
             assertEquals("a", ((JavascriptExecutor) driver).executeScript("return window.name"));
             assertEquals(start + 2, ((JavascriptExecutor) driver).executeScript("return window.history.length"));
             assertEquals(URL_FIRST.toString(), driver.getCurrentUrl());
+
             driver.navigate().forward();
+            verifyAlerts(driver, expectedAlerts[i++], expectedAlerts[i++], expectedAlerts[i++], expectedAlerts[i++],
+                    expectedAlerts[i++], expectedAlerts[i++]);
             assertEquals("a", ((JavascriptExecutor) driver).executeScript("return window.name"));
             assertEquals(start + 2, ((JavascriptExecutor) driver).executeScript("return window.history.length"));
             assertEquals(URL_FIRST + "bar.html", driver.getCurrentUrl());
+
             driver.navigate().forward();
+            verifyAlerts(driver, expectedAlerts[i++], expectedAlerts[i++], expectedAlerts[i++], expectedAlerts[i++],
+                    expectedAlerts[i++], expectedAlerts[i++]);
             assertEquals("a", ((JavascriptExecutor) driver).executeScript("return window.name"));
             assertEquals(start + 2, ((JavascriptExecutor) driver).executeScript("return window.history.length"));
             assertEquals(URL_FIRST + "bar2.html", driver.getCurrentUrl());
         }
 
         assertEquals(1, getMockWebConnection().getRequestCount());
-        verifyAlerts(driver, expectedAlerts);
 
         // because we have changed the window name
+        releaseResources();
         shutDownAll();
     }
 
@@ -311,9 +335,11 @@ public class History2Test extends WebDriverTestCase {
         final String[] expectedAlerts = getExpectedAlerts();
         final WebDriver driver = loadPage2(html);
         driver.findElement(By.id("myId")).click();
+        verifyAlerts(driver, expectedAlerts[0]);
         assertEquals(URL_FIRST + "bar.html", driver.getCurrentUrl());
         assertEquals(URL_FIRST + "bar.html", ((JavascriptExecutor) driver).executeScript("return location.href"));
         driver.findElement(By.id("myId2")).click();
+        verifyAlerts(driver, expectedAlerts[1]);
         assertEquals(URL_FIRST + "bar2.html", driver.getCurrentUrl());
         assertEquals(URL_FIRST + "bar2.html", ((JavascriptExecutor) driver).executeScript("return location.href"));
         driver.navigate().back();
@@ -324,8 +350,6 @@ public class History2Test extends WebDriverTestCase {
         assertEquals(URL_FIRST + "bar.html", driver.getCurrentUrl());
         driver.navigate().forward();
         assertEquals(URL_FIRST + "bar2.html", driver.getCurrentUrl());
-
-        verifyAlerts(driver, expectedAlerts);
     }
 
     /**
@@ -374,6 +398,7 @@ public class History2Test extends WebDriverTestCase {
                 + "</body></html>";
 
         final String[] expectedAlerts = getExpectedAlerts();
+        int i = 0;
         final WebDriver driver = loadPage2(html);
 
         assertEquals("a", ((JavascriptExecutor) driver).executeScript("return window.name"));
@@ -384,24 +409,29 @@ public class History2Test extends WebDriverTestCase {
             assertEquals("a", ((JavascriptExecutor) driver).executeScript("return window.name"));
             assertEquals(start + 1, ((JavascriptExecutor) driver).executeScript("return window.history.length"));
             assertEquals(URL_FIRST + "bar.html", driver.getCurrentUrl());
+
             driver.findElement(By.id("myId2")).click();
             assertEquals("a", ((JavascriptExecutor) driver).executeScript("return window.name"));
             assertEquals(start + 1, ((JavascriptExecutor) driver).executeScript("return window.history.length"));
             assertEquals(URL_FIRST + "bar2.html", driver.getCurrentUrl());
+
             driver.navigate().back();
+            verifyAlerts(driver, expectedAlerts[i++], expectedAlerts[i++], expectedAlerts[i++], expectedAlerts[i++]);
             assertEquals("a", ((JavascriptExecutor) driver).executeScript("return window.name"));
             assertEquals(start + 1, ((JavascriptExecutor) driver).executeScript("return window.history.length"));
             assertEquals(URL_FIRST.toString(), driver.getCurrentUrl());
+
             driver.navigate().forward();
+            verifyAlerts(driver, expectedAlerts[i++], expectedAlerts[i++], expectedAlerts[i++], expectedAlerts[i++]);
             assertEquals("a", ((JavascriptExecutor) driver).executeScript("return window.name"));
             assertEquals(start + 1, ((JavascriptExecutor) driver).executeScript("return window.history.length"));
             assertEquals(URL_FIRST + "bar2.html", driver.getCurrentUrl());
         }
 
         assertEquals(1, getMockWebConnection().getRequestCount());
-        verifyAlerts(driver, expectedAlerts);
 
         // because we have changed the window name
+        releaseResources();
         shutDownAll();
     }
 
@@ -456,6 +486,7 @@ public class History2Test extends WebDriverTestCase {
                 + "</body></html>";
 
         final String[] expectedAlerts = getExpectedAlerts();
+        int i = 0;
         final WebDriver driver = loadPage2(html);
 
         assertEquals("a", ((JavascriptExecutor) driver).executeScript("return window.name"));
@@ -466,24 +497,31 @@ public class History2Test extends WebDriverTestCase {
             assertEquals("a", ((JavascriptExecutor) driver).executeScript("return window.name"));
             assertEquals(start + 1, ((JavascriptExecutor) driver).executeScript("return window.history.length"));
             assertEquals(URL_FIRST + "bar.html", driver.getCurrentUrl());
+
             driver.findElement(By.id("myId2")).click();
             assertEquals("a", ((JavascriptExecutor) driver).executeScript("return window.name"));
             assertEquals(start + 1, ((JavascriptExecutor) driver).executeScript("return window.history.length"));
             assertEquals(URL_FIRST + "bar2.html", driver.getCurrentUrl());
+
             driver.navigate().back();
+            verifyAlerts(driver, expectedAlerts[i++], expectedAlerts[i++], expectedAlerts[i++], expectedAlerts[i++],
+                    expectedAlerts[i++], expectedAlerts[i++]);
             assertEquals("a", ((JavascriptExecutor) driver).executeScript("return window.name"));
             assertEquals(start + 1, ((JavascriptExecutor) driver).executeScript("return window.history.length"));
             assertEquals(URL_FIRST.toString(), driver.getCurrentUrl());
+
             driver.navigate().forward();
+            verifyAlerts(driver, expectedAlerts[i++], expectedAlerts[i++], expectedAlerts[i++], expectedAlerts[i++],
+                    expectedAlerts[i++], expectedAlerts[i++]);
             assertEquals("a", ((JavascriptExecutor) driver).executeScript("return window.name"));
             assertEquals(start + 1, ((JavascriptExecutor) driver).executeScript("return window.history.length"));
             assertEquals(URL_FIRST + "bar2.html", driver.getCurrentUrl());
         }
 
         assertEquals(1, getMockWebConnection().getRequestCount());
-        verifyAlerts(driver, expectedAlerts);
 
         // because we have changed the window name
+        releaseResources();
         shutDownAll();
     }
 
@@ -512,15 +550,15 @@ public class History2Test extends WebDriverTestCase {
         driver.findElement(By.name("length")).click();
 
         // when testing with real browsers we are facing different offsets
-        final int start = Integer.parseInt(getCollectedAlerts(driver).get(0));
+        final int start = Integer.parseInt(getCollectedAlerts(driver, 1).get(0));
 
         driver.findElement(By.name("b")).click();
         driver.findElement(By.name("length")).click();
+        assertEquals(new String[] {"" + (start + 1)}, getCollectedAlerts(driver, 1));
 
         driver.findElement(By.name("x")).click();
         driver.findElement(By.name("length")).click();
-
-        assertEquals(new String[] {"" + (start + 1), "" + (start + 2)}, getCollectedAlerts(driver));
+        assertEquals(new String[] {"" + (start + 2)}, getCollectedAlerts(driver, 1));
     }
 
     /**
@@ -620,12 +658,15 @@ public class History2Test extends WebDriverTestCase {
                     + "'alert(\"1\" in history);alert(1 in history);return false;'>has positive one</a><br>\n"
                 + "</body></html>\n";
 
+        final String[] expectedAlerts = getExpectedAlerts();
+        int i = 0;
         final WebDriver driver = loadPage2(html);
         driver.findElement(By.name("hasNegativeOne")).click();
+        verifyAlerts(driver, expectedAlerts[i++], expectedAlerts[i++]);
         driver.findElement(By.name("hasZero")).click();
+        verifyAlerts(driver, expectedAlerts[i++], expectedAlerts[i++]);
         driver.findElement(By.name("hasPositiveOne")).click();
-
-        verifyAlerts(driver, getExpectedAlerts());
+        verifyAlerts(driver, expectedAlerts[i++], expectedAlerts[i++]);
     }
 
     /**
