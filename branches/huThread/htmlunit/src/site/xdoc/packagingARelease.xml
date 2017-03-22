@@ -68,10 +68,6 @@ mvn -Dmaven.test.skip=true deploy
                         Update maven to latest version, and delete ~/.m2/repository folder.
                     </li>
                     <li>
-                        In pom.xml: temporarily remove "-Xdoclint:none" javadoc configuration and try to fix
-                        javadoc errors other than "script" in BrowserVersion.
-                    </li>
-                    <li>
                         Update the version number in pom.xml
                     </li>
                     <li>
@@ -82,6 +78,9 @@ mvn -Dmaven.test.skip=true deploy
                     </li>
                     <li>
                         Remove pom.xml reference to any snapshot repository (needed for Maven upload request).
+                    </li>
+                    <li>
+                        Remove &lt;repositories&gt; and &lt;pluginRepositories&gt; elements from pom.xml.
                     </li>
                     <li>
                         Build the zip files
