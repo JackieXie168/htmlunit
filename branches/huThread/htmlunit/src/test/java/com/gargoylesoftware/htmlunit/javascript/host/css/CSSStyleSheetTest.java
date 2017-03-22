@@ -26,6 +26,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.htmlunit.HtmlUnitDriver;
+import org.openqa.selenium.htmlunit.local.HtmlUnitLocalDriver;
 
 import com.gargoylesoftware.htmlunit.BrowserRunner;
 import com.gargoylesoftware.htmlunit.BrowserRunner.Alerts;
@@ -1181,15 +1183,10 @@ public class CSSStyleSheetTest extends WebDriverTestCase {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T get(final Object o, final Class<?> c, final String fieldName) {
-        try {
-            final Field field = c.getDeclaredField(fieldName);
-            field.setAccessible(true);
-            return (T) field.get(o);
-        }
-        catch (final Exception e) {
-            throw new RuntimeException(e);
-        }
+    private static <T> T get(final Object o, final Class<?> c, final String fieldName) throws Exception {
+    	final Field field = c.getDeclaredField(fieldName);
+    	field.setAccessible(true);
+    	return (T) field.get(o);
     }
 
     /**
@@ -1201,7 +1198,8 @@ public class CSSStyleSheetTest extends WebDriverTestCase {
         getWebDriver();
 
         int maxInMemory = 0;
-        final WebClient webClient = get(this, WebDriverTestCase.class, "webClient_");
+        final HtmlUnitLocalDriver localDriver = get(getWebDriver(), HtmlUnitDriver.class, "driver");
+        final WebClient webClient = get(localDriver, HtmlUnitLocalDriver.class, "webClient");
         if (webClient != null) {
             maxInMemory = webClient.getOptions().getMaxInMemory();
         }
