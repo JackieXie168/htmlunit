@@ -68,6 +68,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.htmlunit.local.HtmlUnitLocalDriver;
+import org.openqa.selenium.htmlunit.local.HtmlUnitWebElement;
 import org.openqa.selenium.htmlunit.remote.HtmlUnitRemoteDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.BrowserType;
@@ -942,7 +943,7 @@ public abstract class WebDriverTestCase extends WebTestCase {
      * @throws Exception if something goes wrong
      */
     protected final WebDriver loadPageWithAlerts2(final URL url) throws Exception {
-        return loadPageWithAlerts2(url, 0);
+        return loadPageWithAlerts2(url, DEFAULT_WAIT_TIME);
     }
 
     /**
@@ -1054,23 +1055,13 @@ public abstract class WebDriverTestCase extends WebTestCase {
      * Returns the HtmlElement of the specified WebElement.
      * @param webElement the webElement
      * @return the HtmlElement
+     * @throws Exception if an error occurs
      * @see #getWebWindowOf(HtmlUnitRemoteDriver)
      */
-    protected HtmlElement toHtmlElement(final WebElement webElement) {
-        return null;
-        //	      if (webElement instanceof RemoteWebElement) {
-        //	          throw new RuntimeException(
-        //	                      "WebDriverTestCase.toHtmlElement(WebElement) does not work for RemoteWebElement's");
-        //	      }
-        //
-        //	      try {
-        //	          final Field field = HtmlUnitWebElement.class.getDeclaredField("element");
-        //	          field.setAccessible(true);
-        //	          return (HtmlElement) field.get(webElement);
-        //	      }
-        //	      catch (final Exception e) {
-        //	          throw new RuntimeException(e);
-        //	      }
+    protected HtmlElement toHtmlElement(final WebElement webElement) throws Exception {
+        final Field field = HtmlUnitWebElement.class.getDeclaredField("element");
+        field.setAccessible(true);
+        return (HtmlElement) field.get(webElement);
     }
 
     /**
@@ -1165,9 +1156,9 @@ public abstract class WebDriverTestCase extends WebTestCase {
      * @see #toHtmlElement(WebElement)
      */
     protected WebWindow getWebWindowOf(final HtmlUnitDriver driver) throws Exception {
-        final Field getDriver = HtmlUnitDriver.class.getDeclaredField("driver");
-        getDriver.setAccessible(true);
-        final HtmlUnitLocalDriver localDriver = (HtmlUnitLocalDriver) getDriver.get(driver);
+        final Field driverField = HtmlUnitDriver.class.getDeclaredField("driver");
+        driverField.setAccessible(true);
+        final HtmlUnitLocalDriver localDriver = (HtmlUnitLocalDriver) driverField.get(driver);
         final Field field = localDriver.getClass().getDeclaredField("currentWindow");
         field.setAccessible(true);
         return (WebWindow) field.get(localDriver);
