@@ -1493,9 +1493,10 @@ public class HTMLInputElementTest extends WebDriverTestCase {
 
         final WebDriver driver = loadPage2(html);
         driver.findElement(By.id("myButton")).click();
+        verifyAlerts(driver, getExpectedAlerts()[0]);
         driver.findElement(By.id("myInput")).sendKeys("something");
         driver.findElement(By.id("myButton")).click();
-        verifyAlerts(driver, getExpectedAlerts());
+        verifyAlerts(driver, getExpectedAlerts()[1]);
     }
 
     /**
