@@ -92,9 +92,9 @@ public class HtmlAnchorTest extends WebDriverTestCase {
 
         final WebDriver driver = loadPage2(html);
         driver.findElement(By.id("myAnchor")).click();
+        verifyAlerts(driver, getExpectedAlerts()[0]);
         driver.findElement(By.id("myButton")).click();
-
-        verifyAlerts(driver, getExpectedAlerts());
+        verifyAlerts(driver, getExpectedAlerts()[1]);
     }
 
     /**
@@ -527,7 +527,7 @@ public class HtmlAnchorTest extends WebDriverTestCase {
     }
 
     /**
-     * Testcase for issue #1492.
+     * Test case for issue #1492.
      *
      * @throws Exception if the test fails
      */
@@ -557,12 +557,14 @@ public class HtmlAnchorTest extends WebDriverTestCase {
 
         driver.findElement(By.id("a1")).click();
         assertEquals(2, webConnection.getRequestCount());
+        verifyAlerts(driver, getExpectedAlerts());
 
         driver.findElement(By.id("a2")).click();
         assertEquals(2, webConnection.getRequestCount());
 
         driver.findElement(By.id("a3")).click();
         assertEquals(3, webConnection.getRequestCount());
+        verifyAlerts(driver, getExpectedAlerts());
     }
 
     /**
