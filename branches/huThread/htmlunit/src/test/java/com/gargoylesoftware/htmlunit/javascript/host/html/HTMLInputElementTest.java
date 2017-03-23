@@ -476,7 +476,7 @@ public class HTMLInputElementTest extends WebDriverTestCase {
             + "</form>\n"
             + "</body></html>";
 
-        loadPageWithAlerts2(html);
+        loadPageWithAlerts2(html, 2 * DEFAULT_WAIT_TIME);
     }
 
     /**
@@ -505,9 +505,8 @@ public class HTMLInputElementTest extends WebDriverTestCase {
         final WebElement checkBox = driver.findElement(By.id("checkbox1"));
         assertFalse(checkBox.isSelected());
         driver.findElement(By.id("clickme")).click();
-        assertTrue(checkBox.isSelected());
-
         verifyAlerts(driver, getExpectedAlerts());
+        assertTrue(checkBox.isSelected());
     }
 
     /**
@@ -547,11 +546,10 @@ public class HTMLInputElementTest extends WebDriverTestCase {
         assertFalse(radioC.isSelected());
 
         driver.findElement(By.id("clickme")).click();
+        verifyAlerts(driver, getExpectedAlerts());
         assertFalse(radioA.isSelected());
         assertTrue(radioB.isSelected());
         assertFalse(radioC.isSelected());
-
-        verifyAlerts(driver, getExpectedAlerts());
     }
 
     /**
@@ -593,11 +591,10 @@ public class HTMLInputElementTest extends WebDriverTestCase {
         assertFalse(button2.isEnabled());
         assertTrue(button3.isEnabled());
         driver.findElement(By.id("clickme")).click();
+        verifyAlerts(driver, getExpectedAlerts());
         assertFalse(button1.isEnabled());
         assertTrue(button2.isEnabled());
         assertFalse(button3.isEnabled());
-
-        verifyAlerts(driver, getExpectedAlerts());
     }
 
     /**
