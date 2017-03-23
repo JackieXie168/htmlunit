@@ -68,8 +68,9 @@ public class HtmlAnchorTest extends WebDriverTestCase {
 
         final WebDriver driver = loadPage2(html);
         driver.findElement(By.id("myAnchor")).click();
+        verifyAlerts(driver, getExpectedAlerts()[0]);
         driver.findElement(By.id("myButton")).click();
-        verifyAlerts(driver, getExpectedAlerts());
+        verifyAlerts(driver, getExpectedAlerts()[1]);
     }
 
     /**
@@ -509,11 +510,13 @@ public class HtmlAnchorTest extends WebDriverTestCase {
         final MockWebConnection webConnection = getMockWebConnection();
         webConnection.setDefaultResponse(html);
 
-        final WebDriver driver = loadPageWithAlerts2(html);
+        final WebDriver driver = loadPage2(html);
+        verifyAlerts(driver, getExpectedAlerts());
 
         assertEquals(1, webConnection.getRequestCount());
 
         driver.findElement(By.id("a1")).click();
+        verifyAlerts(driver, getExpectedAlerts());
         assertEquals(2, webConnection.getRequestCount());
 
         driver.findElement(By.id("a2")).click();
