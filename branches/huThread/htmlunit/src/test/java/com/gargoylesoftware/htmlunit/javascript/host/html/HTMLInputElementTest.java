@@ -258,7 +258,7 @@ public class HTMLInputElementTest extends WebDriverTestCase {
             + "</form>\n"
             + "</body></html>";
 
-        loadPageWithAlerts2(html);
+        loadPageWithAlerts2(html, 2 * DEFAULT_WAIT_TIME);
     }
 
     /**
@@ -758,9 +758,9 @@ public class HTMLInputElementTest extends WebDriverTestCase {
         textinput.sendKeys("foo");
         final WebElement button = driver.findElement(By.name("myButton"));
         button.click();
-        assertEquals("from button", textinput.getAttribute("value"));
-
         verifyAlerts(driver, getExpectedAlerts());
+        Thread.sleep(10);
+        assertEquals("from button", textinput.getAttribute("value"));
     }
 
     /**
@@ -789,9 +789,9 @@ public class HTMLInputElementTest extends WebDriverTestCase {
         textinput.sendKeys("foo");
         final WebElement button = driver.findElement(By.name("myButton"));
         button.click();
-        assertEquals("from button", textinput.getAttribute("value"));
-
         verifyAlerts(driver, getExpectedAlerts());
+        Thread.sleep(10);
+        assertEquals("from button", textinput.getAttribute("value"));
     }
 
     /**
@@ -1415,6 +1415,7 @@ public class HTMLInputElementTest extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
+    @Alerts("onsubmit")
     public void submitNonRequired() throws Exception {
         final String html
             = HtmlPageTest.STANDARDS_MODE_PREFIX_
@@ -1432,7 +1433,10 @@ public class HTMLInputElementTest extends WebDriverTestCase {
 
         final WebDriver driver = loadPage2(html);
         driver.findElement(By.id("mySubmit")).click();
+        verifyAlerts(driver, getExpectedAlerts());
+        Thread.sleep(10);
         assertTrue(driver.getCurrentUrl().contains("myName"));
+
         // because we have a new page
         assertTrue(getCollectedAlerts(driver).isEmpty());
     }
