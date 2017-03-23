@@ -606,7 +606,7 @@ public class HtmlFileInputTest extends WebDriverTestCase {
 
         // trigger lost focus
         driver.findElement(By.id("b")).click();
-        assertEquals(getExpectedAlerts(), getCollectedAlerts(driver));
+        assertTrue(getCollectedAlerts(driver).isEmpty());
     }
 
     /**
@@ -642,7 +642,7 @@ public class HtmlFileInputTest extends WebDriverTestCase {
 
         // trigger lost focus
         driver.findElement(By.id("b")).click();
-        assertEquals(getExpectedAlerts(), getCollectedAlerts(driver));
+        assertTrue(getCollectedAlerts(driver).isEmpty());
     }
 
     /**
@@ -1125,7 +1125,7 @@ public class HtmlFileInputTest extends WebDriverTestCase {
 
         final WebDriver driver = loadPage2(html);
         driver.findElement(By.id("f")).sendKeys(absolutePath);
-        assertEquals(getExpectedAlerts(), getCollectedAlerts(driver));
+        assertEquals(getExpectedAlerts(), getCollectedAlerts(2 * DEFAULT_WAIT_TIME, driver, 2));
     }
 
     /**
