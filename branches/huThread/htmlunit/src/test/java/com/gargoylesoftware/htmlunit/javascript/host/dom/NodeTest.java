@@ -346,9 +346,8 @@ public class NodeTest extends WebDriverTestCase {
             + "</body></html>";
 
         final WebDriver driver = loadPage2(html);
-        driver.findElement(By.id("div1")).click();
-
         verifyAlerts(driver, getExpectedAlerts());
+        driver.findElement(By.id("div1")).click();
     }
 
     /**
@@ -1095,9 +1094,8 @@ public class NodeTest extends WebDriverTestCase {
         getMockWebConnection().setResponse(URL_SECOND, secondHtml);
 
         final WebDriver driver = loadPage2(firstHtml, URL_FIRST);
-        driver.findElement(By.id("myInput")).click();
-
         verifyAlerts(driver, getExpectedAlerts());
+        driver.findElement(By.id("myInput")).click();
     }
 
     /**

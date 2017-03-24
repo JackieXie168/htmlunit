@@ -313,9 +313,10 @@ public class Document2Test extends WebDriverTestCase {
             + "</body></html>";
 
         final WebDriver driver = loadPage2(html);
+        verifyAlerts(driver, getExpectedAlerts()[0]);
+        Thread.sleep(100);
         driver.findElement(By.id("text1")).click();
-
-        verifyAlerts(driver, getExpectedAlerts());
+        verifyAlerts(driver, getExpectedAlerts()[1]);
     }
 
     /**

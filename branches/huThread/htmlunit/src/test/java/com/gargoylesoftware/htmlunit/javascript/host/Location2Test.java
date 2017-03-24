@@ -753,7 +753,6 @@ public class Location2Test extends WebDriverTestCase {
 
         final MockWebConnection conn = getMockWebConnection();
         conn.setResponse(new URL(getDefaultUrl(), "content.html"), content);
-        conn.setResponse(new URL(getDefaultUrl(), "content.html"), content);
 
         expandExpectedAlertsVariables(getDefaultUrl());
         final WebDriver driver = loadPage2(html);

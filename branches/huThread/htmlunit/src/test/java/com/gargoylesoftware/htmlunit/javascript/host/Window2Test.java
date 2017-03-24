@@ -202,7 +202,7 @@ public class Window2Test extends WebDriverTestCase {
             + "    alert(props[i] + ': ' + typeof(window[props[i]]) + ',' + typeof(eval('this.' + props[i])));\n"
             + "</script>\n"
             + "</body></html>";
-        loadPageWithAlerts2(html);
+        loadPageWithAlerts2(html, 3 * DEFAULT_WAIT_TIME);
     }
 
     /**
