@@ -113,11 +113,12 @@ public class HtmlTextInputTest extends WebDriverTestCase {
 
         final WebElement check = driver.findElement(By.id("check"));
         check.click();
+        verifyAlerts(driver, getExpectedAlerts()[0]);
 
         t.sendKeys("abc");
         check.click();
 
-        verifyAlerts(driver, getExpectedAlerts());
+        verifyAlerts(driver, getExpectedAlerts()[1]);
     }
 
     /**
@@ -139,11 +140,11 @@ public class HtmlTextInputTest extends WebDriverTestCase {
 
         final WebElement check = driver.findElement(By.id("check"));
         check.click();
+        verifyAlerts(driver, getExpectedAlerts()[0]);
 
         t.sendKeys("abc");
         check.click();
-
-        verifyAlerts(driver, getExpectedAlerts());
+        verifyAlerts(driver, getExpectedAlerts()[1]);
     }
 
     /**

@@ -624,9 +624,10 @@ public class Location2Test extends WebDriverTestCase {
             + "</body></html>";
 
         final WebDriver driver = loadPage2(html);
+        verifyAlerts(driver, getExpectedAlerts()[0]);
+        Thread.sleep(100);
         driver.findElement(By.id("click")).click();
-
-        verifyAlerts(driver, getExpectedAlerts());
+        verifyAlerts(driver, getExpectedAlerts()[1]);
     }
 
     /**
@@ -675,9 +676,10 @@ public class Location2Test extends WebDriverTestCase {
 
         expandExpectedAlertsVariables(getDefaultUrl());
         final WebDriver driver = loadPage2(html);
+        verifyAlerts(driver, getExpectedAlerts()[0]);
+        Thread.sleep(100);
         driver.findElement(By.id("click")).click();
-
-        verifyAlerts(driver, getExpectedAlerts());
+        verifyAlerts(driver, getExpectedAlerts()[1]);
     }
 
     /**
@@ -730,6 +732,7 @@ public class Location2Test extends WebDriverTestCase {
         }
         finally {
             // TODO [IE] when run with real IE the window is closed and all following tests are broken
+            releaseResources();
             shutDownAll();
         }
     }
