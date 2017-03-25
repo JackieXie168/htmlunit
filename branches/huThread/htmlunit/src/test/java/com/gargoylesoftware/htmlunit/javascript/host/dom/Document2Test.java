@@ -361,17 +361,19 @@ public class Document2Test extends WebDriverTestCase {
         getMockWebConnection().setResponse(new URL("http://example.com/frame1.html"), "");
 
         final WebDriver driver = loadPage2(html);
+        verifyAlerts(driver, getExpectedAlerts()[0]);
 
         driver.findElement(By.id("insert")).click();
+        verifyAlerts(driver, getExpectedAlerts()[1]);
         driver.switchTo().frame(driver.findElement(By.id("innerFrame")));
         assertEquals("first frame text", driver.findElement(By.tagName("body")).getText());
 
         driver.switchTo().defaultContent();
         driver.findElement(By.id("update")).click();
+        verifyAlerts(driver, getExpectedAlerts()[2]);
         driver.switchTo().frame(driver.findElement(By.id("innerFrame")));
         assertEquals("another frame text", driver.findElement(By.tagName("body")).getText());
 
-        verifyAlerts(driver, getExpectedAlerts());
     }
 
     /**
