@@ -635,6 +635,7 @@ public class HTMLDocumentTest extends WebDriverTestCase {
 
         // for some strange reasons, the selenium driven browser is in an invalid
         // state after this test
+        releaseResources();
         shutDownAll();
     }
 

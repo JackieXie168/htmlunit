@@ -414,7 +414,7 @@ public class HTMLElement2Test extends WebDriverTestCase {
         html = html
             + "</body>\n"
             + "</html>";
-        loadPageWithAlerts2(html, 2 * DEFAULT_WAIT_TIME);
+        loadPageWithAlerts2(html, 8 * DEFAULT_WAIT_TIME);
     }
 
     /**
