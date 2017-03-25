@@ -194,15 +194,12 @@ public class HTMLFrameElement2Test extends WebDriverTestCase {
         final String defaultContent
             = "<html><head><script>alert(location)</script></head></html>";
 
-        getMockWebConnection().setResponse(URL_FIRST, firstContent);
         getMockWebConnection().setDefaultResponse(defaultContent);
 
-        final WebDriver driver = loadPage2(firstContent, URL_FIRST);
-        assertEquals("first", driver.getTitle());
-
+        final WebDriver driver = loadPage2(firstContent);
         expandExpectedAlertsVariables(URL_FIRST);
-
         verifyAlerts(driver, getExpectedAlerts());
+        assertEquals("first", driver.getTitle());
     }
 
     /**
@@ -291,12 +288,15 @@ public class HTMLFrameElement2Test extends WebDriverTestCase {
         getMockWebConnection().setResponse(new URL(URL_FIRST, "frame1.html"), frame1Html);
         getMockWebConnection().setResponse(new URL(URL_FIRST, "frame2.html"), frame2Html);
 
+        final String[] alerts = getExpectedAlerts();
+        int i = 0;
         final WebDriver driver = loadPage2(firstHtml, URL_FIRST);
         driver.findElement(By.id("btn1")).click();
+        verifyAlerts(driver, alerts[i++], alerts[i++]);
         driver.findElement(By.id("btn2")).click();
+        verifyAlerts(driver, alerts[i++], alerts[i++]);
         driver.findElement(By.id("btn3")).click();
-
-        verifyAlerts(driver, getExpectedAlerts());
+        verifyAlerts(driver, alerts[i++], alerts[i++]);
     }
 
     /**
