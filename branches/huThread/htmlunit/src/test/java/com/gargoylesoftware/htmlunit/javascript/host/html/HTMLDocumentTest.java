@@ -784,7 +784,6 @@ public class HTMLDocumentTest extends WebDriverTestCase {
     @Test
     @Alerts(DEFAULT = "not defined",
             IE = {"true", "1"})
-    @NotYetImplemented(IE)
     public void frames() throws Exception {
         final String html = "<html><head><script>\n"
             + "function test() {\n"
