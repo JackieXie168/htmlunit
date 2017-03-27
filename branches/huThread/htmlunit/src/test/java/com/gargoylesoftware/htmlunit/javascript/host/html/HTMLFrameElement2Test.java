@@ -14,7 +14,8 @@
  */
 package com.gargoylesoftware.htmlunit.javascript.host.html;
 
-import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.FF;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.CHROME;
+import static com.gargoylesoftware.htmlunit.BrowserRunner.Browser.IE;
 
 import java.net.URL;
 
@@ -508,12 +509,11 @@ public class HTMLFrameElement2Test extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
-    @Alerts(DEFAULT = {"OnloadTest", "header -> content -> frameSet",
-                        "content\nClick for new frame content with onload",
-                        "header -> content -> frameSet -> onloadFrame",
-                        "onloadFrame\nNew content loaded..."},
-            FF = {"OnloadTest", "header -> frameSet", ""})
-    @NotYetImplemented(FF)
+    @Alerts({"OnloadTest", "header -> content -> frameSet",
+                "content\nClick for new frame content with onload",
+                "header -> content -> frameSet -> onloadFrame",
+                "onloadFrame\nNew content loaded..."})
+    @NotYetImplemented({CHROME, IE})
     public void windowLocationAssignOnload() throws Exception {
         final String html = "<html><head><title>OnloadTest</title></head>\n"
                 + "<frameset rows='50,*' onLoad=\"top.header.addToFrameOrder('frameSet');\">\n"
@@ -570,16 +570,22 @@ public class HTMLFrameElement2Test extends WebDriverTestCase {
         driver.switchTo().frame("content");
         assertEquals(getExpectedAlerts()[2], driver.findElement(By.tagName("body")).getText());
 
-        if (StringUtils.isNotEmpty(getExpectedAlerts()[2])) {
-            driver.findElement(By.name("onloadFrameAnchor")).click();
-            driver.switchTo().defaultContent();
-            driver.switchTo().frame("header");
-            assertEquals(getExpectedAlerts()[3], driver.findElement(By.id("frameOrder")).getText());
-
-            driver.switchTo().defaultContent();
-            driver.switchTo().frame("content");
-            assertEquals(getExpectedAlerts()[4], driver.findElement(By.tagName("body")).getText());
+        driver.findElement(By.name("onloadFrameAnchor")).click();
+        final boolean ie = getBrowserVersion().isIE();
+        verifyAlerts(driver, "Body alert.");
+        if (!ie) {
+            verifyAlerts(driver, "Onload alert.");
         }
+        driver.switchTo().defaultContent();
+        if (ie) {
+            verifyAlerts(driver, "Onload alert.");
+        }
+        driver.switchTo().frame("header");
+        assertEquals(getExpectedAlerts()[3], driver.findElement(By.id("frameOrder")).getText());
+
+        driver.switchTo().defaultContent();
+        driver.switchTo().frame("content");
+        assertEquals(getExpectedAlerts()[4], driver.findElement(By.tagName("body")).getText());
     }
 
     /**
