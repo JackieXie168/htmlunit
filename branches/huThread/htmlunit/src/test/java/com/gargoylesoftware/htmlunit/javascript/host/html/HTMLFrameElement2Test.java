@@ -439,6 +439,7 @@ public class HTMLFrameElement2Test extends WebDriverTestCase {
                 "content\nClick for new frame content with onload",
                 "header -> content -> frameSet -> onloadFrame",
                 "onloadFrame\nNew content loaded..."})
+    @NotYetImplemented
     public void windowLocationReplaceOnload() throws Exception {
         final String html = "<html><head><title>OnloadTest</title></head>\n"
                 + "<frameset rows='50,*' onLoad=\"top.header.addToFrameOrder('frameSet');\">\n"
@@ -496,7 +497,15 @@ public class HTMLFrameElement2Test extends WebDriverTestCase {
         assertEquals(getExpectedAlerts()[2], driver.findElement(By.tagName("body")).getText());
 
         driver.findElement(By.name("onloadFrameAnchor")).click();
+        final boolean ie = getBrowserVersion().isIE();
+        verifyAlerts(driver, "Body alert.");
+        if (!ie) {
+            verifyAlerts(driver, "Onload alert.");
+        }
         driver.switchTo().defaultContent();
+        if (ie) {
+            verifyAlerts(driver, "Onload alert.");
+        }
         driver.switchTo().frame("header");
         assertEquals(getExpectedAlerts()[3], driver.findElement(By.id("frameOrder")).getText());
 
