@@ -686,6 +686,8 @@ public class Location2Test extends WebDriverTestCase {
      * @throws Exception if the test fails
      */
     @Test
+    //real browsers don't show the alert, since it is quickly closed through JavaScript
+    @NotYetImplemented
     @BuggyWebDriver(IE)
     public void locationAfterOpenClosePopup() throws Exception {
         final String html =
